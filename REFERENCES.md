@@ -76,6 +76,17 @@ Reviewed: 2026-08-17
 - IBM Z Workload Scheduler
   - https://www.ibm.com/docs/en/workload-automation/10.2.6?topic=z-workload-scheduler
 
+## Enterprise Integration / Middleware Context
+
+- IBM MQ introduction / message queuing
+  - https://www.ibm.com/docs/en/ibm-mq/9.4.x?topic=mq-introduction
+- HULFT file transfer documentation
+  - https://www.hulft.com/help/en-us/HULFT-V8/COM-FUN/Content/HULFT_FUN/Outline/file_transfer.htm
+- OCI Streaming developer guide
+  - https://docs.oracle.com/en-us/iaas/Content/Streaming/Tasks/developing.htm
+
+Queue messaging、event streaming、managed file transfer、API managementは同じ連携方式ではないため、Context UIでも別patternとして扱います。
+
 ## Notes
 
 - FISCの安全対策基準本文は有償刊行物を含みます。この教材は公開ページで確認できる位置づけを参照し、基準本文を転載していません。
