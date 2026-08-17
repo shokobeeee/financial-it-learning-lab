@@ -2,7 +2,35 @@
 
 ## Goal
 
-原因当てではなく、時間制約下で `Impact → Hypothesis → Evidence → Primary/Contributing Cause → Safe Recovery → Verification/Reconciliation → Communication` を完遂する。
+原因当てではなく、時間制約下で `Impact → Hypothesis → Evidence Diversity → Primary/Contributing Cause → Safe Recovery → Verification/Reconciliation → Communication` を完遂する。
+
+## v16 Incident Model
+
+### Evidence Diversity Gate
+
+Cause確定前に、同じログを複数見るだけではなく**異なるレイヤーのEvidence**を要求する。
+
+- Case01–11: 2レイヤー以上
+- Final Case12: 3レイヤー以上
+
+Evidence layer例:
+
+- App / Compute
+- Network / Hybrid
+- Data / Ledger
+- Async / Ingest
+- Identity / Security
+- Core / Batch
+- Control / Change
+- Business / Reconciliation
+
+### Wrong Layer Coach
+
+操作自体が妥当でも、現在の仮説とレイヤーが違う場合に理由を表示する。
+
+### Provider Context
+
+**🧭 Context**でCommon / AWS / Google Cloud / Azure / OCIへ翻訳できる。ただし製品を1:1同一視せず、まず共通レイヤーで仮説を作る。
 
 ## 12 Cases
 
@@ -22,10 +50,12 @@
 ## Anti-patterns
 
 - Evidenceを取る前の全体再起動
+- 同一レイヤーのログだけ大量取得して原因確定
 - 正本DBを推測で直接修正
 - Security controlの全解除
 - Partial commit確認なしの全件rerun
 - RC=0だけで業務完了と判断
+- provider名だけで原因を断定
 
 ## Final Case 12
 
