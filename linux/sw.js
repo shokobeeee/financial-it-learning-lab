@@ -1,5 +1,6 @@
 const CACHE_NAME = 'linux-kiban-lab-v16-layer-guide';
 const ASSETS = [
+  "./integration-bridge.js?v=1",
   "./ui-compact.css?v=16",
   "./ui-live-terminal.css?v=16",
   "./ui-learning.css?v=16",
