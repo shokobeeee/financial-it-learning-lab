@@ -25,6 +25,23 @@
 
 **Total: 8 Complete Packages / 160 Labs + 12 War Room Cases**
 
+## v16 Context Model
+
+Linux v16で導入した「分類軸を混ぜない」設計を全教材へ展開します。
+
+**Concept → Product / Platform → Operational Evidence**
+
+製品間の対応は `=` ではなく **`≒ conceptual mapping`** として扱います。
+
+- Linux: Debian/Ubuntu ↔ RHEL/Rocky/Alma、systemd、製品固有commandを別レイヤー表示
+- SQL: IBM Db2 / Oracle Database / PostgreSQL / Microsoft SQL Server profile
+- COBOL: IBM Enterprise COBOL / GnuCOBOL / Oracle Pro*COBOL context
+- JCL: JCL/JESと、Control-M / JP1/AJS3 / IBM Z Workload Scheduler等のScheduler層を分離
+- Cloud Fundamentals / War Room: Common / AWS / Google Cloud / Azure / Oracle Cloud Infrastructure (OCI) translation profile
+- AWS / GCP / Azure: provider固有サービスと共通Conceptを同時表示
+
+各教材の **🧭 Context** からLayer Guide / Product Profile / conceptual translationを確認できます。
+
 ## What “Complete Package” means
 
 20 Labsがあるだけでは完成扱いにしません。
@@ -53,7 +70,7 @@ Customer / App
   ↓
 Cloud / DNS / TLS / Load Balancer
   ↓
-VPC / VNet / Hybrid Network
+VPC / VNet / VCN / Hybrid Network
   ↓
 Linux / Compute / Application
   ↓
@@ -61,9 +78,9 @@ SQL / Database / Transaction
   ↓
 On-prem / Mainframe
   ↓
-COBOL / Db2 / CICS
+COBOL / Db2 / Oracle / CICS
   ↓
-JCL / Batch / Scheduler
+JCL / JES / Enterprise Scheduler
   ↓
 Reconciliation / Operational Resilience
 ```
@@ -76,17 +93,18 @@ Linux → SQL / Database → COBOL → JCL / Batch
       → Financial War Room
 ```
 
-3クラウドは順不同でも構いません。共通概念へ戻して比較できることを重視します。
+3クラウド教材は順不同。OCIはCloud Fundamentals / War Roomのtranslation profileとして扱い、必要なら将来独立20-Lab packageへ拡張できます。
 
 ## War Room rule
 
 Financial War Roomは原因当てゲームではありません。
 
-**Impact → Hypothesis → Evidence → Primary/Contributing cause → Safe Recovery → Verification/Reconciliation → Communication**
+**Impact → Hypothesis → Evidence Diversity → Primary/Contributing cause → Safe Recovery → Verification/Reconciliation → Communication**
 
-を評価します。
+を評価します。同じ種類のログを大量に読むだけではCause確定できず、複数レイヤーのEvidenceを要求します。
 
 詳しい知識マップとSign-off設計は [CURRICULUM.md](./CURRICULUM.md)。
 公開参照先の整理は [REFERENCES.md](./REFERENCES.md)。
+v16統合方針は [docs/V16_INTEGRATION_PLAN.md](./docs/V16_INTEGRATION_PLAN.md)。
 
 > This repository contains learning simulators. It is not an operational runbook, regulatory checklist, product certification course, or production change procedure.
