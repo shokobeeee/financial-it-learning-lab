@@ -1,4 +1,4 @@
-Parrot OS Linux基盤ラボ 01-20 — ALL GREEN
+Linux基盤ラボ 01-20 — ALL GREEN
 
 使い方:
 1. このZIPを展開

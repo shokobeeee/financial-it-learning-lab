@@ -1,7 +1,7 @@
 {
   "name": "Linux基盤ラボ",
   "short_name": "Linux Lab",
-  "description": "Linuxコマンド・インフラ構造・障害切り分けを体験的に学ぶシミュレーター",
+  "description": "Linuxコマンド・インフラ構造・障害切り分けをディストリビューション別に学ぶシミュレーター",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

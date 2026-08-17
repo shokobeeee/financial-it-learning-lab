@@ -1,4 +1,4 @@
-Parrot OS Linux基盤ラボ — Mobile PWA版
+Linux基盤ラボ — Mobile PWA版
 
 ■ スマホ対応
 - Lab01〜20をモバイル幅に最適化
