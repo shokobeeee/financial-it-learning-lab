@@ -33,7 +33,7 @@ jobs:
             parrot_linux_lab19_security_hardening.html parrot_linux_lab20_capstone.html
             ui-compact.css ui-live-terminal.css ui-learning.css ui-learning.js ui-generic.css ui-generic.js ui-density.js
             ui-incident-modes.css ui-incident-modes.js ui-incident-polish.css ui-incident-polish.js
-            ui-distro.css ui-distro.js ui-scope-context.css ui-scope-context.js ui-layer-guide.css ui-layer-guide.js
+            ui-distro.css ui-distro.js ui-scope-context.css ui-scope-context.js
           )
           for file in "${files[@]}"; do
             echo "GET $file"
@@ -42,10 +42,10 @@ jobs:
           cp /tmp/linux-package-readme.md linux/README.md
           grep -q 'Linux基盤ラボ' linux/index.html
           grep -q 'Debian / RHEL と systemd は別レイヤー' linux/ui-scope-context.js
-          grep -q '分類の軸は同じではありません' linux/ui-layer-guide.js
+          grep -q 'Linuxの分類は「同じ軸」ではない' linux/ui-scope-context.js
           node --check linux/ui-distro.js
           node --check linux/ui-scope-context.js
-          node --check linux/ui-layer-guide.js
+          node --check linux/ui-incident-polish.js
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add linux
