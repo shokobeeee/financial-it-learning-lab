@@ -2,7 +2,33 @@
 
 ## Goal
 
-COBOLを古い文法としてではなく、業務データを `READ → 判定/計算 → WRITE` する金融・基幹処理として読み、JCL / Db2 / CICSとの境界も説明できること。
+COBOLを古い文法としてではなく、業務データを `READ → 判定/計算 → WRITE` する金融・基幹処理として読み、JCL / Database / CICS等との境界も説明できること。
+
+## Layer Model
+
+```text
+COBOL Language
+  ↓
+Compiler / Runtime
+  ↓
+Host Platform
+  ↓
+Database / TP / File Integration
+  ↓
+JCL / Batch / Scheduler
+```
+
+**COBOL = mainframe** と固定しない。言語、実装、ホスト、外部サービスを別レイヤーにする。
+
+## Platform Profiles
+
+**🧭 Context**で代表的な実行文脈を重ねる。
+
+- IBM Enterprise COBOL / z/OS — canonical financial-mainframe context
+- GnuCOBOL / Open Systems
+- Oracle Pro*COBOL + Oracle Database context
+
+Scope Badgeでは、COBOL標準文、Embedded SQL、CICS、JCL、Runtime Evidenceを別色で表示する。
 
 ## 20 Labs
 
@@ -14,7 +40,8 @@ COBOLを古い文法としてではなく、業務データを `READ → 判定/
 ## Completion
 
 - Lab01–20を修了
-- COBOL / z/OS / JCL / Db2 / CICSを混同しない
+- COBOL / Compiler / Host OS / JCL / Database / CICSを混同しない
+- `EXEC SQL`や`EXEC CICS`を「COBOL文法だけの世界」と扱わず外部基盤との境界として説明する
 - S0C7等で入力データ・I/O・外部基盤の証拠を分離
 - 進捗キー: `cobol_labXX_complete`
 
@@ -23,7 +50,8 @@ COBOLを古い文法としてではなく、業務データを `READ → 判定/
 - 入力レコードのlayout/PICはどう定義されているか
 - 業務ルールと例外条件はどこか
 - FILE STATUS / RETURN-CODE / SQLCODEのどれが証拠か
-- JCL / Db2 / CICSとの責務境界はどこか
+- JCL / Database / CICSとの責務境界はどこか
+- Compiler / Runtime / Host環境は何か
 - 処理前後の件数・金額・control totalは一致するか
 
 Next: **JCL / Batch Operations**
