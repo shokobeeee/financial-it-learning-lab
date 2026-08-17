@@ -36,7 +36,48 @@ Reviewed: 2026-08-17
 - Azure networking overview
   - https://learn.microsoft.com/azure/networking/networking-overview
 
+## Oracle Cloud Infrastructure / Oracle Database
+
+- OCI documentation
+  - https://docs.oracle.com/en-us/iaas/Content/
+- OCI core-service security / VCN / FastConnect context
+  - https://docs.oracle.com/en-us/iaas/Content/Security/Concepts/security_core_services.htm
+- OCI Database service
+  - https://docs.oracle.com/en-us/iaas/Content/Database/home.htm
+- OCI Audit
+  - https://docs.oracle.com/en-us/iaas/Content/Audit/home.htm
+- Oracle Database Dynamic Performance Views
+  - https://docs.oracle.com/en/database/oracle/oracle-database/26/refrn/dynamic-performance-views.html
+- Oracle Pro*COBOL Precompiler Programmer's Guide
+  - https://docs.oracle.com/en/database/oracle/oracle-database/26/lnpcb/toc.htm
+
+## Database Product Context
+
+- IBM Db2 MON_GET_LOCKS
+  - https://www.ibm.com/docs/en/db2/12.1.x?topic=mmr-mon-get-locks-table-function-list-all-locks-in-currently-connected-database
+- PostgreSQL pg_locks
+  - https://www.postgresql.org/docs/current/view-pg-locks.html
+- Microsoft SQL Server sys.dm_tran_locks
+  - https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-objects/sys-dm-tran-locks-transact-sql
+
+## COBOL
+
+- IBM Enterprise COBOL for z/OS documentation library
+  - https://www.ibm.com/support/pages/enterprise-cobol-zos-documentation-library
+- GnuCOBOL Manual
+  - https://gnucobol.sourceforge.io/doc/gnucobol.html
+
+## Enterprise Scheduler Context
+
+- BMC Control-M Documentation
+  - https://documents.bmc.com/supportu/controlm-saas/en-US/Documentation/home.htm
+- JP1/Automatic Job Management System 3
+  - https://www.hitachi.co.jp/Prod/comp/soft1/jp1/product/jp1/ajs/index.html
+- IBM Z Workload Scheduler
+  - https://www.ibm.com/docs/en/workload-automation/10.2.6?topic=z-workload-scheduler
+
 ## Notes
 
 - FISCの安全対策基準本文は有償刊行物を含みます。この教材は公開ページで確認できる位置づけを参照し、基準本文を転載していません。
+- Product Profileは「同じ目的を見る代表的な実装」を示すもので、製品間の完全互換や1:1対応を意味しません。
 - 各クラウドのCLI/API構文暗記を目的にせず、責任境界・障害ドメイン・データ整合性・運用・復旧の判断軸を中心にしています。
