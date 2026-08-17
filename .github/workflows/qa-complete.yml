@@ -1,0 +1,69 @@
+name: QA Complete Curriculum
+
+on:
+  push:
+    branches: ["complete-curriculum-v1"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: |
+          set -e
+          node --check assets/js/common.js
+          node --check assets/js/cloud-lab-engine.js
+          node --check cloud/spec.js
+          node --check aws/spec.js
+          node --check gcp/spec.js
+          node --check azure/spec.js
+          node --check financial-war-room/app.js
+          node --check financial-war-room/scenarios-1.js
+          node --check financial-war-room/scenarios-2.js
+      - name: Curriculum invariants
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          for(const d of ['cloud','aws','gcp','azure']){
+            const box={window:{}};vm.createContext(box);vm.runInContext(fs.readFileSync(`${d}/spec.js`,'utf8'),box);
+            const s=box.window.CLOUD_SPEC;
+            if(!s||s.topics.length!==20) throw new Error(`${d}: expected 20 topics`);
+            if(!s.prefix) throw new Error(`${d}: missing progress prefix`);
+          }
+          const box={window:{WARROOM_SCENARIOS:[]}};vm.createContext(box);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-1.js','utf8'),box);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-2.js','utf8'),box);
+          const cases=box.window.WARROOM_SCENARIOS;
+          if(cases.length!==12) throw new Error(`War Room: expected 12 cases, got ${cases.length}`);
+          for(const s of cases){
+            for(const e of s.evidence) if(typeof e.cost!=='number'||!Number.isFinite(e.cost)) throw new Error(`Case ${s.id}: invalid evidence cost`);
+            const safe=s.actions.find(a=>a.safe);if(!safe) throw new Error(`Case ${s.id}: no safe recovery`);
+            let score={eng:20,con:20,pm:20},time=30;
+            score.con+=10;score.pm+=10;score.eng+=10;
+            if(s.hypotheses.some(h=>h[0]===s.contrib))score.con+=5;
+            const ids=new Set([...s.evidence.filter(e=>e.decisive).map(e=>e.id),...(safe.need||[])]);
+            for(const id of ids){const e=s.evidence.find(e=>e.id===id);if(!e)throw new Error(`Case ${s.id}: missing evidence ${id}`);time-=e.cost;for(const k of Object.keys(score))score[k]+=e.points[k]||0;}
+            score.eng+=15;score.con+=18;score.pm+=5;for(const k of Object.keys(score))score[k]+=safe.points[k]||0;
+            for(const v of s.verifications.filter(v=>v.correct))for(const k of Object.keys(score))score[k]+=v.points[k]||0;
+            score.con+=8;score.pm+=15;
+            const over=Math.max(0,ids.size-4),low=Math.max(0,10-time);score.eng-=over*3+low*.5;score.pm-=over*4+low;score.con-=over*1.5;
+            for(const k of Object.keys(score))score[k]=Math.max(0,Math.min(100,Math.round(score[k])));
+            if(Object.values(score).some(x=>x<85))throw new Error(`Case ${s.id}: optimal sign-off impossible ${JSON.stringify(score)}`);
+          }
+          console.log('QA OK: 80 cloud labs + 12 War Room cases, all sign-off reachable');
+          NODE
+      - name: Static path checks
+        run: |
+          test -f index.html
+          test -f CURRICULUM.md
+          test -f REFERENCES.md
+          test -f financial-war-room/index.html
+          for d in linux cobol sql jcl cloud aws gcp azure; do test -f "$d/index.html"; done
+          grep -q '160 Labs' index.html
+          grep -q '12 Financial War Rooms' index.html
+          grep -q 'jcl_batch_lab' assets/js/common.js
