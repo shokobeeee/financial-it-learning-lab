@@ -20,6 +20,7 @@ jobs:
           set -euo pipefail
           BASE="https://shokobeeee.github.io/linux-kiban-lab"
           cp linux/README.md /tmp/linux-package-readme.md
+          cp linux/integration-bridge.js /tmp/integration-bridge.js
           rm -rf linux
           mkdir -p linux
           files=(
@@ -40,14 +41,33 @@ jobs:
             curl --fail --silent --show-error --location --retry 3 "$BASE/$file" -o "linux/$file"
           done
           cp /tmp/linux-package-readme.md linux/README.md
+          cp /tmp/integration-bridge.js linux/integration-bridge.js
+          python - <<'PY'
+          from pathlib import Path
+          targets=[Path('linux/index.html'), *sorted(Path('linux').glob('parrot_linux_lab*.html'))]
+          tag='  <script src="./integration-bridge.js?v=1"></script>\n'
+          for p in targets:
+              text=p.read_text(encoding='utf-8')
+              if 'integration-bridge.js' not in text:
+                  text=text.replace('</body>',tag+'</body>',1)
+                  p.write_text(text,encoding='utf-8')
+          sw=Path('linux/sw.js')
+          text=sw.read_text(encoding='utf-8')
+          marker='const ASSETS = ['
+          if marker in text and 'integration-bridge.js' not in text:
+              text=text.replace(marker,marker+'\n  "./integration-bridge.js?v=1",',1)
+              sw.write_text(text,encoding='utf-8')
+          PY
           grep -q 'Linux基盤ラボ' linux/index.html
           grep -q 'Debian / RHEL と systemd は別レイヤー' linux/ui-scope-context.js
           grep -q 'Linuxの分類は「同じ軸」ではない' linux/ui-scope-context.js
+          grep -q 'integration-bridge.js?v=1' linux/parrot_linux_lab20_capstone.html
           node --check linux/ui-distro.js
           node --check linux/ui-scope-context.js
           node --check linux/ui-incident-polish.js
+          node --check linux/integration-bridge.js
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add linux
-          git commit -m "Sync Linux Labs to v16" || exit 0
+          git commit -m "Sync Linux Labs to v16 with integration bridge" || exit 0
           git push
