@@ -1,0 +1,150 @@
+name: QA v16 Context Integration
+
+on:
+  push:
+    branches: ["v16-context-integration"]
+    paths:
+      - ".github/workflows/qa-v16-context.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JavaScript syntax
+        run: |
+          set -e
+          node --check assets/js/context-system.js
+          node --check assets/js/warroom-v16.js
+          node --check assets/js/module-package.js
+          node --check assets/js/cloud-lab-engine.js
+          node --check linux/integration-bridge.js
+          node --check linux/ui-distro.js
+          node --check linux/ui-scope-context.js
+          node --check linux/ui-incident-polish.js
+          node --check sql/app.js
+          node --check jcl/app.js
+          node --check financial-war-room/app.js
+          for f in cloud/spec.js aws/spec.js gcp/spec.js azure/spec.js; do node --check "$f"; done
+          for f in financial-war-room/scenarios-*.js; do node --check "$f"; done
+
+      - name: Linux v16 invariants
+        run: |
+          set -e
+          grep -q 'ui-distro.js?v=16' linux/index.html
+          grep -q 'ui-scope-context.js?v=16' linux/index.html
+          grep -q 'ui-incident-polish.js?v=16' linux/parrot_linux_lab20_capstone.html
+          grep -q 'Debian / RHEL と systemd は別レイヤー' linux/ui-scope-context.js
+          grep -q 'Linuxの分類は「同じ軸」ではない' linux/ui-scope-context.js
+          grep -q 'Evidence' linux/ui-incident-polish.js
+          grep -q 'integration-bridge.js?v=1' linux/index.html
+          for f in linux/parrot_linux_lab*.html; do grep -q 'integration-bridge.js?v=1' "$f"; done
+          test "$(find linux -maxdepth 1 -name 'parrot_linux_lab*.html' | wc -l)" -eq 20
+
+      - name: Context system profiles
+        run: |
+          set -e
+          grep -q "oracle:{name:'Oracle Database'" assets/js/context-system.js
+          grep -q "postgres:{name:'PostgreSQL'" assets/js/context-system.js
+          grep -q "sqlserver:{name:'Microsoft SQL Server'" assets/js/context-system.js
+          grep -q "oci:{name:'Oracle Cloud Infrastructure (OCI)'" assets/js/context-system.js
+          grep -q "controlm:{name:'BMC Control-M'" assets/js/context-system.js
+          grep -q "jp1:{name:'JP1/AJS3'" assets/js/context-system.js
+          grep -q "ibmzws:{name:'IBM Z Workload Scheduler'" assets/js/context-system.js
+          grep -Fq 'V$LOCK + V$SESSION' assets/js/context-system.js
+          grep -q 'pg_locks + pg_stat_activity' assets/js/context-system.js
+          grep -q 'sys.dm_tran_locks' assets/js/context-system.js
+          grep -q 'FastConnect' assets/js/context-system.js
+          grep -q 'conceptual mapping' assets/js/context-system.js
+
+      - name: Module context wiring
+        run: |
+          set -e
+          for d in sql cobol jcl cloud aws gcp azure financial-war-room; do
+            grep -q 'context-system.css?v=1' "$d/index.html"
+            grep -q 'context-system.js?v=1' "$d/index.html"
+            grep -q 'module-package.js?v=2' "$d/index.html"
+          done
+          grep -q 'warroom-v16.js?v=1' financial-war-room/index.html
+          grep -q 'Context Model' README.md
+          grep -q 'Product / Platform Profile' PACKAGE_STANDARD.md
+          grep -q 'Evidence Diversity Gate' CURRICULUM.md
+          grep -q 'Oracle Cloud Infrastructure' REFERENCES.md
+
+      - name: Curriculum counts unchanged
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          for(const d of ['cloud','aws','gcp','azure']){
+            const box={window:{}};vm.createContext(box);vm.runInContext(fs.readFileSync(`${d}/spec.js`,'utf8'),box);
+            if(!box.window.CLOUD_SPEC||box.window.CLOUD_SPEC.topics.length!==20)throw new Error(`${d}: expected 20 topics`);
+          }
+          for(const d of ['sql','jcl','cobol']){
+            const box={LABS:[]};vm.createContext(box);
+            for(let i=1;i<=4;i++)vm.runInContext(fs.readFileSync(`${d}/labs-${i}.js`,'utf8'),box);
+            if(box.LABS.length!==20)throw new Error(`${d}: expected 20 labs, got ${box.LABS.length}`);
+          }
+          const w={window:{WARROOM_SCENARIOS:[]}};vm.createContext(w);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-1.js','utf8'),w);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-2.js','utf8'),w);
+          if(w.window.WARROOM_SCENARIOS.length!==12)throw new Error(`War Room expected 12, got ${w.window.WARROOM_SCENARIOS.length}`);
+          console.log('Curriculum counts OK');
+          NODE
+
+      - name: War Room evidence diversity feasibility
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const w={window:{WARROOM_SCENARIOS:[]}};vm.createContext(w);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-1.js','utf8'),w);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-2.js','utf8'),w);
+          function layer(text){
+            const u=String(text||'').toUpperCase();
+            if(/JES|JCL|S0C7|BATCH|DATASET|CHECKPOINT|STEP0\d|STEP\d|JOB\b/.test(u))return'core';
+            if(/REPLICA|DATABASE|\bDB\b|LOCK|LEDGER|COMMIT|SQL|AUTHORITATIVE|BALANCE/.test(u))return'data';
+            if(/QUEUE|CONSUMER|DLQ|INGEST|PUBLISH|EVENT|BACKLOG/.test(u))return'async';
+            if(/DNS|RESOLVER|ROUTE|NETWORK|PACKET|LINK|BGP|VPN|DIRECT CONNECT|INTERCONNECT|EXPRESSROUTE|FASTCONNECT/.test(u))return'network';
+            if(/WAF|IAM|CREDENTIAL|CERTIFICATE|TLS|KEY|SECRET|AUTH/.test(u))return'security';
+            if(/RELEASE|BACKEND|APP|HEALTH|CPU|MEMORY|PROCESS|CONTAINER|VM\b/.test(u))return'app';
+            if(/CHANGE|AUDIT|CONTROL|CONFIG|POLICY/.test(u))return'control';
+            if(/CUSTOMER|BUSINESS|IMPACT|COUNT|AMOUNT|DEBIT|CREDIT|RECONCIL|DUPLICATE/.test(u))return'business';
+            return'observe';
+          }
+          for(const s of w.window.WARROOM_SCENARIOS){
+            const layers=new Set(s.evidence.map(e=>layer(e.label)));
+            const min=s.id===12?3:2;
+            if(layers.size<min)throw new Error(`Case ${s.id}: only ${layers.size} evidence layers; need ${min}`);
+            const safe=s.actions.find(a=>a.safe);if(!safe)throw new Error(`Case ${s.id}: no safe action`);
+            for(const need of safe.need||[])if(!s.evidence.some(e=>e.id===need))throw new Error(`Case ${s.id}: safe action references missing evidence ${need}`);
+          }
+          console.log('Evidence diversity feasible in all 12 cases');
+          NODE
+
+      - name: War Room tri-role sign-off still reachable
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const box={window:{WARROOM_SCENARIOS:[]}};vm.createContext(box);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-1.js','utf8'),box);
+          vm.runInContext(fs.readFileSync('financial-war-room/scenarios-2.js','utf8'),box);
+          for(const s of box.window.WARROOM_SCENARIOS){
+            let score={eng:20,con:20,pm:20},time=30;
+            score.con+=10;score.pm+=10;score.eng+=10;
+            if(s.hypotheses.some(h=>h[0]===s.contrib))score.con+=5;
+            const safe=s.actions.find(a=>a.safe);
+            const ids=new Set([...s.evidence.filter(e=>e.decisive).map(e=>e.id),...(safe.need||[])]);
+            for(const id of ids){const e=s.evidence.find(e=>e.id===id);time-=e.cost;for(const k of Object.keys(score))score[k]+=e.points[k]||0;}
+            score.eng+=15;score.con+=18;score.pm+=5;for(const k of Object.keys(score))score[k]+=safe.points[k]||0;
+            for(const v of s.verifications.filter(v=>v.correct))for(const k of Object.keys(score))score[k]+=v.points[k]||0;
+            score.con+=8;score.pm+=15;
+            const over=Math.max(0,ids.size-4),low=Math.max(0,10-time);score.eng-=over*3+low*.5;score.pm-=over*4+low;score.con-=over*1.5;
+            for(const k of Object.keys(score))score[k]=Math.max(0,Math.min(100,Math.round(score[k])));
+            if(Object.values(score).some(x=>x<85))throw new Error(`Case ${s.id}: sign-off unreachable ${JSON.stringify(score)}`);
+          }
+          console.log('Tri-role sign-off reachable in all 12 cases');
+          NODE
