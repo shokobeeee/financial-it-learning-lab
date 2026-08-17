@@ -1,0 +1,304 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux基盤ラボ 20 - Capstone</title><style>
+:root{--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--warn:#ffd166;--danger:#ff7b7b;--ok:#75e6a5;--line:#2a3858;--terminal:#071019}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100vh} main{width:min(1380px,calc(100% - 32px));margin:24px auto 56px}
+h1{font-size:clamp(26px,4vw,40px);margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{margin:0 0 7px}p{line-height:1.7}.muted{color:var(--muted)}code{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.card{background:rgba(18,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 36px rgba(0,0,0,.18)}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);background:#17213a;border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-danger{color:var(--danger)}.panel-title{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:6px}
+button,select,input{font:inherit}button{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);cursor:pointer;transition:.14s ease}button:hover{transform:translateY(-1px);border-color:#4e6b9d}button.primary{background:#173a31;border-color:#3c8a6b}button.warning{background:#392f18;border-color:#806c39}button.danger{background:#3a1c25;border-color:#804343}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:13px;margin-top:13px}.flowbox{border:1px solid var(--line);background:#0f1728;border-radius:15px;padding:13px}.flow{display:flex;gap:6px;align-items:center;overflow-x:auto}.flow-node{min-width:115px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#17213a;text-align:center;transition:.2s}.flow-node.ok{border-color:#3f9d75}.flow-node.fail{border-color:#a84f5b}.flow-node.wait{opacity:.52}.arrow{color:var(--muted);font-weight:900}.flowmsg{min-height:24px;margin-top:8px;color:var(--muted)}.state-list{display:grid;gap:8px}.state-row{display:grid;grid-template-columns:170px 1fr;gap:8px;padding:8px 10px;background:#0f1728;border:1px solid var(--line);border-radius:11px}.state-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800}
+.lab-grid{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:13px}.controls{display:grid;align-content:start;gap:8px;padding:13px;background:#0f1728;border:1px solid var(--line);border-radius:15px}.screen{min-height:345px;border-radius:14px;background:#f2f5f8;color:#18202d;position:relative;padding:46px 18px 18px;display:flex;align-items:center;justify-content:center;text-align:center}.screenbar{position:absolute;left:0;top:0;right:0;padding:8px 12px;background:#dce3ec;color:#445064;text-align:left;font-size:12px}.big{font-size:26px;font-weight:900}.terminal{min-height:345px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.lesson{margin-top:13px;display:grid;grid-template-columns:170px 1fr;gap:12px;background:#10182a}
+.concept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:13px}.concept{background:#0f1728;border:1px solid var(--line);border-radius:14px;padding:12px}.concept-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0}.concept-card{padding:9px;background:#121b30;border:1px solid var(--line);border-radius:10px;font-size:12px}.action-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.mini-console{margin-top:9px;min-height:150px;padding:11px;border:1px solid #1b3240;border-radius:11px;background:var(--terminal);color:#d9f7e6;white-space:pre-wrap;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.diag-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:12px}.diag-buttons{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.diag-buttons button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:center;padding:6px}.diag-console{min-height:285px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:13px;padding:13px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.answer{display:grid;gap:9px;align-content:start}.answer select{width:100%;min-height:44px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:8px}.score{border:1px solid var(--line);background:#0f1728;border-radius:12px;padding:11px}.score-big{font-size:30px;font-weight:900}.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.chips button{min-height:38px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.breakdown{display:grid;gap:6px}.piece{display:grid;grid-template-columns:190px 1fr;gap:8px;padding:8px;background:#0f1728;border:1px solid var(--line);border-radius:10px}.graduation{text-align:center}.grad-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+@media(max-width:1050px){.hero-grid,.concept-grid,.diag-grid,.cmd-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:220px 1fr}.lab-grid>section:last-child{grid-column:1/-1}.diag-buttons{grid-template-columns:repeat(3,1fr)}} @media(max-width:760px){.lab-grid{grid-template-columns:1fr}.lab-grid>section:last-child{grid-column:auto}.flow{display:grid}.lesson{grid-template-columns:1fr}.concept-cards{grid-template-columns:1fr}.piece{grid-template-columns:1fr}.diag-buttons{grid-template-columns:1fr 1fr}}
+
+.war-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:13px}.phase-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:9px}.phase{padding:9px;background:#121b30;border:1px solid var(--line);border-radius:10px;text-align:center}.phase.ok{border-color:#3f9d75}.evidence-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}.evidence-grid button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}.report-grid{display:grid;grid-template-columns:140px 1fr;gap:8px;margin-top:8px}.report-grid input,.report-grid select,.report-grid textarea{width:100%;min-height:40px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:7px}.report-grid textarea{min-height:90px}.matrix{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}.matrix div{padding:9px;background:#121b30;border:1px solid var(--line);border-radius:10px;text-align:center}
+@media(max-width:900px){.war-grid{grid-template-columns:1fr}.phase-grid,.evidence-grid,.matrix{grid-template-columns:1fr 1fr}.report-grid{grid-template-columns:1fr}}
+</style><style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head><body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab19_security_hardening.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab20</div>
+  <a href="./index.html">⌂</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html" class="current">Lab20</a>
+    </div>
+  </div>
+</div>
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab19_security_hardening.html">← Lab19</a><strong class="lab-title">Lab20 Capstone / War Room</strong><span class="spacer"></span><a href="qa_review_report.html">QA Report →</a></nav>
+<header><h1>🧠 Linux基盤ラボ 20 — 総合 War Room / Incident & Change Capstone</h1><p class="muted">技術障害を当てるだけでなく、<strong>Scope → Evidence → Cause → Safe Change → Rollback → Verify → Stakeholder Report</strong>まで完遂します。PM/コンサル視点も統合した最終Labです。</p></header>
+<section class="card"><h2>Incident Response Flow</h2><div class="phase-grid"><div class="phase">1 Alert/Scope</div><div class="phase">2 Evidence</div><div class="phase">3 Cause</div><div class="phase">4 Change</div><div class="phase">5 Rollback</div><div class="phase">6 Verify</div><div class="phase">7 Report</div></div><div class="war-grid" style="margin-top:13px"><div class="deep"><div id="prompt"></div><div class="evidence-grid"><button data-ev="network">ip/route</button><button data-ev="dns">DNS</button><button data-ev="service">service/port</button><button data-ev="security">FW/SG/permission</button><button data-ev="resource">CPU/Memory</button><button data-ev="storage">Disk/inode</button><button data-ev="log">logs</button><button data-ev="change">change history</button></div><div class="diag-console" id="evidence"></div></div><div class="deep"><button class="primary" id="new">🎲 New Incident</button><div class="report-grid"><label>Severity</label><select id="severity"><option value="">未判定</option><option>P1</option><option>P2</option><option>P3</option></select><label>Cause</label><select id="cause"><option value="">選択</option></select><label></label><button id="answer">Cause確定</button><label>Safe Fix</label><select id="fix"><option value="">選択</option></select><label></label><button id="apply">Change選定</button></div><div id="result" style="margin-top:10px"></div><div class="score"><div class="muted">Capstone score</div><div class="score-big" id="score">100</div></div></div></div></section>
+<section class="card" style="margin-top:13px"><h2>Change / Rollback / Verification</h2><div class="war-grid"><div class="deep"><div class="action-row"><button id="rollbackBtn">Rollback planを準備</button><button id="verify">Fix後Verify</button></div><div class="mini-console" id="rollback">Rollback未準備。\n変更前状態、戻し方、戻す判断条件、担当を明記。</div></div><div class="deep"><div class="mini-console">Safe Changeの原則\n- Evidenceに基づく\n- 影響範囲を絞る\n- Pre-check\n- Rollbackを先に準備\n- 変更後に技術/業務両面でVerify\n- 一時対処と恒久対策を分ける</div></div></div></section>
+<section class="card" style="margin-top:13px"><h2>Stakeholder Communication</h2><div class="war-grid"><div class="deep"><div class="action-row"><button id="reportBtn">状況報告を生成</button></div><textarea id="report" style="width:100%;min-height:200px;background:#071019;color:#d9f7e6;border:1px solid #1b3240;border-radius:11px;padding:12px"></textarea></div><div class="deep"><div class="mini-console">良い報告は\n1. 事実 / 影響範囲\n2. 原因（確定/仮説を分ける）\n3. 実施した対応\n4. 復旧確認\n5. Rollback/残Risk\n6. 次アクション/再発防止\n\n技術用語だけでなく業務影響を伝える。</div></div></div></section>
+<section class="card" style="margin-top:13px"><h2>最終評価マトリクス</h2><div class="matrix"><div>技術切り分け</div><div>変更安全性</div><div>Rollback</div><div>Verification</div><div>Communication</div></div><div class="action-row" style="justify-content:center;margin-top:15px"><button class="primary" id="graduate">🎓 Final Graduation</button></div><div id="grad" style="text-align:center;margin-top:10px"></div></section>
+</main><script>
+(function(){"use strict";const INCIDENTS=[{"id": "dns", "prompt": "Web Hostnameだけ開かない。IP直打ちは成功。", "cause": "DNS record誤り", "fix": "DNS recordを正しいIPへ修正しTTL/propagationを確認", "severity": "P2", "evidence": {"network": "ping 192.168.1.20 OK\nip route normal", "dns": "dig web.lab.local -> 192.168.1.99 (wrong)", "service": "nginx active / :443 LISTEN", "security": "FW/SG allow443", "resource": "CPU 12% Mem normal", "storage": "Disk 44% inode 20%", "log": "access.log: hostname request not reaching server", "change": "17:20 DNS A record changed to .99"}}, {"id": "firewall", "prompt": "ping成功、Service active、Port LISTEN。でも外部からTCP443 timeout。", "cause": "Firewall/SGで443拒否", "fix": "必要Source範囲に443を許可し通信を再検証", "severity": "P1", "evidence": {"network": "ping OK / route OK", "dns": "DNS correct", "service": "nginx active / 0.0.0.0:443", "security": "Cloud SG:22 only / host FW allow443", "resource": "normal", "storage": "normal", "log": "nginx access logに外部Requestなし", "change": "17:15 SG rule cleanup"}}, {"id": "cert", "prompt": "HTTPSだけCertificate expiredで全Client失敗。", "cause": "TLS Certificate期限切れ", "fix": "正規Certificateを更新、nginx -t、reload、外部検証", "severity": "P1", "evidence": {"network": "TCP443 connected", "dns": "correct", "service": "nginx active", "security": "443 allowed", "resource": "normal", "storage": "normal", "log": "TLS alert certificate expired", "change": "renewal timer failed 3 days ago"}}, {"id": "oom", "prompt": "Application Processが突然消え、その後Serviceが再起動。", "cause": "OOM Killer", "fix": "Memory原因Process/Leakを止め、Capacity/limitを是正してService検証", "severity": "P1", "evidence": {"network": "normal", "dns": "normal", "service": "app restarted by systemd", "security": "normal", "resource": "available 20MiB / swap full", "storage": "normal", "log": "kernel: Out of memory: Killed process app", "change": "memory limit removed yesterday"}}, {"id": "disk", "prompt": "複数Serviceが同時にNo space left on device。", "cause": "/var Filesystem容量100%", "fix": "安全に容量を解放し、logrotate/retention/noisy sourceを是正", "severity": "P1", "evidence": {"network": "normal", "dns": "normal", "service": "multiple write errors", "security": "normal", "resource": "CPU/Mem normal", "storage": "df /var 100% / inode 35%", "log": "access.log 18G / rotation failed", "change": "logrotate config changed last week"}}, {"id": "inode", "prompt": "df -h 55%なのに新File作成がNo space left。", "cause": "inode枯渇", "fix": "小File大量生成元を止め、不要Fileを削除しdf -iを監視", "severity": "P2", "evidence": {"network": "normal", "dns": "normal", "service": "write fails", "security": "normal", "resource": "normal", "storage": "df -i 100% / df -h 55%", "log": "spool generated millions tiny files", "change": "batch frequency increased"}}, {"id": "perm", "prompt": "Deploy後nginxがsecret.keyを読めず起動失敗。", "cause": "File owner/permission不正", "fix": "Service Userに必要最小権限でowner/group/modeを修正し再起動", "severity": "P1", "evidence": {"network": "normal", "dns": "normal", "service": "nginx failed Permission denied", "security": "secret 600 root:root / nginx user www-data", "resource": "normal", "storage": "normal", "log": "open secret.key failed (13 Permission denied)", "change": "deploy copied file as root:root"}}, {"id": "apt", "prompt": "Security更新を実施したはずだがnginx Versionが古いまま。", "cause": "Package hold", "fix": "hold理由を確認しChange承認後unhold→upgrade→smoke test", "severity": "P3", "evidence": {"network": "normal", "dns": "normal", "service": "active old version", "security": "scanner flags old version", "resource": "normal", "storage": "normal", "log": "apt upgrade successful but nginx kept back", "change": "apt-mark showhold -> nginx"}}, {"id": "fstab", "prompt": "再起動後Emergency mode。Kernelは起動済み。", "cause": "fstab UUID不正", "fix": "Recovery shellでfstabを修正、mount -a検証後default targetへ", "severity": "P1", "evidence": {"network": "not reached", "dns": "N/A", "service": "systemd emergency", "security": "N/A", "resource": "normal", "storage": "root mounted / data.mount failed wrong UUID", "log": "Dependency failed for local-fs.target", "change": "fstab edited before reboot"}}, {"id": "cron", "prompt": "Backup Script手動成功、定期実行だけcommand not found。", "cause": "Scheduler PATH不足", "fix": "絶対Path/Environmentを明示しJob再実行・Log確認", "severity": "P2", "evidence": {"network": "normal", "dns": "normal", "service": "cron active", "security": "permission OK", "resource": "normal", "storage": "backup destination OK", "log": "cron: backup-tool command not found", "change": "script started using /usr/local/bin tool"}}, {"id": "container", "prompt": "Container内curl :80成功、Host :8080失敗。", "cause": "Container Port未publish", "fix": "安全なHost Port mappingを設定しFW含め再検証", "severity": "P2", "evidence": {"network": "container bridge OK", "dns": "N/A", "service": "container Up nginx :80", "security": "host FW allow8080", "resource": "normal", "storage": "volume normal", "log": "docker port web: no output", "change": "container recreated without -p"}}, {"id": "crashloop", "prompt": "workerが数秒おきにPIDを変えながら再起動。", "cause": "Service Crash Loop", "fix": "Restart policyで隠さず直前Error/Configを修正し安定稼働を確認", "severity": "P2", "evidence": {"network": "normal", "dns": "normal", "service": "activating(auto-restart), counter=42", "security": "normal", "resource": "normal", "storage": "normal", "log": "invalid config line 22 / exited status=1", "change": "config deployed 10min ago"}}];let incident=null,checks=0,used={},severityOK=false,causeOK=false,fixOK=false,rollbackReady=false,verified=false,reported=false;const $=id=>document.getElementById(id);
+function phase(){const vals=[!!incident&&severityOK,checks>=3,causeOK,fixOK,rollbackReady,verified,reported];document.querySelectorAll('.phase').forEach((x,i)=>x.classList.toggle('ok',vals[i]));$('score').textContent=Math.max(0,100-checks*3+(causeOK?10:0)+(fixOK?10:0)+(rollbackReady?5:0)+(verified?10:0)+(reported?5:0));}
+function newInc(){incident=INCIDENTS[Math.floor(Math.random()*INCIDENTS.length)];checks=0;used={};severityOK=causeOK=fixOK=rollbackReady=verified=reported=false;$('prompt').innerHTML='<strong>INCIDENT: '+incident.prompt+'</strong>';$('evidence').textContent='$ War room opened. Evidence first.';$('cause').value='';$('fix').value='';$('result').textContent='';$('severity').value='';phase()}
+function ev(k){if(!incident)return;if(!used[k]){used[k]=1;checks++}$('evidence').textContent+='\n\n['+k.toUpperCase()+']\n'+incident.evidence[k];phase()}
+function answer(){if(!incident)return;severityOK=$('severity').value===incident.severity;causeOK=$('cause').value===incident.id;let msg=[];msg.push(severityOK?'<span class="status-ok">✅ Severity '+incident.severity+'</span>':'<span class="status-danger">❌ Severity再評価</span>');msg.push(causeOK?'<span class="status-ok">✅ Cause: '+incident.cause+'</span>':'<span class="status-danger">❌ Cause mismatch</span>');if(checks<3)msg.push('<span class="status-warn">Evidenceを最低3観点確認</span>');$('result').innerHTML=msg.join('<br>');phase()}
+function applyFix(){if(!incident||!causeOK){$('result').innerHTML='<span class="status-warn">先に原因を証拠で特定。</span>';return}fixOK=$('fix').value===incident.fix;$('result').innerHTML=fixOK?'<span class="status-ok">✅ Safe fix selected</span>':'<span class="status-danger">❌ Fixが原因/安全性に合っていない。</span>';phase()}
+function rollback(){rollbackReady=true;$('rollback').textContent='Rollback ready: 変更前Config/Rule/Versionへ戻す手順、判定条件、担当を記録。';phase()}
+function verify(){if(!(causeOK&&fixOK)){ $('result').innerHTML='<span class="status-warn">原因特定とFix選定後にVerify。</span>';return}verified=true;$('result').innerHTML='<span class="status-ok">✅ Verify: symptom cleared / health OK / logs stable / no new alerts</span>';phase()}
+function report(){if(!incident)return;reported=true;$('report').value='【Severity】'+(severityOK?incident.severity:'未確定')+'\n【事実】'+incident.prompt+'\n【原因】'+(causeOK?incident.cause:'未確定')+'\n【対応】'+(fixOK?incident.fix:'検討中')+'\n【検証】'+(verified?'復旧確認済み':'未確認')+'\n【Rollback】'+(rollbackReady?'準備済み':'未準備')+'\n【次アクション】再発防止・監視/手順更新';phase()}
+function graduate(){if(checks>=3&&severityOK&&causeOK&&fixOK&&rollbackReady&&verified&&reported){$('grad').innerHTML='<strong class="status-ok">🎓 Lab20 COMPLETE — War Room ALL STEPS GREEN</strong>';try{localStorage.setItem('linux_lab20_complete','true')}catch(e){}}else $('grad').innerHTML='<span class="status-warn">Cause / Safe fix / Rollback / Verify / Report の全工程をGreenにしてください。</span>'}
+$('new').onclick=newInc;document.querySelectorAll('[data-ev]').forEach(b=>b.onclick=()=>ev(b.dataset.ev));$('answer').onclick=answer;$('apply').onclick=applyFix;$('rollbackBtn').onclick=rollback;$('verify').onclick=verify;$('reportBtn').onclick=report;$('graduate').onclick=graduate;
+const cause=$('cause');INCIDENTS.forEach(x=>{let o=document.createElement('option');o.value=x.id;o.textContent=x.cause;cause.appendChild(o)});const fix=$('fix');[...new Set(INCIDENTS.map(x=>x.fix))].forEach(x=>{let o=document.createElement('option');o.value=x;o.textContent=x;fix.appendChild(o)});newInc();}());
+</script>
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body></html>

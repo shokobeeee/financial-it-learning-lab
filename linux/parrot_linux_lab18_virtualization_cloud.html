@@ -1,0 +1,318 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux Lab</title><style>
+:root{--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--warn:#ffd166;--danger:#ff7b7b;--ok:#75e6a5;--line:#2a3858;--terminal:#071019}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100vh} main{width:min(1380px,calc(100% - 32px));margin:24px auto 56px}
+h1{font-size:clamp(26px,4vw,40px);margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{margin:0 0 7px}p{line-height:1.7}.muted{color:var(--muted)}code{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.card{background:rgba(18,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 36px rgba(0,0,0,.18)}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);background:#17213a;border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-danger{color:var(--danger)}.panel-title{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:6px}
+button,select,input{font:inherit}button{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);cursor:pointer;transition:.14s ease}button:hover{transform:translateY(-1px);border-color:#4e6b9d}button.primary{background:#173a31;border-color:#3c8a6b}button.warning{background:#392f18;border-color:#806c39}button.danger{background:#3a1c25;border-color:#804343}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:13px;margin-top:13px}.flowbox{border:1px solid var(--line);background:#0f1728;border-radius:15px;padding:13px}.flow{display:flex;gap:6px;align-items:center;overflow-x:auto}.flow-node{min-width:115px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#17213a;text-align:center;transition:.2s}.flow-node.ok{border-color:#3f9d75}.flow-node.fail{border-color:#a84f5b}.flow-node.wait{opacity:.52}.arrow{color:var(--muted);font-weight:900}.flowmsg{min-height:24px;margin-top:8px;color:var(--muted)}.state-list{display:grid;gap:8px}.state-row{display:grid;grid-template-columns:170px 1fr;gap:8px;padding:8px 10px;background:#0f1728;border:1px solid var(--line);border-radius:11px}.state-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800}
+.lab-grid{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:13px}.controls{display:grid;align-content:start;gap:8px;padding:13px;background:#0f1728;border:1px solid var(--line);border-radius:15px}.screen{min-height:345px;border-radius:14px;background:#f2f5f8;color:#18202d;position:relative;padding:46px 18px 18px;display:flex;align-items:center;justify-content:center;text-align:center}.screenbar{position:absolute;left:0;top:0;right:0;padding:8px 12px;background:#dce3ec;color:#445064;text-align:left;font-size:12px}.big{font-size:26px;font-weight:900}.terminal{min-height:345px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.lesson{margin-top:13px;display:grid;grid-template-columns:170px 1fr;gap:12px;background:#10182a}
+.concept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:13px}.concept{background:#0f1728;border:1px solid var(--line);border-radius:14px;padding:12px}.concept-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0}.concept-card{padding:9px;background:#121b30;border:1px solid var(--line);border-radius:10px;font-size:12px}.action-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.mini-console{margin-top:9px;min-height:150px;padding:11px;border:1px solid #1b3240;border-radius:11px;background:var(--terminal);color:#d9f7e6;white-space:pre-wrap;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.diag-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:12px}.diag-buttons{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.diag-buttons button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:center;padding:6px}.diag-console{min-height:285px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:13px;padding:13px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.answer{display:grid;gap:9px;align-content:start}.answer select{width:100%;min-height:44px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:8px}.score{border:1px solid var(--line);background:#0f1728;border-radius:12px;padding:11px}.score-big{font-size:30px;font-weight:900}.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.chips button{min-height:38px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.breakdown{display:grid;gap:6px}.piece{display:grid;grid-template-columns:190px 1fr;gap:8px;padding:8px;background:#0f1728;border:1px solid var(--line);border-radius:10px}.graduation{text-align:center}.grad-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+@media(max-width:1050px){.hero-grid,.concept-grid,.diag-grid,.cmd-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:220px 1fr}.lab-grid>section:last-child{grid-column:1/-1}.diag-buttons{grid-template-columns:repeat(3,1fr)}} @media(max-width:760px){.lab-grid{grid-template-columns:1fr}.lab-grid>section:last-child{grid-column:auto}.flow{display:grid}.lesson{grid-template-columns:1fr}.concept-cards{grid-template-columns:1fr}.piece{grid-template-columns:1fr}.diag-buttons{grid-template-columns:1fr 1fr}}
+</style><style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head><body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab17_ansible_iac.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab18</div>
+  <a href="./parrot_linux_lab19_security_hardening.html">→</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html" class="current">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab17_ansible_iac.html">← Lab17</a><strong class="lab-title">Lab18 VM / Cloud</strong><span class="spacer"></span><a href="parrot_linux_lab19_security_hardening.html">Lab19 →</a></nav>
+<header><h1 id="title"></h1><p class="muted" id="subtitle"></p></header>
+<section class="card"><h2>まず構造：このLabで何がつながる？</h2><div class="hero-grid"><div class="flowbox"><div class="flow" id="flow"></div><div class="flowmsg" id="flowMsg"></div></div><div class="state-list" id="stateList"></div></div></section>
+<section class="card" style="margin-top:13px"><h2>操作してみる</h2><div class="lab-grid"><aside class="controls" id="actions"></aside><section><div class="panel-title">利用者/運用からはこう見える</div><div class="screen"><div class="screenbar">Interactive Lab / Linux Host</div><div><div class="big" id="screenTitle">初期状態</div><p id="screenBody">左の操作を試してください。</p></div></div></section><section><div class="panel-title">裏ではこのコマンド / 状態</div><div class="terminal" id="terminal">$</div></section></div><div class="lesson card"><div><span class="badge">💡 ここがポイント</span></div><div id="lesson"></div></div></section>
+<section class="card" style="margin-top:13px"><h2>深掘りして理解する</h2><div class="concept-grid" id="concepts"></div></section>
+<section class="card" style="margin-top:13px"><h2>🕵 障害切り分けゲーム</h2><div class="diag-grid"><div><div id="incidentPrompt"><strong>「障害が起きました」</strong> — 新しい障害を発生させてください。</div><div class="diag-buttons" id="diagButtons"></div><div class="diag-console" id="diagConsole">$ まだ調査していません。</div></div><div class="answer"><button class="primary" id="newIncidentBtn">🎲 新しい障害</button><select id="incidentAnswer"></select><button id="answerIncidentBtn">回答する</button><div class="score"><div class="muted" id="scoreLabel">確認回数</div><div class="score-big" id="scoreValue">0</div></div><div id="incidentExplain" class="muted"></div></div></div></section>
+<section class="card" style="margin-top:13px"><h2>🧩 コマンドを分解する</h2><div class="cmd-grid"><div><div class="chips" id="cmdButtons"></div><div class="breakdown" id="cmdBreakdown">コマンドを押すと意味を分解します。</div></div><div class="concept"><div class="mini-console">VM/Cloud障害確認
+1. VM state/Consoleは？
+2. Guest IP/Route/Serviceは？
+3. Cloud SG/NACL/Routeは？
+4. Volume attach状態は？
+5. cloud-init/User-dataは？
+6. Hypervisor/Host contentionは？
+7. SnapshotとBackupを混同してない？</div></div></div></section>
+<section class="card graduation" style="margin-top:13px"><h2>🎓 卒業テスト</h2><p id="gradQuestion"></p><div class="grad-actions" id="gradActions"></div><div id="gradResult" style="margin-top:10px"></div></section>
+</main><script>
+(function(){"use strict";
+const LAB={"num": 18, "icon": "☁️", "title": "Virtualization / VM / Cloud基礎", "short": "VM / Cloud", "subtitle": "VMとContainer、Host FirewallとCloud Security Group、SnapshotとBackupを混同しない。<strong>Hypervisor → VM → vNIC → Virtual Network → Security → Storage → Cloud-init</strong>をつなぎます。", "flow": [{"icon": "🖥", "label": "Physical Host"}, {"icon": "🧩", "label": "Hypervisor"}, {"icon": "💻", "label": "VM"}, {"icon": "🌐", "label": "vNIC"}, {"icon": "🛡", "label": "Security Group"}, {"icon": "💽", "label": "Block Storage"}, {"icon": "☁️", "label": "Cloud-init"}], "initial": {"hypervisor": "KVM-like", "VM": "running 2vCPU/4GiB", "network": "10.0.1.20/24", "security": "22 ALLOW / 443 DENY", "disk": "root 30G attached", "snapshot": "none", "cloudInit": "done", "sg443": false, "diskAttached": true, "cloudInitOk": true, "vmRunning": true, "hostPressure": false}, "stateRows": [{"label": "Hypervisor", "key": "hypervisor"}, {"label": "VM", "key": "VM"}, {"label": "vNIC/IP", "key": "network"}, {"label": "Cloud security", "key": "security"}, {"label": "Block storage", "key": "disk"}, {"label": "Snapshot", "key": "snapshot"}, {"label": "cloud-init", "key": "cloudInit"}], "defaultLesson": "VMは独自Kernelを持つGuest OS。CloudではGuest内設定に加え、Virtual Network/Security Group/Block Storageなど外側のLayerもあります。", "actions": [{"label": "VMを起動", "kind": "primary", "set": {"vmRunning": true, "VM": "running 2vCPU/4GiB"}, "command": "VM state: RUNNING\nGuest boot → cloud-init → sshd", "title": "✅ VM running", "body": "Guest OSがHypervisor上で起動。", "okUntil": 2}, {"label": "Security Groupで443許可", "set": {"sg443": true, "security": "22,443 ALLOW"}, "command": "Cloud firewall rule: ingress tcp/443 from 0.0.0.0/0\n# 実環境では必要なSource範囲に絞る", "title": "🛡 443 rule追加", "body": "Cloud側Packet filterを通過可能に。", "okUntil": 4}, {"label": "Snapshot作成", "set": {"snapshot": "snap-20260817"}, "command": "Create volume snapshot snap-20260817", "title": "📸 Snapshot", "body": "短時間の復旧点。ただしBackup戦略とは別。", "okUntil": 5}, {"label": "Data diskをdetach", "kind": "danger", "set": {"diskAttached": false, "disk": "data disk DETACHED"}, "command": "Detach block volume vol-data", "title": "❌ Disk detached", "body": "GuestからDeviceが消える/IO影響。", "okUntil": 4, "failAt": 5}, {"label": "Cloud-initを失敗", "kind": "warning", "set": {"cloudInitOk": false, "cloudInit": "FAILED module user-data"}, "command": "$ cloud-init status --long\nstatus: error", "title": "☁️ Provisioning失敗", "body": "VMは起動してもUser/Package/Configが未反映。", "okUntil": 5, "failAt": 6}, {"label": "HostをOvercommit", "kind": "warning", "set": {"hostPressure": true, "hypervisor": "KVM / CPU contention HIGH"}, "command": "Host vCPU allocated=32 / physical cores=8\nsteal time rising", "title": "⚠ Host contention", "body": "Guest CPUが低く見えてもsteal/Host圧迫が影響する場合。", "okUntil": 1, "failAt": 2}, {"label": "正常状態へ戻す", "set": {"sg443": true, "diskAttached": true, "disk": "root+data attached", "cloudInitOk": true, "cloudInit": "done", "hostPressure": false, "hypervisor": "KVM-like"}, "command": "Restore cloud-side resources and guest config", "title": "✅ Recovered", "body": "Cloud外側とGuest内側を両方確認。", "okUntil": 6}], "concepts": [{"title": "VM vs Container", "intro": "VMはGuest Kernelを持ち、ContainerはHost Kernel共有。Isolation/起動速度/運用責任が異なる。", "cards": [["VM", "Virtual hardware + Guest OS"], ["Container", "Process isolation + shared kernel"], ["Image", "VM image/container imageは意味が異なる"]], "console": "Physical → Hypervisor → VM Kernel\nPhysical → Host Kernel → Container process", "exercises": [{"label": "detect virt", "console": "$ systemd-detect-virt\nkvm"}]}, {"title": "Virtual Network / Security", "intro": "Guest内FirewallだけでなくCloud側Security Group/NACL等の外側Filterがある。", "cards": [["vNIC", "VMの仮想NIC"], ["Subnet/Route", "Virtual network"], ["Security Group", "Instance/ENI周辺Filter"]], "console": "Internet → Cloud SG → vNIC → Guest Firewall → Service", "exercises": [{"label": "443 blocked", "console": "Guest ufw ALLOW 443\nCloud SG DENY 443\n→ 外部からは届かない"}]}, {"title": "Block / Object / Snapshot", "intro": "VM DiskはBlock Storage。Object StorageはMount Diskと同じではない。Snapshotは特定時点Copy。", "cards": [["Block", "Filesystemを載せる"], ["Object", "API/KeyでObject保存"], ["Snapshot", "Volume時点Copy"]], "console": "snapshot ≠ tested offsite backup", "exercises": [{"label": "Detach", "console": "Guest: lsblkからdata diskが消える\nCloud console: volume detached"}]}, {"title": "Cloud-init / Metadata", "intro": "初回BootでUser/SSH key/Package/Configを自動投入する仕組み。失敗してもVM自体はrunningになり得る。", "cards": [["user-data", "初期Script/Config"], ["metadata", "Instance情報"], ["cloud-init status", "実行結果"]], "console": "$ cloud-init status --long\nstatus: done", "exercises": [{"label": "Log", "console": "$ less /var/log/cloud-init-output.log"}]}], "diagLabels": {"guest": "guest ip/service", "sg": "cloud security", "route": "virtual route", "disk": "block storage", "cloudinit": "cloud-init", "host": "hypervisor pressure"}, "diagHint": "「Cloud外側（SG/Route/Storage）とGuest内側（IP/FW/Service）を分けて確認」。", "incidents": [{"cause": "sg", "answer": "Cloud Security Groupで443拒否", "prompt": "Guest内nginx/ufwは正常、同Subnetからは443成功、Internetから失敗。", "evidence": {"guest": "nginx LISTEN 0.0.0.0:443 / guest firewall allow", "sg": "ingress: 22 only / 443 DENY", "route": "public route OK", "disk": "normal", "cloudinit": "done", "host": "normal"}, "explain": "Guestより外側のCloud SGで遮断。"}, {"cause": "disk", "answer": "Block volume detach", "prompt": "VMはrunningだが/dataが突然消えた。", "evidence": {"guest": "lsblk: data device missing", "sg": "normal", "route": "normal", "disk": "Cloud console: vol-data detached", "cloudinit": "done", "host": "normal"}, "explain": "Guest filesystem以前にBlock Storageがdetach。"}, {"cause": "cloudinit", "answer": "cloud-init失敗", "prompt": "新VMはrunningだがUserが作られずnginxも入っていない。", "evidence": {"guest": "OS booted / expected user absent", "sg": "SSH rule OK", "route": "OK", "disk": "normal", "cloudinit": "status: error / package module failed", "host": "normal"}, "explain": "Provisioning layerの失敗。"}, {"cause": "hostpressure", "answer": "Hypervisor/Host resource contention", "prompt": "複数VMが同時に遅いがGuest内CPU使用率は低め。", "evidence": {"guest": "CPU us 20% / steal 35%", "sg": "normal", "route": "normal", "disk": "latency normal", "cloudinit": "done", "host": "Physical cores 8 / allocated vCPU 32 / contention"}, "explain": "Host overcommit/steal timeを確認。"}, {"cause": "snapshot", "answer": "SnapshotをBackupと誤認", "prompt": "Volume削除とSnapshot削除を同一操作で失い、別Copyがない。", "evidence": {"guest": "VM unavailable", "sg": "N/A", "route": "N/A", "disk": "volume + same-account snapshots deleted", "cloudinit": "N/A", "host": "N/A"}, "explain": "Snapshotだけでは運用/障害モデル次第で独立Backupにならない。"}], "commands": {"virt": {"label": "systemd-detect-virt", "parts": [["systemd-detect-virt", "Virtualization種別検出"]]}, "lsblk": {"label": "lsblk -f", "parts": [["lsblk", "Guestから見えるBlock Device"], ["-f", "Filesystem/Mount表示"]]}, "cloudinit": {"label": "cloud-init status --long", "parts": [["cloud-init", "初期Provisioning"], ["status --long", "完了/失敗詳細"]]}, "ip": {"label": "ip addr / ip route", "parts": [["ip addr", "Guest vNIC/IP"], ["ip route", "Guest routing"]]}}, "checklist": "VM/Cloud障害確認\n1. VM state/Consoleは？\n2. Guest IP/Route/Serviceは？\n3. Cloud SG/NACL/Routeは？\n4. Volume attach状態は？\n5. cloud-init/User-dataは？\n6. Hypervisor/Host contentionは？\n7. SnapshotとBackupを混同してない？", "graduation": {"question": "<strong>「Guest内ss/ufwは443 OK。同Subnetから接続成功。Internetからだけtimeout。Cloud SGは22番のみ許可。」</strong><br>原因は？", "answers": [{"id": "nginx", "label": "nginx停止"}, {"id": "sg", "label": "Cloud Security Group"}, {"id": "inode", "label": "inode枯渇"}], "correct": "sg", "explain": "Guest内の証拠は正常。Cloud側ingress 443がないのが直接原因です。"}}; let state=JSON.parse(JSON.stringify(LAB.initial)); let incident=null,checks=0,used={};
+const $=id=>document.getElementById(id); const esc=s=>String(s??'');
+function setScreen(t,b){$('screenTitle').textContent=t;$('screenBody').textContent=b} function setTerm(s){$('terminal').textContent=s} function setLesson(s){$('lesson').textContent=s}
+function renderFlow(okUntil=-1,failAt=-1,msg=''){const box=$('flow');box.replaceChildren();LAB.flow.forEach((n,i)=>{const d=document.createElement('div');d.className='flow-node '+(i===failAt?'fail':i<=okUntil?'ok':'wait');d.innerHTML='<div style="font-size:20px">'+n.icon+'</div><strong>'+n.label+'</strong>';box.appendChild(d);if(i<LAB.flow.length-1){const a=document.createElement('div');a.className='arrow';a.textContent='→';box.appendChild(a)}});$('flowMsg').textContent=msg||'操作すると処理がどこまで進んだか表示します。'}
+function statusClass(v){const s=String(v).toLowerCase();if(/error|failed|broken|missing|expired|unsafe|stopped|denied|down|invalid|full|unreachable|mismatch/.test(s)||s==='off'||s==='no')return 'status-danger';if(/warn|pending|stale|none|not configured|unverified|manual/.test(s))return 'status-warn';return 'status-ok'}
+function renderState(){const box=$('stateList');box.replaceChildren();LAB.stateRows.forEach(r=>{const row=document.createElement('div');row.className='state-row';const l=document.createElement('div');l.textContent=r.label;const v=document.createElement('div');v.className='state-value '+statusClass(state[r.key]);v.textContent=state[r.key];row.append(l,v);box.appendChild(row)})}
+function reqOK(req){if(!req)return true;return Object.keys(req).every(k=>state[k]===req[k])}
+function act(a){if(a.requires&&!reqOK(a.requires)){const f=a.fail||{};setTerm(f.command||'$ '+a.label+'\n\n条件が整っていません。');setScreen(f.title||'❌ 前提条件不足',f.body||'先に必要な準備を確認してください。');setLesson(f.lesson||'作業は前提条件を確認してから進めます。');renderFlow(f.okUntil??0,f.failAt??1,f.flowMsg||'前提条件の段階で停止。');return}if(a.set)Object.assign(state,a.set);setTerm(a.command||'$ '+a.label);setScreen(a.title||'✅ 実行',a.body||'状態を更新しました。');setLesson(a.lesson||LAB.defaultLesson);renderFlow(a.okUntil??LAB.flow.length-1,a.failAt??-1,a.flowMsg||'処理が完了しました。');renderState()}
+function renderActions(){const box=$('actions');box.replaceChildren();LAB.actions.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a.label;b.className=a.kind||'';b.addEventListener('click',()=>act(a));box.appendChild(b)})}
+function renderConcepts(){const box=$('concepts');box.replaceChildren();LAB.concepts.forEach((c,ci)=>{const sec=document.createElement('section');sec.className='concept';const h=document.createElement('h3');h.textContent=c.title;const p=document.createElement('p');p.className='muted';p.textContent=c.intro;sec.append(h,p);if(c.cards){const cards=document.createElement('div');cards.className='concept-cards';c.cards.forEach(x=>{const d=document.createElement('div');d.className='concept-card';d.innerHTML='<strong>'+x[0]+'</strong><br>'+x[1];cards.appendChild(d)});sec.appendChild(cards)}const row=document.createElement('div');row.className='action-row';const con=document.createElement('div');con.className='mini-console';con.textContent=c.console||'';(c.exercises||[]).forEach(ex=>{const b=document.createElement('button');b.textContent=ex.label;b.addEventListener('click',()=>{con.textContent=ex.console;if(ex.lesson)setLesson(ex.lesson)});row.appendChild(b)});sec.append(row,con);box.appendChild(sec)})}
+function renderDiag(){const box=$('diagButtons');box.replaceChildren();Object.entries(LAB.diagLabels).forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.addEventListener('click',()=>diagnose(k));box.appendChild(b)});const sel=$('incidentAnswer');sel.innerHTML='<option value="">原因を選ぶ</option>';LAB.incidents.forEach(x=>{const o=document.createElement('option');o.value=x.cause;o.textContent=x.answer;sel.appendChild(o)})}
+function newIncident(){let pool=LAB.incidents.filter(x=>!incident||x.cause!==incident.cause);incident=pool[Math.floor(Math.random()*pool.length)];checks=0;used={};$('incidentPrompt').innerHTML='<strong>「'+incident.prompt+'」</strong><br>原因は伏せています。';$('diagConsole').textContent='$ 調査開始。どの証拠を見る？';$('incidentAnswer').value='';$('incidentExplain').textContent='';score()}
+function diagnose(k){if(!incident){$('diagConsole').textContent='$ 先に新しい障害を発生させてください。';return}if(!used[k]){used[k]=1;checks++}$('diagConsole').textContent+='\n\n'+(incident.evidence[k]||'(この観点に追加情報なし)');score()}
+function score(v){$('scoreLabel').textContent=v==null?'確認回数':'スコア';$('scoreValue').textContent=v==null?checks:v}
+function answerIncident(){if(!incident||!$('incidentAnswer').value)return;if($('incidentAnswer').value===incident.cause){let s=Math.max(50,100-Math.max(0,checks-2)*10);score(s);$('incidentExplain').innerHTML='<strong class="status-ok">✅ 正解 '+s+'点</strong><br>'+incident.explain}else{score(0);$('incidentExplain').innerHTML='<strong class="status-danger">❌ まだ違う</strong><br>'+LAB.diagHint}}
+function renderCommands(){const box=$('cmdButtons');box.replaceChildren();Object.entries(LAB.commands).forEach(([k,c])=>{const b=document.createElement('button');b.textContent=c.label;b.addEventListener('click',()=>{const out=$('cmdBreakdown');out.replaceChildren();c.parts.forEach(x=>{const d=document.createElement('div');d.className='piece';d.innerHTML='<code>'+x[0]+'</code><div>'+x[1]+'</div>';out.appendChild(d)})});box.appendChild(b)})}
+function renderGrad(){ $('gradQuestion').innerHTML=LAB.graduation.question;const box=$('gradActions');box.replaceChildren();LAB.graduation.answers.forEach(x=>{const b=document.createElement('button');b.textContent=x.label;b.addEventListener('click',()=>{if(x.id===LAB.graduation.correct){$('gradResult').innerHTML='<strong class="status-ok">🎓 Lab'+String(LAB.num).padStart(2,'0')+' COMPLETE</strong><br>'+LAB.graduation.explain;try{localStorage.setItem('linux_lab'+String(LAB.num).padStart(2,'0')+'_complete','true')}catch(e){}}else{$('gradResult').innerHTML='<span class="status-warn">△ '+(x.feedback||'証拠をもう一度整理しよう。')+'</span>'}});box.appendChild(b)})}
+function init(){document.title='Linux基盤ラボ '+String(LAB.num).padStart(2,'0')+' - '+LAB.title;$('title').textContent=LAB.icon+' Linux基盤ラボ '+String(LAB.num).padStart(2,'0')+' — '+LAB.title;$('subtitle').innerHTML=LAB.subtitle;$('lesson').textContent=LAB.defaultLesson;renderFlow();renderState();renderActions();renderConcepts();renderDiag();renderCommands();renderGrad();$('newIncidentBtn').onclick=newIncident;$('answerIncidentBtn').onclick=answerIncident}
+init();}());
+</script>
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body></html>

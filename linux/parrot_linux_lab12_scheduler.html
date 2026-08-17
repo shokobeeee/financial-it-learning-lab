@@ -1,0 +1,317 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux Lab</title><style>
+:root{--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--warn:#ffd166;--danger:#ff7b7b;--ok:#75e6a5;--line:#2a3858;--terminal:#071019}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100vh} main{width:min(1380px,calc(100% - 32px));margin:24px auto 56px}
+h1{font-size:clamp(26px,4vw,40px);margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{margin:0 0 7px}p{line-height:1.7}.muted{color:var(--muted)}code{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.card{background:rgba(18,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 36px rgba(0,0,0,.18)}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);background:#17213a;border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-danger{color:var(--danger)}.panel-title{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:6px}
+button,select,input{font:inherit}button{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);cursor:pointer;transition:.14s ease}button:hover{transform:translateY(-1px);border-color:#4e6b9d}button.primary{background:#173a31;border-color:#3c8a6b}button.warning{background:#392f18;border-color:#806c39}button.danger{background:#3a1c25;border-color:#804343}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:13px;margin-top:13px}.flowbox{border:1px solid var(--line);background:#0f1728;border-radius:15px;padding:13px}.flow{display:flex;gap:6px;align-items:center;overflow-x:auto}.flow-node{min-width:115px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#17213a;text-align:center;transition:.2s}.flow-node.ok{border-color:#3f9d75}.flow-node.fail{border-color:#a84f5b}.flow-node.wait{opacity:.52}.arrow{color:var(--muted);font-weight:900}.flowmsg{min-height:24px;margin-top:8px;color:var(--muted)}.state-list{display:grid;gap:8px}.state-row{display:grid;grid-template-columns:170px 1fr;gap:8px;padding:8px 10px;background:#0f1728;border:1px solid var(--line);border-radius:11px}.state-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800}
+.lab-grid{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:13px}.controls{display:grid;align-content:start;gap:8px;padding:13px;background:#0f1728;border:1px solid var(--line);border-radius:15px}.screen{min-height:345px;border-radius:14px;background:#f2f5f8;color:#18202d;position:relative;padding:46px 18px 18px;display:flex;align-items:center;justify-content:center;text-align:center}.screenbar{position:absolute;left:0;top:0;right:0;padding:8px 12px;background:#dce3ec;color:#445064;text-align:left;font-size:12px}.big{font-size:26px;font-weight:900}.terminal{min-height:345px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.lesson{margin-top:13px;display:grid;grid-template-columns:170px 1fr;gap:12px;background:#10182a}
+.concept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:13px}.concept{background:#0f1728;border:1px solid var(--line);border-radius:14px;padding:12px}.concept-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0}.concept-card{padding:9px;background:#121b30;border:1px solid var(--line);border-radius:10px;font-size:12px}.action-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.mini-console{margin-top:9px;min-height:150px;padding:11px;border:1px solid #1b3240;border-radius:11px;background:var(--terminal);color:#d9f7e6;white-space:pre-wrap;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.diag-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:12px}.diag-buttons{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.diag-buttons button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:center;padding:6px}.diag-console{min-height:285px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:13px;padding:13px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.answer{display:grid;gap:9px;align-content:start}.answer select{width:100%;min-height:44px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:8px}.score{border:1px solid var(--line);background:#0f1728;border-radius:12px;padding:11px}.score-big{font-size:30px;font-weight:900}.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.chips button{min-height:38px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.breakdown{display:grid;gap:6px}.piece{display:grid;grid-template-columns:190px 1fr;gap:8px;padding:8px;background:#0f1728;border:1px solid var(--line);border-radius:10px}.graduation{text-align:center}.grad-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+@media(max-width:1050px){.hero-grid,.concept-grid,.diag-grid,.cmd-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:220px 1fr}.lab-grid>section:last-child{grid-column:1/-1}.diag-buttons{grid-template-columns:repeat(3,1fr)}} @media(max-width:760px){.lab-grid{grid-template-columns:1fr}.lab-grid>section:last-child{grid-column:auto}.flow{display:grid}.lesson{grid-template-columns:1fr}.concept-cards{grid-template-columns:1fr}.piece{grid-template-columns:1fr}.diag-buttons{grid-template-columns:1fr 1fr}}
+</style><style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head><body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab11_bash_pipes.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab12</div>
+  <a href="./parrot_linux_lab13_backup_restore.html">→</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html" class="current">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab11_bash_pipes.html">← Lab11</a><strong class="lab-title">Lab12 Scheduler</strong><span class="spacer"></span><a href="parrot_linux_lab13_backup_restore.html">Lab13 →</a></nav>
+<header><h1 id="title"></h1><p class="muted" id="subtitle"></p></header>
+<section class="card"><h2>まず構造：このLabで何がつながる？</h2><div class="hero-grid"><div class="flowbox"><div class="flow" id="flow"></div><div class="flowmsg" id="flowMsg"></div></div><div class="state-list" id="stateList"></div></div></section>
+<section class="card" style="margin-top:13px"><h2>操作してみる</h2><div class="lab-grid"><aside class="controls" id="actions"></aside><section><div class="panel-title">利用者/運用からはこう見える</div><div class="screen"><div class="screenbar">Interactive Lab / Linux Host</div><div><div class="big" id="screenTitle">初期状態</div><p id="screenBody">左の操作を試してください。</p></div></div></section><section><div class="panel-title">裏ではこのコマンド / 状態</div><div class="terminal" id="terminal">$</div></section></div><div class="lesson card"><div><span class="badge">💡 ここがポイント</span></div><div id="lesson"></div></div></section>
+<section class="card" style="margin-top:13px"><h2>深掘りして理解する</h2><div class="concept-grid" id="concepts"></div></section>
+<section class="card" style="margin-top:13px"><h2>🕵 障害切り分けゲーム</h2><div class="diag-grid"><div><div id="incidentPrompt"><strong>「障害が起きました」</strong> — 新しい障害を発生させてください。</div><div class="diag-buttons" id="diagButtons"></div><div class="diag-console" id="diagConsole">$ まだ調査していません。</div></div><div class="answer"><button class="primary" id="newIncidentBtn">🎲 新しい障害</button><select id="incidentAnswer"></select><button id="answerIncidentBtn">回答する</button><div class="score"><div class="muted" id="scoreLabel">確認回数</div><div class="score-big" id="scoreValue">0</div></div><div id="incidentExplain" class="muted"></div></div></div></section>
+<section class="card" style="margin-top:13px"><h2>🧩 コマンドを分解する</h2><div class="cmd-grid"><div><div class="chips" id="cmdButtons"></div><div class="breakdown" id="cmdBreakdown">コマンドを押すと意味を分解します。</div></div><div class="concept"><div class="mini-console">定期実行の確認順
+1. Scheduler/Timerは有効？
+2. 次回/前回時刻は？
+3. User / PATH / cwd / TZは？
+4. Script単体のexit statusは？
+5. journal/stdoutは？
+6. 多重実行してない？</div></div></div></section>
+<section class="card graduation" style="margin-top:13px"><h2>🎓 卒業テスト</h2><p id="gradQuestion"></p><div class="grad-actions" id="gradActions"></div><div id="gradResult" style="margin-top:10px"></div></section>
+</main><script>
+(function(){"use strict";
+const LAB={"num": 12, "icon": "⏰", "title": "Cron / systemd timer / 定期実行", "short": "Scheduler", "subtitle": "手動では動くScriptが、定期実行ではなぜ失敗するのか。<strong>時刻 → Scheduler → Environment → Script → Lock → Log</strong>の順で理解します。", "flow": [{"icon": "🕒", "label": "Trigger"}, {"icon": "📅", "label": "Scheduler"}, {"icon": "🌐", "label": "Environment"}, {"icon": "📜", "label": "Script"}, {"icon": "🔒", "label": "Overlap Lock"}, {"icon": "📚", "label": "Log"}], "initial": {"cron": "active", "timer": "disabled", "PATH": "minimal /usr/bin:/bin", "timezone": "Asia/Tokyo", "script": "executable", "overlap": "unprotected", "lastRun": "never", "cronConfigured": false, "pathOk": true, "scriptExec": true, "lockOk": false, "timerEnabled": false}, "stateRows": [{"label": "cron daemon", "key": "cron"}, {"label": "systemd timer", "key": "timer"}, {"label": "PATH", "key": "PATH"}, {"label": "Timezone", "key": "timezone"}, {"label": "Script", "key": "script"}, {"label": "Overlap", "key": "overlap"}, {"label": "Last run", "key": "lastRun"}], "defaultLesson": "定期実行は「手動Shellと同じ環境」ではありません。PATH・WorkingDirectory・User・Timezone・同時実行を明示します。", "actions": [{"label": "crontabを登録", "kind": "primary", "set": {"cronConfigured": true}, "command": "$ crontab -e\n*/5 * * * * /opt/jobs/report.sh", "title": "✅ cron登録", "body": "5分ごとにScriptを起動する設定。", "lesson": "cronの5フィールドは「分 時 日 月 曜日」。実行Userのcrontabかsystem crontabかも区別。", "okUntil": 1}, {"label": "定期Jobを実行", "requires": {"cronConfigured": true, "pathOk": true, "scriptExec": true}, "set": {"lastRun": "18:10 success"}, "command": "$ journalctl -u cron --since \"18:09\"\nCRON: CMD (/opt/jobs/report.sh)\nreport.sh: completed", "title": "✅ Scheduled job成功", "body": "SchedulerからScriptが起動しLogも残りました。", "okUntil": 5, "fail": {"command": "$ journalctl -u cron\nCRON: CMD (/opt/jobs/report.sh)\nreport.sh: command not found / Permission denied", "title": "❌ Scheduled job失敗", "body": "手動と定期実行の環境差を確認。", "okUntil": 2, "failAt": 3}}, {"label": "PATH依存を壊す", "kind": "warning", "set": {"pathOk": false, "PATH": "minimal /usr/bin:/bin (app missing)"}, "command": "$ # script内で backup-tool を絶対pathなしで呼ぶ想定", "title": "⚠ PATH問題を作成", "body": "Interactive shellにはあるCommandがcron PATHにはありません。", "okUntil": 2}, {"label": "絶対Pathで修正", "set": {"pathOk": true, "PATH": "explicit /usr/local/bin:/usr/bin:/bin"}, "command": "$ sed -i \"s#backup-tool#/usr/local/bin/backup-tool#\" /opt/jobs/report.sh", "title": "✅ PATH修正", "body": "Script内の実行Commandを明示しました。", "okUntil": 3}, {"label": "実行権限を外す", "kind": "danger", "set": {"scriptExec": false, "script": "not executable"}, "command": "$ chmod -x /opt/jobs/report.sh", "title": "❌ xを外した", "body": "Schedulerから直接実行するとPermission denied。", "okUntil": 2, "failAt": 3}, {"label": "chmod +xで戻す", "set": {"scriptExec": true, "script": "executable"}, "command": "$ chmod 750 /opt/jobs/report.sh", "title": "✅ 実行権限復旧", "body": "Owner/Group設計も確認。", "okUntil": 3}, {"label": "systemd timerを有効化", "set": {"timerEnabled": true, "timer": "enabled / Persistent=true"}, "command": "$ sudo systemctl enable --now report.timer\n$ systemctl list-timers report.timer", "title": "✅ Timer enabled", "body": "次回実行時刻とLast triggerを確認できます。", "okUntil": 1}, {"label": "flockで二重起動防止", "set": {"lockOk": true, "overlap": "protected by flock"}, "command": "$ flock -n /run/report.lock /opt/jobs/report.sh", "title": "🔒 Overlap保護", "body": "前回処理が残る場合は新しい実行を開始しない設計。", "okUntil": 4}], "concepts": [{"title": "cronの時刻表現", "intro": "5つの欄を読み違えると「動かない」ではなく「違う時刻に動く」。", "cards": [["*/5 * * * *", "5分ごと"], ["0 2 * * *", "毎日02:00"], ["0 9 * * 1", "毎週月曜09:00"]], "console": "$ crontab -l\n0 2 * * * /opt/jobs/backup.sh", "exercises": [{"label": "毎日03:30", "console": "30 3 * * * /opt/jobs/report.sh"}, {"label": "平日09:00", "console": "0 9 * * 1-5 /opt/jobs/report.sh"}]}, {"title": "systemd timerの強み", "intro": "Unitとして状態・Log・Dependencyを扱え、Persistent=trueなら停止中に逃した実行を復帰後に補える設計も可能。", "cards": [["OnCalendar", "Calendar trigger"], ["Persistent=true", "missed run補完"], ["RandomizedDelaySec", "同時集中を分散"]], "console": "$ systemctl list-timers\nNEXT ... LEFT ... LAST ... PASSED ... UNIT", "exercises": [{"label": "Timer status", "console": "$ systemctl status report.timer\nActive: active (waiting)"}, {"label": "Service log", "console": "$ journalctl -u report.service --since today"}]}, {"title": "Environment差", "intro": "cron/systemdはInteractive shellのalias・PATH・cwdをそのまま継承しない。", "cards": [["PATH", "絶対Path推奨"], ["WorkingDirectory", "相対Pathの基準"], ["User", "権限/Groupが変わる"]], "console": "$ env\nPATH=/usr/bin:/bin\nHOME=/home/learner", "exercises": [{"label": "Shell側と比較", "console": "$ echo $PATH\n/usr/local/bin:/usr/bin:/bin\n\ncron PATH=/usr/bin:/bin"}]}, {"title": "重複実行とLog", "intro": "長いJobを短い間隔で起動すると多重実行になる。成功/失敗の終了Statusも残す。", "cards": [["flock", "同時実行抑止"], ["timeout", "無限待ち防止"], ["journal/stdout", "証拠を残す"]], "console": "$ flock -n /run/job.lock job.sh || echo already-running", "exercises": [{"label": "Exit status", "console": "$ job.sh\n$ echo $?\n0"}]}], "diagLabels": {"schedule": "schedule", "env": "env/PATH", "perm": "permission", "timer": "timer status", "log": "journal", "process": "ps/flock"}, "diagHint": "「時刻が来たか → Schedulerが起動したか → Environment/権限 → Script exit → 重複」の順で確認。", "incidents": [{"cause": "path", "answer": "cron PATH不足", "prompt": "手動では成功、cronだけcommand not found。", "evidence": {"schedule": "crontabは正しい", "env": "cron PATH=/usr/bin:/bin / backup-toolは/usr/local/bin", "perm": "script 750で実行可能", "timer": "cron active", "log": "report.sh: backup-tool: command not found", "process": "重複なし"}, "explain": "Interactive shellとのPATH差。絶対Pathか明示Environmentで修正。"}, {"cause": "perm", "answer": "Script実行権限不足", "prompt": "cronがJobを起動するがPermission denied。", "evidence": {"schedule": "schedule OK", "env": "PATH OK", "perm": "-rw-r----- report.sh (xなし)", "timer": "cron active", "log": "Permission denied", "process": "なし"}, "explain": "Script自身またはPath途中の権限を確認。"}, {"cause": "timeroff", "answer": "systemd timerがdisabled", "prompt": "昨日作ったtimerが再起動後に動かない。", "evidence": {"schedule": "OnCalendar正しい", "env": "OK", "perm": "OK", "timer": "Loaded: disabled / Active: inactive", "log": "last trigger: never", "process": "なし"}, "explain": "Timer Unitがenable/startされていない。"}, {"cause": "timezone", "answer": "Timezoneの認識違い", "prompt": "毎日09:00のつもりが想定外の時刻に動く。", "evidence": {"schedule": "0 9 * * *", "env": "TZ=UTC", "perm": "OK", "timer": "active", "log": "09:00 UTCに実行", "process": "なし"}, "explain": "Schedulerが解釈するTimezoneを確認。"}, {"cause": "overlap", "answer": "Job多重実行", "prompt": "処理が徐々に重くなり同じJobが大量に残る。", "evidence": {"schedule": "1分ごと", "env": "OK", "perm": "OK", "timer": "active", "log": "1回の処理に4分", "process": "report.shが4個同時実行"}, "explain": "間隔より処理時間が長い。flock/設計変更で重複防止。"}], "commands": {"cron": {"label": "crontab -l", "parts": [["crontab", "Userのcron table"], ["-l", "現在の設定を表示"]]}, "timers": {"label": "systemctl list-timers", "parts": [["systemctl", "systemd操作"], ["list-timers", "TimerのNEXT/LASTを一覧"]]}, "journal": {"label": "journalctl -u job.service", "parts": [["journalctl", "journal参照"], ["-u", "Unit指定"], ["job.service", "実行本体Service"]]}, "flock": {"label": "flock -n lock cmd", "parts": [["flock", "File lockを利用"], ["-n", "取得できなければ待たず終了"], ["lock", "Lock file"], ["cmd", "保護するCommand"]]}}, "checklist": "定期実行の確認順\n1. Scheduler/Timerは有効？\n2. 次回/前回時刻は？\n3. User / PATH / cwd / TZは？\n4. Script単体のexit statusは？\n5. journal/stdoutは？\n6. 多重実行してない？", "graduation": {"question": "<strong>「Scriptは手動実行なら成功。でもcronでは backup-tool: command not found。」</strong><br>最初に疑うものは？", "answers": [{"id": "network", "label": "Firewall"}, {"id": "path", "label": "cronのPATH / 実行環境"}, {"id": "disk", "label": "GRUB"}], "correct": "path", "explain": "手動ShellとcronのEnvironment差が典型。PATH/絶対Pathを確認します。"}}; let state=JSON.parse(JSON.stringify(LAB.initial)); let incident=null,checks=0,used={};
+const $=id=>document.getElementById(id); const esc=s=>String(s??'');
+function setScreen(t,b){$('screenTitle').textContent=t;$('screenBody').textContent=b} function setTerm(s){$('terminal').textContent=s} function setLesson(s){$('lesson').textContent=s}
+function renderFlow(okUntil=-1,failAt=-1,msg=''){const box=$('flow');box.replaceChildren();LAB.flow.forEach((n,i)=>{const d=document.createElement('div');d.className='flow-node '+(i===failAt?'fail':i<=okUntil?'ok':'wait');d.innerHTML='<div style="font-size:20px">'+n.icon+'</div><strong>'+n.label+'</strong>';box.appendChild(d);if(i<LAB.flow.length-1){const a=document.createElement('div');a.className='arrow';a.textContent='→';box.appendChild(a)}});$('flowMsg').textContent=msg||'操作すると処理がどこまで進んだか表示します。'}
+function statusClass(v){const s=String(v).toLowerCase();if(/error|failed|broken|missing|expired|unsafe|stopped|denied|down|invalid|full|unreachable|mismatch/.test(s)||s==='off'||s==='no')return 'status-danger';if(/warn|pending|stale|none|not configured|unverified|manual/.test(s))return 'status-warn';return 'status-ok'}
+function renderState(){const box=$('stateList');box.replaceChildren();LAB.stateRows.forEach(r=>{const row=document.createElement('div');row.className='state-row';const l=document.createElement('div');l.textContent=r.label;const v=document.createElement('div');v.className='state-value '+statusClass(state[r.key]);v.textContent=state[r.key];row.append(l,v);box.appendChild(row)})}
+function reqOK(req){if(!req)return true;return Object.keys(req).every(k=>state[k]===req[k])}
+function act(a){if(a.requires&&!reqOK(a.requires)){const f=a.fail||{};setTerm(f.command||'$ '+a.label+'\n\n条件が整っていません。');setScreen(f.title||'❌ 前提条件不足',f.body||'先に必要な準備を確認してください。');setLesson(f.lesson||'作業は前提条件を確認してから進めます。');renderFlow(f.okUntil??0,f.failAt??1,f.flowMsg||'前提条件の段階で停止。');return}if(a.set)Object.assign(state,a.set);setTerm(a.command||'$ '+a.label);setScreen(a.title||'✅ 実行',a.body||'状態を更新しました。');setLesson(a.lesson||LAB.defaultLesson);renderFlow(a.okUntil??LAB.flow.length-1,a.failAt??-1,a.flowMsg||'処理が完了しました。');renderState()}
+function renderActions(){const box=$('actions');box.replaceChildren();LAB.actions.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a.label;b.className=a.kind||'';b.addEventListener('click',()=>act(a));box.appendChild(b)})}
+function renderConcepts(){const box=$('concepts');box.replaceChildren();LAB.concepts.forEach((c,ci)=>{const sec=document.createElement('section');sec.className='concept';const h=document.createElement('h3');h.textContent=c.title;const p=document.createElement('p');p.className='muted';p.textContent=c.intro;sec.append(h,p);if(c.cards){const cards=document.createElement('div');cards.className='concept-cards';c.cards.forEach(x=>{const d=document.createElement('div');d.className='concept-card';d.innerHTML='<strong>'+x[0]+'</strong><br>'+x[1];cards.appendChild(d)});sec.appendChild(cards)}const row=document.createElement('div');row.className='action-row';const con=document.createElement('div');con.className='mini-console';con.textContent=c.console||'';(c.exercises||[]).forEach(ex=>{const b=document.createElement('button');b.textContent=ex.label;b.addEventListener('click',()=>{con.textContent=ex.console;if(ex.lesson)setLesson(ex.lesson)});row.appendChild(b)});sec.append(row,con);box.appendChild(sec)})}
+function renderDiag(){const box=$('diagButtons');box.replaceChildren();Object.entries(LAB.diagLabels).forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.addEventListener('click',()=>diagnose(k));box.appendChild(b)});const sel=$('incidentAnswer');sel.innerHTML='<option value="">原因を選ぶ</option>';LAB.incidents.forEach(x=>{const o=document.createElement('option');o.value=x.cause;o.textContent=x.answer;sel.appendChild(o)})}
+function newIncident(){let pool=LAB.incidents.filter(x=>!incident||x.cause!==incident.cause);incident=pool[Math.floor(Math.random()*pool.length)];checks=0;used={};$('incidentPrompt').innerHTML='<strong>「'+incident.prompt+'」</strong><br>原因は伏せています。';$('diagConsole').textContent='$ 調査開始。どの証拠を見る？';$('incidentAnswer').value='';$('incidentExplain').textContent='';score()}
+function diagnose(k){if(!incident){$('diagConsole').textContent='$ 先に新しい障害を発生させてください。';return}if(!used[k]){used[k]=1;checks++}$('diagConsole').textContent+='\n\n'+(incident.evidence[k]||'(この観点に追加情報なし)');score()}
+function score(v){$('scoreLabel').textContent=v==null?'確認回数':'スコア';$('scoreValue').textContent=v==null?checks:v}
+function answerIncident(){if(!incident||!$('incidentAnswer').value)return;if($('incidentAnswer').value===incident.cause){let s=Math.max(50,100-Math.max(0,checks-2)*10);score(s);$('incidentExplain').innerHTML='<strong class="status-ok">✅ 正解 '+s+'点</strong><br>'+incident.explain}else{score(0);$('incidentExplain').innerHTML='<strong class="status-danger">❌ まだ違う</strong><br>'+LAB.diagHint}}
+function renderCommands(){const box=$('cmdButtons');box.replaceChildren();Object.entries(LAB.commands).forEach(([k,c])=>{const b=document.createElement('button');b.textContent=c.label;b.addEventListener('click',()=>{const out=$('cmdBreakdown');out.replaceChildren();c.parts.forEach(x=>{const d=document.createElement('div');d.className='piece';d.innerHTML='<code>'+x[0]+'</code><div>'+x[1]+'</div>';out.appendChild(d)})});box.appendChild(b)})}
+function renderGrad(){ $('gradQuestion').innerHTML=LAB.graduation.question;const box=$('gradActions');box.replaceChildren();LAB.graduation.answers.forEach(x=>{const b=document.createElement('button');b.textContent=x.label;b.addEventListener('click',()=>{if(x.id===LAB.graduation.correct){$('gradResult').innerHTML='<strong class="status-ok">🎓 Lab'+String(LAB.num).padStart(2,'0')+' COMPLETE</strong><br>'+LAB.graduation.explain;try{localStorage.setItem('linux_lab'+String(LAB.num).padStart(2,'0')+'_complete','true')}catch(e){}}else{$('gradResult').innerHTML='<span class="status-warn">△ '+(x.feedback||'証拠をもう一度整理しよう。')+'</span>'}});box.appendChild(b)})}
+function init(){document.title='Linux基盤ラボ '+String(LAB.num).padStart(2,'0')+' - '+LAB.title;$('title').textContent=LAB.icon+' Linux基盤ラボ '+String(LAB.num).padStart(2,'0')+' — '+LAB.title;$('subtitle').innerHTML=LAB.subtitle;$('lesson').textContent=LAB.defaultLesson;renderFlow();renderState();renderActions();renderConcepts();renderDiag();renderCommands();renderGrad();$('newIncidentBtn').onclick=newIncident;$('answerIncidentBtn').onclick=answerIncident}
+init();}());
+</script>
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body></html>

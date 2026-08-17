@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux基盤ラボ 05 - Users / Permissions / sudo</title>
+<style>
+:root{--panel:#121a2d;--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--warn:#ffd166;--danger:#ff7b7b;--ok:#75e6a5;--line:#2a3858;--terminal:#071019}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100vh}
+main{width:min(1380px,calc(100% - 32px));margin:24px auto 56px}
+h1{font-size:clamp(26px,4vw,40px);margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{margin:0 0 7px}
+p{line-height:1.7}.muted{color:var(--muted)}code{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.card{background:rgba(18,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 36px rgba(0,0,0,.18)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.nav a,.nav span{min-height:40px;display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);text-decoration:none}.nav .current{background:#173a31;border-color:#3c8a6b;font-weight:800}
+.badge{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#17213a;border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}
+.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-danger{color:var(--danger)}
+.panel-title{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:6px}
+button,select,input{font:inherit}button{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);cursor:pointer;transition:.14s ease}button:hover{transform:translateY(-1px);border-color:#4e6b9d}button.primary{background:#173a31;border-color:#3c8a6b}button.danger{background:#3a1c25;border-color:#804343}button.warning{background:#392f18;border-color:#806c39}
+
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:13px;margin-top:13px}.flowbox{border:1px solid var(--line);background:#0f1728;border-radius:15px;padding:13px}
+.flow{display:grid;grid-template-columns:repeat(11,auto);gap:6px;align-items:center;justify-content:start;overflow-x:auto}.node{min-width:118px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#17213a;text-align:center;transition:.2s ease}.node.ok{border-color:#3f9d75;box-shadow:0 0 16px rgba(117,230,165,.12)}.node.fail{border-color:#a84f5b;box-shadow:0 0 16px rgba(255,123,123,.12)}.node.wait{opacity:.55}.arrow{color:var(--muted);font-weight:900}.flowmsg{min-height:24px;margin-top:8px;color:var(--muted)}
+.state-list{display:grid;gap:8px}.state-row{display:grid;grid-template-columns:155px 1fr;gap:8px;align-items:center;padding:8px 10px;background:#0f1728;border:1px solid var(--line);border-radius:11px}.state-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800}
+
+.lab-grid{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:13px}.controls{display:grid;align-content:start;gap:8px;padding:13px;background:#0f1728;border:1px solid var(--line);border-radius:15px}
+.screen{min-height:340px;border-radius:14px;background:#f2f5f8;color:#18202d;position:relative;padding:46px 18px 18px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}.screenbar{position:absolute;left:0;top:0;right:0;padding:8px 12px;background:#dce3ec;color:#445064;border-bottom:1px solid #c5ceda;text-align:left;font-size:12px}.big{font-size:26px;font-weight:900}
+.terminal{min-height:340px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.lesson{margin-top:13px;display:grid;grid-template-columns:170px 1fr;gap:12px;background:#10182a}
+
+.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.deep{background:#0f1728;border:1px solid var(--line);border-radius:14px;padding:12px}.action-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.mini-console{margin-top:9px;min-height:145px;padding:11px;border:1px solid #1b3240;border-radius:11px;background:var(--terminal);color:#d9f7e6;white-space:pre-wrap;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.perm-matrix{display:grid;grid-template-columns:110px repeat(3,1fr);gap:6px;align-items:center;margin-top:10px}.perm-cell{padding:8px;border:1px solid var(--line);border-radius:9px;background:#121b30;text-align:center}.perm-cell strong{display:block}
+.chmod-build{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.chmod-col{padding:10px;background:#121b30;border:1px solid var(--line);border-radius:11px}.check-row{display:flex;gap:8px;align-items:center;margin-top:5px}.mode-result{margin-top:9px;padding:11px;border:1px solid var(--line);border-radius:11px;background:#071019;color:#d9f7e6;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}
+.dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.dir-card{padding:10px;background:#121b30;border:1px solid var(--line);border-radius:11px}
+.umask-grid{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center;margin-top:9px}.umask-grid input{width:100%;min-height:42px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px}
+.sudo-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}.sudo-table th,.sudo-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left}.sudo-table th{color:var(--muted)}
+.acl-list{display:grid;gap:6px;margin-top:9px}.acl-row{padding:8px;border:1px solid var(--line);border-radius:10px;background:#121b30;font:12px ui-monospace,SFMono-Regular,Consolas,monospace}
+.special-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.special{padding:10px;background:#121b30;border:1px solid var(--line);border-radius:11px}
+
+.diag-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:12px}.diag-buttons{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.diag-buttons button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:center;padding:6px}.diag-console{min-height:285px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:13px;padding:13px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.answer{display:grid;gap:9px;align-content:start}.answer select{width:100%;min-height:44px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:8px}.score{border:1px solid var(--line);background:#0f1728;border-radius:12px;padding:11px}.score-big{font-size:30px;font-weight:900}
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.chips button{min-height:38px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center;padding:6px 9px}.breakdown{display:grid;gap:6px;margin-top:8px}.piece{display:grid;grid-template-columns:170px 1fr;gap:8px;padding:8px;background:#0f1728;border:1px solid var(--line);border-radius:10px}
+.graduation{text-align:center;margin-top:13px}.grad-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+
+@media(max-width:1050px){.hero-grid,.two-grid,.diag-grid,.cmd-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:210px 1fr}.lab-grid>section:last-child{grid-column:1/-1}.diag-buttons{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.lab-grid{grid-template-columns:1fr}.lab-grid>section:last-child{grid-column:auto}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);text-align:center}.lesson{grid-template-columns:1fr}.chmod-build,.dir-grid,.special-grid{grid-template-columns:1fr}.perm-matrix{grid-template-columns:1fr}.umask-grid{grid-template-columns:1fr}.piece{grid-template-columns:1fr}.diag-buttons{grid-template-columns:1fr 1fr}}
+</style>
+<style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head>
+<body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab04_ssh.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab05</div>
+  <a href="./parrot_linux_lab06_process_memory.html">→</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html" class="current">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab04_ssh.html">← Lab04</a><strong class="lab-title">Lab05 Permissions</strong><span class="spacer"></span><a href="parrot_linux_lab06_process_memory.html">Lab06 →</a></nav>
+<nav class="nav">
+<a href="parrot_linux_lab01_web_nginx.html">Lab01 Web / nginx</a>
+<a href="parrot_linux_lab02_firewall_complete.html">Lab02 Firewall</a>
+<a href="parrot_linux_lab03_ip_dns.html">Lab03 IP / DNS</a>
+<a href="parrot_linux_lab04_ssh.html">Lab04 SSH</a>
+<span class="current">Lab05 Users / Permissions</span>
+</nav>
+
+<header>
+<h1>👤 Linux基盤ラボ 05 — Users / Permissions / sudo</h1>
+<p class="muted">
+SSHでLinuxへ入ったあと、今度は<strong>「誰として」「何に」「どこまで」アクセスできるか</strong>。
+User / Group / owner / rwx / sudo / umask / ACL を動かし、<code>Permission denied</code>を根拠で切り分けます。
+</p>
+</header>
+
+<section class="card">
+<h2>まず構造：Linuxは何を見て許可・拒否する？</h2>
+<div class="hero-grid">
+<div class="flowbox">
+<div class="flow">
+<div class="node wait" id="fUser">👤<br>User</div><div class="arrow">→</div>
+<div class="node wait" id="fGroup">👥<br>Groups</div><div class="arrow">→</div>
+<div class="node wait" id="fOwner">📄<br>Owner/Group</div><div class="arrow">→</div>
+<div class="node wait" id="fMode">🔐<br>rwx</div><div class="arrow">→</div>
+<div class="node wait" id="fAcl">📋<br>ACL</div><div class="arrow">→</div>
+<div class="node wait" id="fResult">✅/❌<br>Access</div>
+</div>
+<div class="flowmsg" id="flowMsg">ファイルを読む・書く操作で、どの条件が効いたか表示します。</div>
+</div>
+<div class="state-list">
+<div class="state-row"><div>Current user</div><div id="userState" class="state-value">learner (uid=1000)</div></div>
+<div class="state-row"><div>Groups</div><div id="groupsState" class="state-value">learner, developers</div></div>
+<div class="state-row"><div>File</div><div id="fileState" class="state-value">root:developers 640</div></div>
+<div class="state-row"><div>Directory</div><div id="dirState" class="state-value">root:developers 750</div></div>
+<div class="state-row"><div>sudo</div><div id="sudoState" class="state-value status-ok">allowed</div></div>
+<div class="state-row"><div>ACL</div><div id="aclState" class="state-value">none</div></div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>操作してみる</h2>
+<p class="muted">左でUser/Group/権限を変える → 中央で結果 → 右でコマンド。</p>
+<div class="lab-grid">
+<aside class="controls">
+<div class="panel-title">Userを切替</div>
+<button data-user="learner">learner</button>
+<button data-user="alice">alice</button>
+<button data-user="root">root</button>
+
+<div class="panel-title" style="margin-top:7px">ファイル操作</div>
+<button class="primary" data-action="read">report.txt を読む</button>
+<button data-action="write">report.txt に書く</button>
+<button data-action="execute">script.sh を実行</button>
+<button data-action="listdir">project/ を一覧</button>
+<button data-action="traverse">project/ 内へ入る</button>
+
+<div class="panel-title" style="margin-top:7px">壊して直す</div>
+<button class="danger" data-action="removeGroup">developersから外す</button>
+<button data-action="addGroup">developersへ追加</button>
+<button class="warning" data-action="removeDirX">directory xを外す</button>
+<button data-action="fixDirX">directory xを戻す</button>
+<button data-action="sudoRead">sudoで読む</button>
+<button data-action="reset">↻ 初期化</button>
+</aside>
+
+<section><div class="panel-title">画面ではこう見える</div><div class="screen" id="screen"><div class="screenbar">Terminal / learner@server01</div><div><div class="big">Lab05 初期状態</div><p>まず <code>cat /srv/project/report.txt</code> を実行するイメージで試そう。</p></div></div></section>
+<section><div class="panel-title">裏ではこのコマンド</div><div class="terminal" id="terminal">$</div></section>
+</div>
+<div class="lesson card"><div><span class="badge">💡 ここがポイント</span></div><div id="lesson">Linuxはファイルのowner/group/modeと、操作するUserのUID/GIDを照合します。rootは通常これらの制約を大きく超えて操作できます。</div></div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🔢 chmod 数字を「計算」ではなく触って理解</h2>
+<div class="two-grid">
+<div class="deep">
+<div class="panel-title">r=4 / w=2 / x=1 を足す</div>
+<div class="chmod-build">
+<div class="chmod-col"><strong>Owner</strong><label class="check-row"><input type="checkbox" data-mode="u-r" checked> r (4)</label><label class="check-row"><input type="checkbox" data-mode="u-w" checked> w (2)</label><label class="check-row"><input type="checkbox" data-mode="u-x"> x (1)</label></div>
+<div class="chmod-col"><strong>Group</strong><label class="check-row"><input type="checkbox" data-mode="g-r" checked> r (4)</label><label class="check-row"><input type="checkbox" data-mode="g-w"> w (2)</label><label class="check-row"><input type="checkbox" data-mode="g-x"> x (1)</label></div>
+<div class="chmod-col"><strong>Others</strong><label class="check-row"><input type="checkbox" data-mode="o-r"> r (4)</label><label class="check-row"><input type="checkbox" data-mode="o-w"> w (2)</label><label class="check-row"><input type="checkbox" data-mode="o-x"> x (1)</label></div>
+</div>
+<div class="mode-result" id="modeResult">chmod 640 report.txt
+-rw-r-----</div>
+<div class="action-row"><button id="applyModeBtn">report.txtへ適用</button><button id="preset755Btn">755</button><button id="preset644Btn">644</button><button id="preset600Btn">600</button></div>
+</div>
+<div class="deep">
+<div class="panel-title">よく見るPermission</div>
+<div class="perm-matrix">
+<div></div><div class="perm-cell"><strong>Owner</strong></div><div class="perm-cell"><strong>Group</strong></div><div class="perm-cell"><strong>Others</strong></div>
+<div><code>644</code></div><div class="perm-cell">rw-</div><div class="perm-cell">r--</div><div class="perm-cell">r--</div>
+<div><code>600</code></div><div class="perm-cell">rw-</div><div class="perm-cell">---</div><div class="perm-cell">---</div>
+<div><code>755</code></div><div class="perm-cell">rwx</div><div class="perm-cell">r-x</div><div class="perm-cell">r-x</div>
+<div><code>750</code></div><div class="perm-cell">rwx</div><div class="perm-cell">r-x</div><div class="perm-cell">---</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>📁 Directoryの r / w / x はFileと意味が違う</h2>
+<div class="dir-grid">
+<div class="dir-card"><strong>r = list</strong><br><span class="muted">ディレクトリ内の名前一覧を読む。</span></div>
+<div class="dir-card"><strong>w = create/delete</strong><br><span class="muted">中にファイルを作る・削除する。</span></div>
+<div class="dir-card"><strong>x = traverse</strong><br><span class="muted">そのディレクトリを通過して中へ到達する。</span></div>
+</div>
+<div class="two-grid">
+<div class="deep"><div class="panel-title">実験</div><div class="action-row"><button id="dirROnlyBtn">Directoryを r-- にする</button><button id="dirXOnlyBtn">Directoryを --x にする</button><button id="dirRxBtn">Directoryを r-x に戻す</button></div><div class="mini-console" id="dirConsole">$ ls -ld /srv/project
+drwxr-x--- root developers /srv/project</div></div>
+<div class="deep"><div class="panel-title">面白いポイント</div><div class="mini-console">r だけ:
+名前一覧は読めても、中のfileへ到達できないことがある
+
+x だけ:
+名前を知っていれば到達できても、lsで一覧は出せない
+
+r + x:
+一覧も参照もできる</div></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>👥 owner / group / chown / chgrp</h2>
+<div class="two-grid">
+<div class="deep"><div class="panel-title">report.txtの所有者</div><div class="action-row"><button id="chownLearnerBtn">owner → learner</button><button id="chownRootBtn">owner → root</button><button id="groupDevBtn">group → developers</button><button id="groupFinanceBtn">group → finance</button></div><div class="mini-console" id="ownershipConsole">$ ls -l /srv/project/report.txt
+-rw-r----- 1 root developers 1200 Aug 17 report.txt</div></div>
+<div class="deep"><div class="panel-title">Groupメンバーシップ</div><div class="action-row"><button id="addFinanceBtn">learnerをfinanceへ追加</button><button id="removeFinanceBtn">financeから外す</button></div><div class="mini-console" id="groupConsole">$ id learner
+uid=1000(learner) gid=1000(learner) groups=1000(learner),1100(developers)</div><p class="muted">Group追加後は、新しいLogin sessionでSupplementary Groupが反映される点も現場では重要です。</p></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🧮 umask — 新しく作るFileの初期Permission</h2>
+<div class="two-grid">
+<div class="deep"><div class="umask-grid"><label>umask</label><input id="umaskInput" value="022" maxlength="4"></div><div class="action-row"><button id="calcUmaskBtn">新規file/dirのmodeを見る</button><button id="umask077Btn">077にする</button><button id="umask002Btn">002にする</button></div><div class="mode-result" id="umaskResult">umask 022
+file:  666 - 022 → 644
+dir:   777 - 022 → 755</div></div>
+<div class="deep"><div class="panel-title">考え方</div><div class="mini-console">新規Fileの最大ベース:
+666 = rw-rw-rw-
+
+新規Directoryの最大ベース:
+777 = rwxrwxrwx
+
+umaskは「付けない権限」を指定する
+
+例: umask 077
+file → 600
+dir  → 700</div></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🛡 sudo — rootになるのではなく「許可された管理操作を借りる」</h2>
+<div class="two-grid">
+<div class="deep"><div class="panel-title">sudoersを試す</div><table class="sudo-table"><thead><tr><th>User</th><th>許可</th></tr></thead><tbody><tr><td>learner</td><td id="sudoRuleCell">ALL=(ALL:ALL) ALL</td></tr><tr><td>alice</td><td>なし</td></tr></tbody></table><div class="action-row"><button id="sudoListBtn">sudo -l</button><button id="removeSudoBtn">learnerのsudoを外す</button><button id="restoreSudoBtn">sudoを戻す</button><button id="visudoBtn">visudoで安全編集</button></div></div>
+<div class="deep"><div class="panel-title">なぜvisudo？</div><div class="mini-console" id="sudoConsole">$ sudo -l
+User learner may run the following commands:
+    (ALL : ALL) ALL
+
+# sudoersを壊すと管理操作できなくなるので
+# 構文チェック付きのvisudoを使う</div></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>📋 ACL — owner/group/othersだけでは足りない例外許可</h2>
+<div class="two-grid">
+<div class="deep"><div class="panel-title">aliceだけreport.txtを読めるようにする</div><div class="action-row"><button id="addAclBtn">setfacl -m u:alice:r</button><button id="removeAclBtn">ACLを削除</button></div><div class="acl-list" id="aclList"><div class="acl-row">user::rw-</div><div class="acl-row">group::r--</div><div class="acl-row">other::---</div></div></div>
+<div class="deep"><div class="panel-title">確認</div><div class="mini-console" id="aclConsole">$ getfacl /srv/project/report.txt
+# owner: root
+# group: developers
+user::rw-
+group::r--
+other::---</div><p class="muted"><code>ls -l</code>に <code>+</code> が付いていたらACLが設定されている可能性があります。</p></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>✨ 特殊Permission — 知っておくと現場で困りにくい</h2>
+<div class="special-grid">
+<div class="special"><strong>setuid</strong><br><span class="muted">実行時にfile ownerの権限を使う。代表例としてpasswdなどで見かける。</span></div>
+<div class="special"><strong>setgid</strong><br><span class="muted">Directoryで使うと、新規fileがDirectoryのgroupを継承しやすい。</span></div>
+<div class="special"><strong>sticky bit</strong><br><span class="muted">共有Directoryで、自分のfile以外を勝手に削除しにくくする。/tmpなど。</span></div>
+</div>
+<div class="action-row"><button id="stickyBtn">/tmp の1777を見る</button><button id="setgidBtn">共有projectの2770を見る</button></div>
+<div class="mini-console" id="specialConsole">$ ls -ld /tmp
+drwxrwxrwt ... /tmp
+# 最後の t = sticky bit</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🕵 Permission denied 障害切り分けゲーム</h2>
+<p class="muted">「権限がない」で終わらず、User / Group / mode / Directory x / ACL / sudoのどこかを特定します。</p>
+<div class="diag-grid">
+<div><div id="incidentPrompt"><strong>「Permission deniedです」</strong> — 新しい障害を発生させてください。</div><div class="diag-buttons">
+<button data-diag="id">id</button><button data-diag="ls">ls -l</button><button data-diag="namei">namei -l</button><button data-diag="acl">getfacl</button><button data-diag="sudo">sudo -l</button><button data-diag="groups">groups</button></div><div class="diag-console" id="diagConsole">$ まだ調査していません。</div></div>
+<div class="answer"><button class="primary" id="newIncidentBtn">🎲 新しい障害</button><select id="incidentAnswer">
+<option value="">原因を選ぶ</option><option value="not_group">必要Groupに所属していない</option><option value="dir_no_x">親Directoryにxがない</option><option value="file_mode">File modeでwrite不可</option><option value="acl_deny">ACL/maskの影響</option><option value="no_sudo">sudo権限なし</option><option value="wrong_owner">ownerが想定と違う</option></select>
+<button id="answerIncidentBtn">回答する</button><div class="score" id="scoreBox"><div class="muted">確認回数</div><div class="score-big">0</div></div><div id="incidentExplain" class="muted"></div></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🧩 コマンドを分解する</h2>
+<div class="cmd-grid">
+<div><div class="chips">
+<button data-cmd="id">id learner</button><button data-cmd="ls">ls -l</button><button data-cmd="chmod">chmod 640 report.txt</button><button data-cmd="chown">chown root:developers</button><button data-cmd="namei">namei -l /srv/project/report.txt</button><button data-cmd="sudo">sudo -l</button><button data-cmd="acl">getfacl report.txt</button></div><div class="breakdown" id="cmdBreakdown">コマンドを押すと意味を分解します。</div></div>
+<div class="deep"><div class="panel-title">Permission deniedの一次切り分け順</div><div class="mini-console">1. whoami / id
+   誰として実行？
+
+2. ls -l
+   owner / group / rwx
+
+3. namei -l path
+   親Directoryのxも確認
+
+4. groups / id
+   必要Groupに所属？
+
+5. getfacl
+   ACLの追加制御は？
+
+6. sudo -l
+   管理権限が必要な操作？</div></div>
+</div>
+</section>
+
+<section class="card graduation"><h2>🎓 Lab05 卒業テスト</h2><p><strong>「report.txt は `-rw-r----- root developers`。learnerはdevelopers所属。でも `cat` するとPermission denied。file自体は640。」</strong><br>次に特に確認したいものは？</p><div class="grad-actions"><button data-grad="network">Firewall</button><button data-grad="parent">親Directoryのx / path権限</button><button data-grad="port">TCP Port</button></div><div id="gradResult" style="margin-top:10px"></div></section>
+
+</main>
+<script>
+(function(){
+"use strict";
+var state={user:"learner",groups:{learner:["learner","developers"],alice:["alice"],root:["root"]},fileOwner:"root",fileGroup:"developers",fileMode:640,dirOwner:"root",dirGroup:"developers",dirMode:750,scriptMode:750,sudoAllowed:true,aclAlice:false,aclMaskRead:true};
+var currentIncident=null,incidentSteps=0,incidentUsed={};
+
+var el={
+fUser:document.getElementById("fUser"),fGroup:document.getElementById("fGroup"),fOwner:document.getElementById("fOwner"),fMode:document.getElementById("fMode"),fAcl:document.getElementById("fAcl"),fResult:document.getElementById("fResult"),flowMsg:document.getElementById("flowMsg"),
+userState:document.getElementById("userState"),groupsState:document.getElementById("groupsState"),fileState:document.getElementById("fileState"),dirState:document.getElementById("dirState"),sudoState:document.getElementById("sudoState"),aclState:document.getElementById("aclState"),screen:document.getElementById("screen"),terminal:document.getElementById("terminal"),lesson:document.getElementById("lesson"),
+modeResult:document.getElementById("modeResult"),dirConsole:document.getElementById("dirConsole"),ownershipConsole:document.getElementById("ownershipConsole"),groupConsole:document.getElementById("groupConsole"),umaskInput:document.getElementById("umaskInput"),umaskResult:document.getElementById("umaskResult"),sudoRuleCell:document.getElementById("sudoRuleCell"),sudoConsole:document.getElementById("sudoConsole"),aclList:document.getElementById("aclList"),aclConsole:document.getElementById("aclConsole"),specialConsole:document.getElementById("specialConsole"),
+incidentPrompt:document.getElementById("incidentPrompt"),diagConsole:document.getElementById("diagConsole"),incidentAnswer:document.getElementById("incidentAnswer"),scoreBox:document.getElementById("scoreBox"),incidentExplain:document.getElementById("incidentExplain"),cmdBreakdown:document.getElementById("cmdBreakdown"),gradResult:document.getElementById("gradResult")};
+
+function modeParts(mode){var s=String(mode).padStart(3,"0");return s.split("").map(Number)}
+function rwx(n){return(n&4?"r":"-")+(n&2?"w":"-")+(n&1?"x":"-")}
+function modeString(mode,type){var p=modeParts(mode);return(type||"-")+rwx(p[0])+rwx(p[1])+rwx(p[2])}
+function setScreen(t,b){el.screen.replaceChildren();var bar=document.createElement("div");bar.className="screenbar";bar.textContent="Terminal / "+state.user+"@parrot";var box=document.createElement("div"),h=document.createElement("div"),p=document.createElement("p");h.className="big";h.textContent=t;p.textContent=b;box.appendChild(h);box.appendChild(p);el.screen.appendChild(bar);el.screen.appendChild(box)}
+function term(a){el.terminal.textContent=a.join("\n")}function lesson(t){el.lesson.textContent=t}
+function node(n,s){n.classList.remove("ok","fail","wait");n.classList.add(s)}
+function resetFlow(m){[el.fUser,el.fGroup,el.fOwner,el.fMode,el.fAcl,el.fResult].forEach(function(n){node(n,"wait")});el.flowMsg.textContent=m||"ファイル操作で、どの条件が効いたか表示します。"}
+function updateUI(){var gs=state.groups[state.user]||[];el.userState.textContent=state.user+(state.user==="root"?" (uid=0)":" (uid=1000+)");el.groupsState.textContent=gs.join(", ");el.fileState.textContent=state.fileOwner+":"+state.fileGroup+" "+state.fileMode+" "+modeString(state.fileMode);el.dirState.textContent=state.dirOwner+":"+state.dirGroup+" "+state.dirMode+" "+modeString(state.dirMode,"d");el.sudoState.textContent=state.user==="root"?"root":(state.user==="learner"&&state.sudoAllowed?"allowed":"not allowed");el.sudoState.className="state-value "+((state.user==="root"||(state.user==="learner"&&state.sudoAllowed))?"status-ok":"status-danger");el.aclState.textContent=state.aclAlice?"alice:r--":"none";renderOwnership();renderGroups();renderAcl()}
+function currentGroups(){return state.groups[state.user]||[]}
+function classFor(owner,group){if(state.user==="root")return"root";if(state.user===owner)return"owner";if(currentGroups().indexOf(group)!==-1)return"group";return"other"}
+function digitFor(mode,cls){var p=modeParts(mode);return cls==="owner"?p[0]:cls==="group"?p[1]:p[2]}
+function has(mode,cls,bit){if(cls==="root")return true;return (digitFor(mode,cls)&bit)!==0}
+function dirTraverse(){var cls=classFor(state.dirOwner,state.dirGroup);return has(state.dirMode,cls,1)}
+function fileAccess(bit){if(state.user==="root")return{ok:true,why:"root"};if(!dirTraverse())return{ok:false,why:"parent directory lacks x"};if(state.user==="alice"&&state.aclAlice&&bit===4&&state.aclMaskRead)return{ok:true,why:"ACL user:alice:r--"};var cls=classFor(state.fileOwner,state.fileGroup);return{ok:has(state.fileMode,cls,bit),why:cls+" class "+rwx(digitFor(state.fileMode,cls))}}
+function animateAccess(result){resetFlow();node(el.fUser,"ok");setTimeout(function(){node(el.fGroup,"ok")},80);setTimeout(function(){node(el.fOwner,"ok")},160);setTimeout(function(){node(el.fMode,result.ok?"ok":"fail")},240);if(state.user==="alice"&&state.aclAlice)setTimeout(function(){node(el.fAcl,result.ok?"ok":"fail")},320);setTimeout(function(){node(el.fResult,result.ok?"ok":"fail")},400);el.flowMsg.textContent=result.ok?"Access granted: "+result.why:"Access denied: "+result.why}
+function readFile(useSudo){var original=state.user;if(useSudo){if(!(state.user==="root"||(state.user==="learner"&&state.sudoAllowed))){term(["$ sudo cat /srv/project/report.txt",state.user+" is not in the sudoers file."]);setScreen("❌ sudo不可","このUserにはsudo権限がありません。");return}state.user="root"}var r=fileAccess(4);if(r.ok){term(["$ "+(useSudo?"sudo ":"")+"cat /srv/project/report.txt","Quarterly infrastructure report..."]);setScreen("✅ 読めました","Permission check: "+r.why)}else{term(["$ cat /srv/project/report.txt","cat: Permission denied"]);setScreen("❌ Permission denied",r.why)}animateAccess(r);if(useSudo)state.user=original;updateUI()}
+function writeFile(){var r=fileAccess(2);if(r.ok){term(["$ echo update >> /srv/project/report.txt","# write OK"]);setScreen("✅ 書き込み成功",r.why)}else{term(["$ echo update >> /srv/project/report.txt","bash: /srv/project/report.txt: Permission denied"]);setScreen("❌ 書けません",r.why)}animateAccess(r)}
+function executeScript(){var originalOwner=state.fileOwner,originalGroup=state.fileGroup,originalMode=state.fileMode;state.fileOwner="root";state.fileGroup="developers";state.fileMode=state.scriptMode;var r=fileAccess(1);state.fileOwner=originalOwner;state.fileGroup=originalGroup;state.fileMode=originalMode;if(r.ok){term(["$ /srv/project/script.sh","Hello from script"]);setScreen("✅ 実行成功","x permissionあり")}else{term(["$ /srv/project/script.sh","Permission denied"]);setScreen("❌ 実行不可","x permissionなし")}animateAccess(r)}
+function listDir(){var cls=classFor(state.dirOwner,state.dirGroup),ok=has(state.dirMode,cls,4);if(ok){term(["$ ls /srv/project","report.txt  script.sh"]);setScreen("✅ 一覧表示できる","Directory r が効いています。")}else{term(["$ ls /srv/project","ls: cannot open directory: Permission denied"]);setScreen("❌ 一覧不可","Directory r がありません。")}animateAccess({ok:ok,why:"directory "+cls+" "+rwx(digitFor(state.dirMode,cls))})}
+function traverseDir(){var ok=dirTraverse();if(ok){term(["$ cd /srv/project","$ pwd","/srv/project"]);setScreen("✅ 中へ入れる","Directory x = traverse")}else{term(["$ cd /srv/project","bash: cd: Permission denied"]);setScreen("❌ 入れません","Directory x がありません。")}animateAccess({ok:ok,why:"directory x"})}
+function setUser(u){state.user=u;term(["$ su - "+u,"$ id",u==="root"?"uid=0(root) gid=0(root)":("uid=1000("+u+") groups="+currentGroups().join(","))]);updateUI();resetFlow()}
+function removeDev(){state.groups.learner=state.groups.learner.filter(function(g){return g!=="developers"});term(["$ sudo gpasswd -d learner developers","Removing user learner from group developers"]);lesson("Group membershipが変わると、group permissionを使えるかが変わります。");updateUI()}
+function addDev(){if(state.groups.learner.indexOf("developers")===-1)state.groups.learner.push("developers");term(["$ sudo usermod -aG developers learner","# 新しいlogin sessionで反映"]);updateUI()}
+function removeDirX(){state.dirMode=740;term(["$ sudo chmod 740 /srv/project",modeString(state.dirMode,"d")+" /srv/project"]);lesson("Fileが読めても、親DirectoryにxがないとPathを通れずPermission deniedになります。");updateUI()}
+function fixDirX(){state.dirMode=750;term(["$ sudo chmod 750 /srv/project"]);updateUI()}
+function resetLab(){state={user:"learner",groups:{learner:["learner","developers"],alice:["alice"],root:["root"]},fileOwner:"root",fileGroup:"developers",fileMode:640,dirOwner:"root",dirGroup:"developers",dirMode:750,scriptMode:750,sudoAllowed:true,aclAlice:false,aclMaskRead:true};term(["$"]);setScreen("Lab05 初期状態","まず cat /srv/project/report.txt を実行するイメージで試そう。");lesson("Linuxはowner/group/modeとUserのUID/GIDを照合します。");updateUI();syncModeChecks();resetFlow()}
+
+function checksToMode(){function sum(prefix){var n=0;document.querySelectorAll('[data-mode^="'+prefix+'-"]').forEach(function(cb){if(cb.checked)n+=cb.getAttribute("data-mode").endsWith("-r")?4:cb.getAttribute("data-mode").endsWith("-w")?2:1});return n}return Number(""+sum("u")+sum("g")+sum("o"))}
+function syncModeChecks(){var p=modeParts(state.fileMode),map=[["u",p[0]],["g",p[1]],["o",p[2]]];map.forEach(function(x){["r","w","x"].forEach(function(ch){var cb=document.querySelector('[data-mode="'+x[0]+'-'+ch+'"]');var bit=ch==="r"?4:ch==="w"?2:1;cb.checked=(x[1]&bit)!==0})});renderMode()}
+function renderMode(){var m=checksToMode();el.modeResult.textContent="chmod "+m+" report.txt\n"+modeString(m)}
+function setPreset(m){state.fileMode=m;syncModeChecks();updateUI()}
+function applyMode(){state.fileMode=checksToMode();term(["$ chmod "+state.fileMode+" /srv/project/report.txt",modeString(state.fileMode)+" report.txt"]);updateUI()}
+function dirSet(mode){state.dirMode=mode;el.dirConsole.textContent="$ chmod "+mode+" /srv/project\n"+modeString(mode,"d")+" /srv/project";updateUI()}
+function renderOwnership(){el.ownershipConsole.textContent="$ ls -l /srv/project/report.txt\n"+modeString(state.fileMode)+" 1 "+state.fileOwner+" "+state.fileGroup+" 1200 Aug 17 report.txt"}
+function renderGroups(){el.groupConsole.textContent="$ id learner\nuid=1000(learner) gid=1000(learner) groups="+state.groups.learner.join(",")}
+function chown(owner){state.fileOwner=owner;term(["$ sudo chown "+owner+" /srv/project/report.txt"]);updateUI()}
+function chgrp(g){state.fileGroup=g;term(["$ sudo chgrp "+g+" /srv/project/report.txt"]);updateUI()}
+function addFinance(){if(state.groups.learner.indexOf("finance")===-1)state.groups.learner.push("finance");term(["$ sudo usermod -aG finance learner","# re-login後にgroup反映"]);updateUI()}
+function removeFinance(){state.groups.learner=state.groups.learner.filter(function(g){return g!=="finance"});updateUI()}
+function calcUmask(){var raw=el.umaskInput.value.replace(/[^0-7]/g,"").slice(0,4);el.umaskInput.value=raw;if(!raw){return}var u=parseInt(raw,8);var fm=0o666 & (~u);var dm=0o777 & (~u);el.umaskResult.textContent="umask "+raw+"\nfile: "+fm.toString(8)+" "+modeString(Number(fm.toString(8)))+"\ndir:  "+dm.toString(8)+" "+modeString(Number(dm.toString(8)),"d")}
+function sudoList(){el.sudoConsole.textContent=state.sudoAllowed?"$ sudo -l\nUser learner may run:\n    (ALL : ALL) ALL":"$ sudo -l\nSorry, user learner may not run sudo on parrot.";updateUI()}
+function setSudo(ok){state.sudoAllowed=ok;el.sudoRuleCell.textContent=ok?"ALL=(ALL:ALL) ALL":"なし";term([ok?"$ sudo usermod -aG sudo learner":"$ sudo gpasswd -d learner sudo"]);updateUI()}
+function visudo(){el.sudoConsole.textContent="$ sudo visudo\n\nlearner ALL=(ALL:ALL) ALL\n\n# 保存前にsudoers構文チェック"}
+function renderAcl(){el.aclList.innerHTML='<div class="acl-row">user::rw-</div>'+(state.aclAlice?'<div class="acl-row">user:alice:r--</div><div class="acl-row">mask::r--</div>':'')+'<div class="acl-row">group::r--</div><div class="acl-row">other::---</div>';el.aclConsole.textContent="$ getfacl /srv/project/report.txt\n# owner: "+state.fileOwner+"\n# group: "+state.fileGroup+"\nuser::rw-\n"+(state.aclAlice?"user:alice:r--\nmask::r--\n":"")+"group::r--\nother::---";el.aclState.textContent=state.aclAlice?"alice:r--":"none"}
+function setAcl(ok){state.aclAlice=ok;term([ok?"$ setfacl -m u:alice:r /srv/project/report.txt":"$ setfacl -x u:alice /srv/project/report.txt"]);renderAcl();updateUI()}
+
+var INCIDENTS=[
+{cause:"not_group",prompt:"report.txtは root:developers 640。learnerが読めない。",e:{id:"$ id learner\nuid=1000 learner groups=learner",ls:"$ ls -l report.txt\n-rw-r----- root developers report.txt",namei:"$ namei -l /srv/project/report.txt\nproject drwxr-x--- root developers\nreport -rw-r----- root developers",acl:"$ getfacl report.txt\n(no extra ACL)",sudo:"$ sudo -l\nallowed",groups:"$ groups learner\nlearner"},x:"learnerがdevelopersに所属していないためgroup rを使えません。"},
+{cause:"dir_no_x",prompt:"Fileは640でdevelopersにrあり。learnerもdevelopers所属なのにcatが失敗。",e:{id:"$ id learner\ngroups=learner,developers",ls:"$ ls -l report.txt\n-rw-r----- root developers",namei:"$ namei -l /srv/project/report.txt\n/srv drwxr-xr-x\nproject drwxr----- root developers\nreport -rw-r-----",acl:"$ getfacl report.txt\nnormal",sudo:"$ sudo -l\nallowed",groups:"developers present"},x:"親Directory projectにxがなくPathをtraverseできません。"},
+{cause:"file_mode",prompt:"learnerはdevelopers所属。report.txtは読めるが追記できない。",e:{id:"groups=learner,developers",ls:"-rw-r----- root developers report.txt",namei:"project drwxr-x--- root developers",acl:"no extra ACL",sudo:"sudo allowed",groups:"developers"},x:"group permissionはr--でwがありません。File modeの問題。"},
+{cause:"acl_deny",prompt:"ls -lではgroup rwに見えるのにaliceだけ書けない。",e:{id:"alice groups=alice,developers",ls:"-rw-rw----+ root developers report.txt",namei:"path OK",acl:"user::rw-\nuser:alice:rw-\nmask::r--\ngroup::rw-\nother::---",sudo:"alice may not run sudo",groups:"developers"},x:"ACL maskがr--なのでaliceのeffective writeが落ちています。"},
+{cause:"no_sudo",prompt:"通常fileは読めるが sudo systemctl restart nginx が拒否される。",e:{id:"uid=1000 learner",ls:"normal file perms irrelevant",namei:"path OK",acl:"none",sudo:"$ sudo -l\nSorry, learner may not run sudo",groups:"learner,developers"},x:"sudoers/管理Groupに権限がありません。"},
+{cause:"wrong_owner",prompt:"アプリ設定Fileをownerだけ書ける600にしたらサービスUserが読めない。",e:{id:"service runs as www-data",ls:"-rw------- root root app.conf",namei:"path OK",acl:"no ACL",sudo:"service has no sudo",groups:"www-data"},x:"owner=rootかつ600なのでwww-dataは読めません。所有者/設計の問題。"}
+];
+function newIncident(){var c=INCIDENTS.filter(function(i){return!currentIncident||i.cause!==currentIncident.cause});currentIncident=c[Math.floor(Math.random()*c.length)];incidentSteps=0;incidentUsed={};el.incidentAnswer.value="";el.diagConsole.textContent="$ 調査開始。どこから見る？";el.incidentPrompt.innerHTML="<strong>「"+currentIncident.prompt+"」</strong><br>原因は伏せられています。";el.incidentExplain.textContent="";score()}
+function score(final){el.scoreBox.replaceChildren();var a=document.createElement("div");a.className="muted";a.textContent=final==null?"確認回数":"スコア";var b=document.createElement("div");b.className="score-big";b.textContent=final==null?String(incidentSteps):String(final);el.scoreBox.appendChild(a);el.scoreBox.appendChild(b)}
+function diagnose(k){if(!currentIncident){el.diagConsole.textContent="$ 先に新しい障害を発生。";return}if(!incidentUsed[k]){incidentUsed[k]=true;incidentSteps++}el.diagConsole.textContent+="\n\n"+currentIncident.e[k];score()}
+function answerIncident(){if(!currentIncident||!el.incidentAnswer.value)return;if(el.incidentAnswer.value===currentIncident.cause){var s=Math.max(50,100-Math.max(0,incidentSteps-2)*10);score(s);el.incidentExplain.innerHTML='<strong class="status-ok">✅ 正解 '+s+'点</strong><br>'+currentIncident.x}else{score(0);el.incidentExplain.innerHTML='<strong class="status-danger">❌ まだ違う</strong><br>User → path → owner/group/mode → ACL → sudo の順で確認。'}}
+
+var CMDS={id:[["id","UID/GIDと所属Groupを見る"],["learner","対象User"]],ls:[["ls","File/Directoryを表示"],["-l","long formatでowner/group/modeを見る"]],chmod:[["chmod","mode変更"],["640","owner=rw, group=r, other=none"],["report.txt","対象File"]],chown:[["chown","owner/groupを変更"],["root:developers","owner:group"]],namei:[["namei","Path各階層を分解"],["-l","各Directoryのpermissionも表示"]],sudo:[["sudo","別User(多くはroot)権限で許可されたcommandを実行"],["-l","自分が何をsudoできるか表示"]],acl:[["getfacl","POSIX ACLを表示"],["report.txt","対象File"]]};
+function showCmd(k){el.cmdBreakdown.replaceChildren();CMDS[k].forEach(function(x){var r=document.createElement("div");r.className="piece";var c=document.createElement("code");c.textContent=x[0];var d=document.createElement("div");d.textContent=x[1];r.appendChild(c);r.appendChild(d);el.cmdBreakdown.appendChild(r)})}
+function graduate(a){if(a==="parent"){el.gradResult.innerHTML='<strong class="status-ok">🎓 正解。Lab05 COMPLETE</strong><br>File自身が読める条件でも、Path途中のDirectory xがないと到達できません。';try{localStorage.setItem("linux_lab05_complete","true")}catch(e){}}else el.gradResult.innerHTML='<strong class="status-warn">△ 今回はFile権限まで確認済み。Pathを構成する親Directoryも見よう。</strong>'}
+
+document.querySelectorAll("[data-user]").forEach(function(b){b.addEventListener("click",function(){setUser(b.getAttribute("data-user"))})});
+document.querySelectorAll("[data-action]").forEach(function(b){b.addEventListener("click",function(){var a=b.getAttribute("data-action");if(a==="read")readFile(false);if(a==="write")writeFile();if(a==="execute")executeScript();if(a==="listdir")listDir();if(a==="traverse")traverseDir();if(a==="removeGroup")removeDev();if(a==="addGroup")addDev();if(a==="removeDirX")removeDirX();if(a==="fixDirX")fixDirX();if(a==="sudoRead")readFile(true);if(a==="reset")resetLab()})});
+document.querySelectorAll("[data-mode]").forEach(function(cb){cb.addEventListener("change",renderMode)});
+document.getElementById("applyModeBtn").addEventListener("click",applyMode);document.getElementById("preset755Btn").addEventListener("click",function(){setPreset(755)});document.getElementById("preset644Btn").addEventListener("click",function(){setPreset(644)});document.getElementById("preset600Btn").addEventListener("click",function(){setPreset(600)});
+document.getElementById("dirROnlyBtn").addEventListener("click",function(){dirSet(740)});document.getElementById("dirXOnlyBtn").addEventListener("click",function(){dirSet(710)});document.getElementById("dirRxBtn").addEventListener("click",function(){dirSet(750)});
+document.getElementById("chownLearnerBtn").addEventListener("click",function(){chown("learner")});document.getElementById("chownRootBtn").addEventListener("click",function(){chown("root")});document.getElementById("groupDevBtn").addEventListener("click",function(){chgrp("developers")});document.getElementById("groupFinanceBtn").addEventListener("click",function(){chgrp("finance")});
+document.getElementById("addFinanceBtn").addEventListener("click",addFinance);document.getElementById("removeFinanceBtn").addEventListener("click",removeFinance);
+document.getElementById("calcUmaskBtn").addEventListener("click",calcUmask);document.getElementById("umask077Btn").addEventListener("click",function(){el.umaskInput.value="077";calcUmask()});document.getElementById("umask002Btn").addEventListener("click",function(){el.umaskInput.value="002";calcUmask()});
+document.getElementById("sudoListBtn").addEventListener("click",sudoList);document.getElementById("removeSudoBtn").addEventListener("click",function(){setSudo(false)});document.getElementById("restoreSudoBtn").addEventListener("click",function(){setSudo(true)});document.getElementById("visudoBtn").addEventListener("click",visudo);
+document.getElementById("addAclBtn").addEventListener("click",function(){setAcl(true)});document.getElementById("removeAclBtn").addEventListener("click",function(){setAcl(false)});
+document.getElementById("stickyBtn").addEventListener("click",function(){el.specialConsole.textContent="$ ls -ld /tmp\ndrwxrwxrwt ... /tmp\n# 1777: sticky bitにより他人のfile削除を制限"});
+document.getElementById("setgidBtn").addEventListener("click",function(){el.specialConsole.textContent="$ chmod 2770 /srv/shared\n$ ls -ld /srv/shared\ndrwxrws--- root developers /srv/shared\n# 2 = setgid / 新規fileがdevelopers groupを継承"});
+document.getElementById("newIncidentBtn").addEventListener("click",newIncident);document.getElementById("answerIncidentBtn").addEventListener("click",answerIncident);document.querySelectorAll("[data-diag]").forEach(function(b){b.addEventListener("click",function(){diagnose(b.getAttribute("data-diag"))})});document.querySelectorAll("[data-cmd]").forEach(function(b){b.addEventListener("click",function(){showCmd(b.getAttribute("data-cmd"))})});document.querySelectorAll("[data-grad]").forEach(function(b){b.addEventListener("click",function(){graduate(b.getAttribute("data-grad"))})});
+
+updateUI();syncModeChecks();renderAcl();resetFlow();
+}());
+</script>
+
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body>
+</html>

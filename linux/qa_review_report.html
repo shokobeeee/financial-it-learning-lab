@@ -1,0 +1,271 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux Lab 01-20 QA Review</title><style>body{font-family:system-ui;margin:0;background:#0b1020;color:#e8edf7}main{max-width:1100px;margin:30px auto;padding:0 18px}h1{font-size:38px}.muted{color:#9eabc0;line-height:1.7}.summary{padding:18px;border:1px solid #2a3858;border-radius:16px;background:#121a2d}.green{color:#75e6a5;font-weight:800}table{width:100%;border-collapse:collapse;background:#121a2d;margin-bottom:24px}th,td{padding:11px;border:1px solid #2a3858;text-align:left;vertical-align:top}th{background:#17213a}.checks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.check{padding:11px;border:1px solid #2a3858;border-radius:10px;background:#121a2d}@media(max-width:700px){.checks{grid-template-columns:1fr}}a{color:#76e3b2}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head><body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./index.html">⌂</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Linux基盤ラボ</div>
+  <a href="./index.html">⌂</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><h1>✅ Linux基盤ラボ 01–20 — ALL GREEN QA</h1><div class="summary"><p><strong>最終判定: ALL GREEN</strong></p><p class="muted">5つの専門ロールを別人格として想定した構造化レビューを実施し、指摘を最終Bundleへ反映しました。これは実在する5人が操作したという意味ではなく、各ロールの評価基準でUser Journey/技術内容/運用安全性をレビューしたものです。</p><div class="checks"><div class="check">✅ Lab01–20存在</div><div class="check">✅ JS syntax全件</div><div class="check">✅ HTML内部Link全件</div><div class="check">✅ 統一Navigation</div><div class="check">✅ Troubleshooting</div><div class="check">✅ Graduation</div><div class="check">✅ Rollback/Verify</div><div class="check">✅ Final Capstone</div></div><p><a href="index.html">← 学習ポータルへ</a></p></div><h2>優秀なインフラエンジニア</h2><table><thead><tr><th>初回指摘</th><th>修正</th><th>最終</th></tr></thead><tbody><tr><td>BackupでSnapshot=Backupと誤解する余地</td><td>Lab13で同一障害ドメイン問題とRestore testを明示</td><td class="green">✅ GREEN</td></tr><tr><td>ContainerがPort公開だけで終わりVolume権限/Restart/Resourceが弱い</td><td>Lab14にUID/GID・Volume・Restart policy・Cgroup limitを追加</td><td class="green">✅ GREEN</td></tr><tr><td>TLSで期限だけに偏る</td><td>Lab15にSAN/Chain/Key/Clock/Trustを追加</td><td class="green">✅ GREEN</td></tr><tr><td>Cloud障害でGuest内だけ見てしまう</td><td>Lab18にSG/Virtual route/Volume/cloud-init/Host contentionを追加</td><td class="green">✅ GREEN</td></tr><tr><td>総合Labが再起動頼みになる懸念</td><td>Lab20でEvidence→Safe Fix→Rollback→Verifyを必須化</td><td class="green">✅ GREEN</td></tr></tbody></table><h2>プロジェクトマネージャー</h2><table><thead><tr><th>初回指摘</th><th>修正</th><th>最終</th></tr></thead><tbody><tr><td>20 LabsのScope/出口が見えにくい</td><td>indexに4フェーズと修了到達像、進捗表示を追加</td><td class="green">✅ GREEN</td></tr><tr><td>変更作業でRollback/完了条件が弱い</td><td>Lab19/20でChange record・Rollback criteria・Verifyを必須化</td><td class="green">✅ GREEN</td></tr><tr><td>IncidentでSeverity/報告が抜ける</td><td>Lab20にP1-P3、状況報告Templateを追加</td><td class="green">✅ GREEN</td></tr></tbody></table><h2>プロダクトマネージャー</h2><table><thead><tr><th>初回指摘</th><th>修正</th><th>最終</th></tr></thead><tbody><tr><td>個別知識の寄せ集めに見える</td><td>01-20を基礎→運用→自動化/復旧→発展/統合の学習Journeyへ再編</td><td class="green">✅ GREEN</td></tr><tr><td>進捗/再訪導線が不足</td><td>Home progress dashboard + Prev/Nextを全Labに統一</td><td class="green">✅ GREEN</td></tr><tr><td>最終Value確認が弱い</td><td>Lab20で技術+運用+Communicationの総合Outcomeを評価</td><td class="green">✅ GREEN</td></tr></tbody></table><h2>UI責任者</h2><table><thead><tr><th>初回指摘</th><th>修正</th><th>最終</th></tr></thead><tbody><tr><td>Lab数増加で上部Navが過密</td><td>旧Navを非表示にしSticky Home/Prev/Current/Nextへ統一</td><td class="green">✅ GREEN</td></tr><tr><td>Keyboard focusが見えにくい</td><td>focus-visible outlineを統一Nav/CSSへ追加</td><td class="green">✅ GREEN</td></tr><tr><td>長い教材で現在地が分かりにくい</td><td>Sticky current Lab label + Home dashboardを追加</td><td class="green">✅ GREEN</td></tr></tbody></table><h2>シニアコンサルタント</h2><table><thead><tr><th>初回指摘</th><th>修正</th><th>最終</th></tr></thead><tbody><tr><td>事実と仮説を混ぜる恐れ</td><td>各TroubleshootingをEvidence-first、Lab20報告を事実/原因/対応/検証に分離</td><td class="green">✅ GREEN</td></tr><tr><td>技術復旧だけで終了し再発防止がない</td><td>Lab20報告に残Risk/次アクション/再発防止を追加</td><td class="green">✅ GREEN</td></tr><tr><td>業務影響と技術原因が接続されない</td><td>Monitoring SLI/SLOとCapstone Severity/Stakeholder reportを追加</td><td class="green">✅ GREEN</td></tr></tbody></table><h2>第2巡レビューで追加修正</h2><table><thead><tr><th>指摘</th><th>修正</th><th>最終</th></tr></thead><tbody><tr><td>State表示の単純文字列判定で normal まで error色になる可能性</td><td>状態Class判定を単語境界相当へ修正し、disabledのように文脈で善悪が変わる語を自動Error扱いしない</td><td class="green">✅ GREEN</td></tr><tr><td>Lab20がCause/Fixを推測だけで当てても卒業できる余地</td><td>Evidence最低3観点 + Severity正答を卒業条件へ追加。報告にもSeverityを明示</td><td class="green">✅ GREEN</td></tr><tr><td>Lab14のPort publish操作が既存Containerへ後付けできるように読める</td><td>Container再作成で -p 8080:80 を付与する表現へ修正</td><td class="green">✅ GREEN</td></tr></tbody></table><h2>完了条件</h2><p class="muted">Critical/Major指摘 0件、Navigation/Script/Link静的検査 0件、5ロールの指摘すべて修正済み。以後の改善は新規Enhancementとして扱えます。</p></main>
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body></html>

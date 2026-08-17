@@ -1,0 +1,318 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux Lab</title><style>
+:root{--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--warn:#ffd166;--danger:#ff7b7b;--ok:#75e6a5;--line:#2a3858;--terminal:#071019}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100vh} main{width:min(1380px,calc(100% - 32px));margin:24px auto 56px}
+h1{font-size:clamp(26px,4vw,40px);margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{margin:0 0 7px}p{line-height:1.7}.muted{color:var(--muted)}code{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.card{background:rgba(18,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 36px rgba(0,0,0,.18)}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);background:#17213a;border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-danger{color:var(--danger)}.panel-title{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:6px}
+button,select,input{font:inherit}button{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);cursor:pointer;transition:.14s ease}button:hover{transform:translateY(-1px);border-color:#4e6b9d}button.primary{background:#173a31;border-color:#3c8a6b}button.warning{background:#392f18;border-color:#806c39}button.danger{background:#3a1c25;border-color:#804343}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:13px;margin-top:13px}.flowbox{border:1px solid var(--line);background:#0f1728;border-radius:15px;padding:13px}.flow{display:flex;gap:6px;align-items:center;overflow-x:auto}.flow-node{min-width:115px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#17213a;text-align:center;transition:.2s}.flow-node.ok{border-color:#3f9d75}.flow-node.fail{border-color:#a84f5b}.flow-node.wait{opacity:.52}.arrow{color:var(--muted);font-weight:900}.flowmsg{min-height:24px;margin-top:8px;color:var(--muted)}.state-list{display:grid;gap:8px}.state-row{display:grid;grid-template-columns:170px 1fr;gap:8px;padding:8px 10px;background:#0f1728;border:1px solid var(--line);border-radius:11px}.state-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800}
+.lab-grid{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:13px}.controls{display:grid;align-content:start;gap:8px;padding:13px;background:#0f1728;border:1px solid var(--line);border-radius:15px}.screen{min-height:345px;border-radius:14px;background:#f2f5f8;color:#18202d;position:relative;padding:46px 18px 18px;display:flex;align-items:center;justify-content:center;text-align:center}.screenbar{position:absolute;left:0;top:0;right:0;padding:8px 12px;background:#dce3ec;color:#445064;text-align:left;font-size:12px}.big{font-size:26px;font-weight:900}.terminal{min-height:345px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.lesson{margin-top:13px;display:grid;grid-template-columns:170px 1fr;gap:12px;background:#10182a}
+.concept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:13px}.concept{background:#0f1728;border:1px solid var(--line);border-radius:14px;padding:12px}.concept-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0}.concept-card{padding:9px;background:#121b30;border:1px solid var(--line);border-radius:10px;font-size:12px}.action-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.mini-console{margin-top:9px;min-height:150px;padding:11px;border:1px solid #1b3240;border-radius:11px;background:var(--terminal);color:#d9f7e6;white-space:pre-wrap;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.diag-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:12px}.diag-buttons{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.diag-buttons button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:center;padding:6px}.diag-console{min-height:285px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:13px;padding:13px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.answer{display:grid;gap:9px;align-content:start}.answer select{width:100%;min-height:44px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:8px}.score{border:1px solid var(--line);background:#0f1728;border-radius:12px;padding:11px}.score-big{font-size:30px;font-weight:900}.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.chips button{min-height:38px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.breakdown{display:grid;gap:6px}.piece{display:grid;grid-template-columns:190px 1fr;gap:8px;padding:8px;background:#0f1728;border:1px solid var(--line);border-radius:10px}.graduation{text-align:center}.grad-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+@media(max-width:1050px){.hero-grid,.concept-grid,.diag-grid,.cmd-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:220px 1fr}.lab-grid>section:last-child{grid-column:1/-1}.diag-buttons{grid-template-columns:repeat(3,1fr)}} @media(max-width:760px){.lab-grid{grid-template-columns:1fr}.lab-grid>section:last-child{grid-column:auto}.flow{display:grid}.lesson{grid-template-columns:1fr}.concept-cards{grid-template-columns:1fr}.piece{grid-template-columns:1fr}.diag-buttons{grid-template-columns:1fr 1fr}}
+</style><style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head><body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab18_virtualization_cloud.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab19</div>
+  <a href="./parrot_linux_lab20_capstone.html">→</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html" class="current">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab18_virtualization_cloud.html">← Lab18</a><strong class="lab-title">Lab19 Security / Hardening</strong><span class="spacer"></span><a href="parrot_linux_lab20_capstone.html">Lab20 →</a></nav>
+<header><h1 id="title"></h1><p class="muted" id="subtitle"></p></header>
+<section class="card"><h2>まず構造：このLabで何がつながる？</h2><div class="hero-grid"><div class="flowbox"><div class="flow" id="flow"></div><div class="flowmsg" id="flowMsg"></div></div><div class="state-list" id="stateList"></div></div></section>
+<section class="card" style="margin-top:13px"><h2>操作してみる</h2><div class="lab-grid"><aside class="controls" id="actions"></aside><section><div class="panel-title">利用者/運用からはこう見える</div><div class="screen"><div class="screenbar">Interactive Lab / Linux Host</div><div><div class="big" id="screenTitle">初期状態</div><p id="screenBody">左の操作を試してください。</p></div></div></section><section><div class="panel-title">裏ではこのコマンド / 状態</div><div class="terminal" id="terminal">$</div></section></div><div class="lesson card"><div><span class="badge">💡 ここがポイント</span></div><div id="lesson"></div></div></section>
+<section class="card" style="margin-top:13px"><h2>深掘りして理解する</h2><div class="concept-grid" id="concepts"></div></section>
+<section class="card" style="margin-top:13px"><h2>🕵 障害切り分けゲーム</h2><div class="diag-grid"><div><div id="incidentPrompt"><strong>「障害が起きました」</strong> — 新しい障害を発生させてください。</div><div class="diag-buttons" id="diagButtons"></div><div class="diag-console" id="diagConsole">$ まだ調査していません。</div></div><div class="answer"><button class="primary" id="newIncidentBtn">🎲 新しい障害</button><select id="incidentAnswer"></select><button id="answerIncidentBtn">回答する</button><div class="score"><div class="muted" id="scoreLabel">確認回数</div><div class="score-big" id="scoreValue">0</div></div><div id="incidentExplain" class="muted"></div></div></div></section>
+<section class="card" style="margin-top:13px"><h2>🧩 コマンドを分解する</h2><div class="cmd-grid"><div><div class="chips" id="cmdButtons"></div><div class="breakdown" id="cmdBreakdown">コマンドを押すと意味を分解します。</div></div><div class="concept"><div class="mini-console">Hardening確認
+1. 想定Asset/Port/Serviceとの差分は？
+2. SSH/User/sudoは最小権限？
+3. Secret permission/保管/rotationは？
+4. Security patchは？
+5. Audit/Logは生きてる？
+6. 直前Change/例外設定は？
+7. 変更前にRollback/Management pathを確保？</div></div></div></section>
+<section class="card graduation" style="margin-top:13px"><h2>🎓 卒業テスト</h2><p id="gradQuestion"></p><div class="grad-actions" id="gradActions"></div><div id="gradResult" style="margin-top:10px"></div></section>
+</main><script>
+(function(){"use strict";
+const LAB={"num": 19, "icon": "🛡", "title": "Security Hardening / Audit / Change Control", "short": "Security / Hardening", "subtitle": "「全部閉じる」ではなく、業務要件を満たしつつ<strong>Least Privilege / Attack Surface / Patch / Secret / Audit / Change / Rollback</strong>を管理します。", "flow": [{"icon": "📋", "label": "Asset"}, {"icon": "🔄", "label": "Patch"}, {"icon": "🔐", "label": "Least Privilege"}, {"icon": "🔌", "label": "Exposure"}, {"icon": "🔑", "label": "Secrets"}, {"icon": "🧾", "label": "Audit"}, {"icon": "↩️", "label": "Rollback"}], "initial": {"rootSSH": "disabled", "passwordSSH": "disabled / key only", "listening": "22,443 only", "secretPerm": "600 root:app", "patch": "current", "audit": "enabled", "change": "documented / rollback ready", "safe": true, "secretSafe": true, "extraPort": false, "auditOn": true}, "stateRows": [{"label": "SSH root login", "key": "rootSSH"}, {"label": "SSH auth", "key": "passwordSSH"}, {"label": "Listening ports", "key": "listening"}, {"label": "Secret permission", "key": "secretPerm"}, {"label": "Patch status", "key": "patch"}, {"label": "Audit", "key": "audit"}, {"label": "Change control", "key": "change"}], "defaultLesson": "HardeningはDefense in Depth。1つの設定に頼らず、不要機能削減・最小権限・Patch・Audit・Rollbackを組み合わせます。", "actions": [{"label": "Listening Port棚卸し", "kind": "primary", "command": "$ sudo ss -ltnp\nLISTEN :22 sshd\nLISTEN :443 nginx", "title": "✅ Attack surface確認", "body": "想定Portと実際のLISTENを突合。", "okUntil": 3}, {"label": "8080を外部公開", "kind": "danger", "set": {"extraPort": true, "listening": "22,443,8080 unexpected"}, "command": "$ demo-app --listen 0.0.0.0:8080", "title": "⚠ Unexpected exposure", "body": "Firewall/Cloud ruleも含め、本当に必要な公開か確認。", "okUntil": 3}, {"label": "Secretを644にする", "kind": "danger", "set": {"secretSafe": false, "secretPerm": "644 world-readable"}, "command": "$ chmod 644 /etc/app/secret.env\n-rw-r--r-- root app secret.env", "title": "❌ Secret露出", "body": "Local Userから読める可能性。", "okUntil": 4, "failAt": 4}, {"label": "Secretを600へ戻す", "set": {"secretSafe": true, "secretPerm": "600 root:app"}, "command": "$ chown root:app secret.env\n$ chmod 600 secret.env", "title": "✅ Secret permission修正", "body": "Serviceが必要な最小権限へ。", "okUntil": 4}, {"label": "Root SSHを有効化", "kind": "warning", "set": {"rootSSH": "enabled / risky"}, "command": "PermitRootLogin yes", "title": "⚠ Root direct login", "body": "直接Root LoginはAccountability/Brute force面のリスクを増やす。", "okUntil": 2}, {"label": "Security Update適用", "set": {"patch": "current"}, "command": "$ apt list --upgradable\n$ sudo apt upgrade\n# change window + verify", "title": "🔄 Patch applied", "body": "更新後のService/互換性も確認。", "okUntil": 1}, {"label": "Auditを停止", "kind": "danger", "set": {"auditOn": false, "audit": "disabled"}, "command": "$ systemctl stop auditd  # simulation", "title": "❌ Audit gap", "body": "重要操作の追跡性が落ちる。", "okUntil": 4, "failAt": 5}, {"label": "Change+Rollbackを記録", "set": {"change": "approved / rollback tested"}, "command": "Change: SSH policy hardening\nPrecheck / backup / apply / verify / rollback", "title": "📝 Controlled change", "body": "技術的に正しい変更でも、戻せる形で実施。", "okUntil": 6}], "concepts": [{"title": "Least Privilege", "intro": "User/Service/Networkの権限を業務に必要な最小限へ。", "cards": [["sudo", "必要Commandだけ"], ["Service User", "root不要なら非root"], ["Network", "Source/Portを最小化"]], "console": "誰が / 何に / 何をできる必要がある？", "exercises": [{"label": "sudo確認", "console": "$ sudo -l\n(ALL) /bin/systemctl status nginx"}]}, {"title": "Attack Surface", "intro": "Install済み、Enabled Service、LISTEN Port、外部公開Ruleを棚卸し。", "cards": [["ss -ltnp", "実際のListen"], ["systemctl", "Enabled Service"], ["FW/SG", "到達可能範囲"]], "console": "Expected: 22 from admin subnet, 443 public\nActual: +8080 public → investigate", "exercises": [{"label": "不要Service", "console": "$ systemctl disable --now demo.service"}]}, {"title": "Patch / Secret", "intro": "Patchは脆弱性だけでなく変更リスクも管理。SecretはSource code/平文共有を避ける。", "cards": [["Patch window", "検証/rollback"], ["Secret file", "600等最小権限"], ["Rotation", "漏えい時に交換可能"]], "console": "Patch → smoke test → monitor\nSecret → store/permission/rotation", "exercises": [{"label": "Hash確認", "console": "$ sha256sum config\n# Change前後の確認にも利用可"}]}, {"title": "Audit / Change", "intro": "誰が何を変えたか、何が起きたかを追える状態を保つ。", "cards": [["sudo log", "管理操作"], ["audit/log", "重要Event"], ["Change record", "目的/手順/rollback"]], "console": "Fact / Change ID / Operator / Time / Result", "exercises": [{"label": "失敗変更", "console": "Rollback criteria: health check fail → revert config → reload → verify"}]}], "diagLabels": {"ports": "ss/listen", "ssh": "sshd config", "perm": "secret perms", "patch": "apt/version", "audit": "audit/log", "change": "change history"}, "diagHint": "「想定Baselineと実状態の差分 → 権限/公開範囲 → Patch/Secret → Audit → 直前Change」を確認。", "incidents": [{"cause": "port", "answer": "想定外Portが外部公開", "prompt": "Security scanで8080が新たにOPEN。", "evidence": {"ports": "0.0.0.0:8080 demo-app LISTEN", "ssh": "normal", "perm": "secrets 600", "patch": "current", "audit": "process started by deploy user", "change": "Change ticketに8080記載なし"}, "explain": "想定外Attack surface。必要性確認→閉鎖/Source制限→原因追跡。"}, {"cause": "secret", "answer": "Secret file world-readable", "prompt": "同一Hostの一般UserがAPI keyを読める。", "evidence": {"ports": "normal", "ssh": "normal", "perm": "-rw-r--r-- /etc/app/secret.env", "patch": "current", "audit": "chmod変更履歴あり", "change": "deploy script changed mode"}, "explain": "File permission/secret管理の問題。漏えい扱いならRotationも検討。"}, {"cause": "rootssh", "answer": "Root SSH loginが有効", "prompt": "Hardening checkでPermitRootLogin yes。", "evidence": {"ports": "22 expected", "ssh": "PermitRootLogin yes / PasswordAuthentication yes", "perm": "normal", "patch": "current", "audit": "root login observed", "change": "emergency change left behind"}, "explain": "緊急変更の戻し漏れ。管理経路を確保してPolicyへ戻す。"}, {"cause": "unpatched", "answer": "Security Update未適用", "prompt": "Scannerが既知脆弱Versionを検出。", "evidence": {"ports": "normal", "ssh": "hardened", "perm": "normal", "patch": "Installed openssl old / security candidate available", "audit": "normal", "change": "maintenance deferred 3 times"}, "explain": "Risk評価しMaintenanceでUpdate/Verify。例外なら期限付きRisk acceptance。"}, {"cause": "auditgap", "answer": "Audit/Logging停止", "prompt": "重要設定が変わったが誰が変更したか追えない。", "evidence": {"ports": "changed", "ssh": "normal", "perm": "normal", "patch": "current", "audit": "audit/logging disabled 2 days", "change": "no change record"}, "explain": "Detection/Accountability gap。Audit復旧と変更追跡、影響確認。"}], "commands": {"ss": {"label": "ss -ltnp", "parts": [["ss", "Socket状態"], ["-ltnp", "Listen/TCP/Numeric/Process"]]}, "sudo": {"label": "sudo -l", "parts": [["sudo -l", "現在Userの許可Command確認"]]}, "apt": {"label": "apt list --upgradable", "parts": [["apt list", "Package一覧"], ["--upgradable", "Update候補"]]}, "journal": {"label": "journalctl _COMM=sudo", "parts": [["journalctl", "Event検索"], ["_COMM=sudo", "sudo Process由来をFilter"]]}}, "checklist": "Hardening確認\n1. 想定Asset/Port/Serviceとの差分は？\n2. SSH/User/sudoは最小権限？\n3. Secret permission/保管/rotationは？\n4. Security patchは？\n5. Audit/Logは生きてる？\n6. 直前Change/例外設定は？\n7. 変更前にRollback/Management pathを確保？", "graduation": {"question": "<strong>「Emergency対応でPermitRootLogin yesに変更。その後障害は解消したが、Change完了後もyesのまま。」</strong><br>問題は？", "answers": [{"id": "fine", "label": "障害が直ったので問題なし"}, {"id": "rollback", "label": "一時例外設定の戻し漏れ / Change closure不備"}, {"id": "dns", "label": "DNS TTL"}], "correct": "rollback", "explain": "Emergency changeには期限・Rollback/Normalisationまで含めます。残置するとAttack surfaceが恒久化します。"}}; let state=JSON.parse(JSON.stringify(LAB.initial)); let incident=null,checks=0,used={};
+const $=id=>document.getElementById(id); const esc=s=>String(s??'');
+function setScreen(t,b){$('screenTitle').textContent=t;$('screenBody').textContent=b} function setTerm(s){$('terminal').textContent=s} function setLesson(s){$('lesson').textContent=s}
+function renderFlow(okUntil=-1,failAt=-1,msg=''){const box=$('flow');box.replaceChildren();LAB.flow.forEach((n,i)=>{const d=document.createElement('div');d.className='flow-node '+(i===failAt?'fail':i<=okUntil?'ok':'wait');d.innerHTML='<div style="font-size:20px">'+n.icon+'</div><strong>'+n.label+'</strong>';box.appendChild(d);if(i<LAB.flow.length-1){const a=document.createElement('div');a.className='arrow';a.textContent='→';box.appendChild(a)}});$('flowMsg').textContent=msg||'操作すると処理がどこまで進んだか表示します。'}
+function statusClass(v){const s=String(v).toLowerCase();if(/error|failed|broken|missing|expired|unsafe|stopped|denied|down|invalid|full|unreachable|mismatch/.test(s)||s==='off'||s==='no')return 'status-danger';if(/warn|pending|stale|none|not configured|unverified|manual/.test(s))return 'status-warn';return 'status-ok'}
+function renderState(){const box=$('stateList');box.replaceChildren();LAB.stateRows.forEach(r=>{const row=document.createElement('div');row.className='state-row';const l=document.createElement('div');l.textContent=r.label;const v=document.createElement('div');v.className='state-value '+statusClass(state[r.key]);v.textContent=state[r.key];row.append(l,v);box.appendChild(row)})}
+function reqOK(req){if(!req)return true;return Object.keys(req).every(k=>state[k]===req[k])}
+function act(a){if(a.requires&&!reqOK(a.requires)){const f=a.fail||{};setTerm(f.command||'$ '+a.label+'\n\n条件が整っていません。');setScreen(f.title||'❌ 前提条件不足',f.body||'先に必要な準備を確認してください。');setLesson(f.lesson||'作業は前提条件を確認してから進めます。');renderFlow(f.okUntil??0,f.failAt??1,f.flowMsg||'前提条件の段階で停止。');return}if(a.set)Object.assign(state,a.set);setTerm(a.command||'$ '+a.label);setScreen(a.title||'✅ 実行',a.body||'状態を更新しました。');setLesson(a.lesson||LAB.defaultLesson);renderFlow(a.okUntil??LAB.flow.length-1,a.failAt??-1,a.flowMsg||'処理が完了しました。');renderState()}
+function renderActions(){const box=$('actions');box.replaceChildren();LAB.actions.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a.label;b.className=a.kind||'';b.addEventListener('click',()=>act(a));box.appendChild(b)})}
+function renderConcepts(){const box=$('concepts');box.replaceChildren();LAB.concepts.forEach((c,ci)=>{const sec=document.createElement('section');sec.className='concept';const h=document.createElement('h3');h.textContent=c.title;const p=document.createElement('p');p.className='muted';p.textContent=c.intro;sec.append(h,p);if(c.cards){const cards=document.createElement('div');cards.className='concept-cards';c.cards.forEach(x=>{const d=document.createElement('div');d.className='concept-card';d.innerHTML='<strong>'+x[0]+'</strong><br>'+x[1];cards.appendChild(d)});sec.appendChild(cards)}const row=document.createElement('div');row.className='action-row';const con=document.createElement('div');con.className='mini-console';con.textContent=c.console||'';(c.exercises||[]).forEach(ex=>{const b=document.createElement('button');b.textContent=ex.label;b.addEventListener('click',()=>{con.textContent=ex.console;if(ex.lesson)setLesson(ex.lesson)});row.appendChild(b)});sec.append(row,con);box.appendChild(sec)})}
+function renderDiag(){const box=$('diagButtons');box.replaceChildren();Object.entries(LAB.diagLabels).forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.addEventListener('click',()=>diagnose(k));box.appendChild(b)});const sel=$('incidentAnswer');sel.innerHTML='<option value="">原因を選ぶ</option>';LAB.incidents.forEach(x=>{const o=document.createElement('option');o.value=x.cause;o.textContent=x.answer;sel.appendChild(o)})}
+function newIncident(){let pool=LAB.incidents.filter(x=>!incident||x.cause!==incident.cause);incident=pool[Math.floor(Math.random()*pool.length)];checks=0;used={};$('incidentPrompt').innerHTML='<strong>「'+incident.prompt+'」</strong><br>原因は伏せています。';$('diagConsole').textContent='$ 調査開始。どの証拠を見る？';$('incidentAnswer').value='';$('incidentExplain').textContent='';score()}
+function diagnose(k){if(!incident){$('diagConsole').textContent='$ 先に新しい障害を発生させてください。';return}if(!used[k]){used[k]=1;checks++}$('diagConsole').textContent+='\n\n'+(incident.evidence[k]||'(この観点に追加情報なし)');score()}
+function score(v){$('scoreLabel').textContent=v==null?'確認回数':'スコア';$('scoreValue').textContent=v==null?checks:v}
+function answerIncident(){if(!incident||!$('incidentAnswer').value)return;if($('incidentAnswer').value===incident.cause){let s=Math.max(50,100-Math.max(0,checks-2)*10);score(s);$('incidentExplain').innerHTML='<strong class="status-ok">✅ 正解 '+s+'点</strong><br>'+incident.explain}else{score(0);$('incidentExplain').innerHTML='<strong class="status-danger">❌ まだ違う</strong><br>'+LAB.diagHint}}
+function renderCommands(){const box=$('cmdButtons');box.replaceChildren();Object.entries(LAB.commands).forEach(([k,c])=>{const b=document.createElement('button');b.textContent=c.label;b.addEventListener('click',()=>{const out=$('cmdBreakdown');out.replaceChildren();c.parts.forEach(x=>{const d=document.createElement('div');d.className='piece';d.innerHTML='<code>'+x[0]+'</code><div>'+x[1]+'</div>';out.appendChild(d)})});box.appendChild(b)})}
+function renderGrad(){ $('gradQuestion').innerHTML=LAB.graduation.question;const box=$('gradActions');box.replaceChildren();LAB.graduation.answers.forEach(x=>{const b=document.createElement('button');b.textContent=x.label;b.addEventListener('click',()=>{if(x.id===LAB.graduation.correct){$('gradResult').innerHTML='<strong class="status-ok">🎓 Lab'+String(LAB.num).padStart(2,'0')+' COMPLETE</strong><br>'+LAB.graduation.explain;try{localStorage.setItem('linux_lab'+String(LAB.num).padStart(2,'0')+'_complete','true')}catch(e){}}else{$('gradResult').innerHTML='<span class="status-warn">△ '+(x.feedback||'証拠をもう一度整理しよう。')+'</span>'}});box.appendChild(b)})}
+function init(){document.title='Linux基盤ラボ '+String(LAB.num).padStart(2,'0')+' - '+LAB.title;$('title').textContent=LAB.icon+' Linux基盤ラボ '+String(LAB.num).padStart(2,'0')+' — '+LAB.title;$('subtitle').innerHTML=LAB.subtitle;$('lesson').textContent=LAB.defaultLesson;renderFlow();renderState();renderActions();renderConcepts();renderDiag();renderCommands();renderGrad();$('newIncidentBtn').onclick=newIncident;$('answerIncidentBtn').onclick=answerIncident}
+init();}());
+</script>
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body></html>

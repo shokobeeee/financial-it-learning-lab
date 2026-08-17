@@ -1,1 +1,192 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux Lab | Financial IT Learning Lab</title><link rel="stylesheet" href="../assets/css/common.css"></head><body><main class="wrap"><a class="back" href="../">← 総合TOP</a><section class="card placeholder"><div class="kicker">LINUX / INFRASTRUCTURE</div><h1>🐧 Linux基盤ラボ</h1><p class="muted">Linux教材は現在、既存の専用GitHub Pagesで公開中です。統合版へ移植するまでは既存サイトを正として利用します。</p><a class="cta" href="https://shokobeeee.github.io/linux-kiban-lab/">既存 Linux Lab を開く →</a></section></main></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linux基盤ラボ</title>
+
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style>
+:root{--bg:#0a0f1d;--panel:#121a2d;--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--line:#2a3858}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100dvh}
+main{width:min(1100px,calc(100% - 28px));margin:24px auto 70px}
+.hero{padding:20px;border:1px solid var(--line);background:rgba(18,26,45,.96);border-radius:20px}
+h1{margin:0 0 8px;font-size:clamp(28px,6vw,44px)}p{color:var(--muted);line-height:1.7}
+.progress{margin-top:12px;padding:10px;background:#0f1728;border:1px solid var(--line);border-radius:12px}
+.progressbar{height:14px;background:#071019;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.progressfill{height:100%;width:0;background:linear-gradient(90deg,#284664,#3c8a6b);transition:.25s}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.lab-card{min-height:94px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#121a2d;color:var(--text);text-decoration:none;display:flex;flex-direction:column;justify-content:space-between}
+.lab-card:hover{border-color:#4e6b9d}.lab-num{font-weight:900;font-size:18px}.lab-status{color:var(--muted);font-size:13px}.complete .lab-status{color:var(--accent)}
+.install{margin-top:16px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#0f1728;color:var(--muted);line-height:1.7}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:11px;background:#182441;color:var(--text);font:inherit}
+@media(max-width:760px){main{width:auto;margin:12px 10px calc(30px + env(safe-area-inset-bottom,0px))}.hero{padding:15px;border-radius:15px}.grid{grid-template-columns:1fr 1fr}.lab-card{min-height:82px}}
+@media(max-width:390px){.grid{grid-template-columns:1fr}}
+</style>
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head>
+<body>
+<main>
+<section class="hero">
+<h1>🐧 Linux基盤ラボ</h1>
+<p>Lab01〜20をスマホ・PCの両方で操作できる学習ポータル。卒業状態はこのブラウザに保存されます。</p>
+<div class="progress">
+  <div id="progressText">0 / 20 COMPLETE</div>
+  <div class="progressbar"><div class="progressfill" id="progressFill"></div></div>
+</div>
+<div class="actions">
+  <button id="continueBtn">▶ 続きから</button>
+  <button id="resetProgressBtn">進捗をリセット</button>
+</div>
+</section>
+
+<div class="grid">
+<a class="lab-card" href="./parrot_linux_lab01_web_nginx.html" data-lab="1">
+          <div class="lab-num">Lab01</div>
+          <div class="lab-status" id="status1">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab02_firewall_complete.html" data-lab="2">
+          <div class="lab-num">Lab02</div>
+          <div class="lab-status" id="status2">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab03_ip_dns.html" data-lab="3">
+          <div class="lab-num">Lab03</div>
+          <div class="lab-status" id="status3">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab04_ssh.html" data-lab="4">
+          <div class="lab-num">Lab04</div>
+          <div class="lab-status" id="status4">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab05_permissions.html" data-lab="5">
+          <div class="lab-num">Lab05</div>
+          <div class="lab-status" id="status5">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab06_process_memory.html" data-lab="6">
+          <div class="lab-num">Lab06</div>
+          <div class="lab-status" id="status6">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab07_storage_mount.html" data-lab="7">
+          <div class="lab-num">Lab07</div>
+          <div class="lab-status" id="status7">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab08_logs_troubleshooting.html" data-lab="8">
+          <div class="lab-num">Lab08</div>
+          <div class="lab-status" id="status8">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab09_apt_packages.html" data-lab="9">
+          <div class="lab-num">Lab09</div>
+          <div class="lab-status" id="status9">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab10_boot_kernel.html" data-lab="10">
+          <div class="lab-num">Lab10</div>
+          <div class="lab-status" id="status10">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab11_bash_pipes.html" data-lab="11">
+          <div class="lab-num">Lab11</div>
+          <div class="lab-status" id="status11">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab12_scheduler.html" data-lab="12">
+          <div class="lab-num">Lab12</div>
+          <div class="lab-status" id="status12">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab13_backup_restore.html" data-lab="13">
+          <div class="lab-num">Lab13</div>
+          <div class="lab-status" id="status13">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab14_containers.html" data-lab="14">
+          <div class="lab-num">Lab14</div>
+          <div class="lab-status" id="status14">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab15_tls_https.html" data-lab="15">
+          <div class="lab-num">Lab15</div>
+          <div class="lab-status" id="status15">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab16_monitoring.html" data-lab="16">
+          <div class="lab-num">Lab16</div>
+          <div class="lab-status" id="status16">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab17_ansible_iac.html" data-lab="17">
+          <div class="lab-num">Lab17</div>
+          <div class="lab-status" id="status17">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab18_virtualization_cloud.html" data-lab="18">
+          <div class="lab-num">Lab18</div>
+          <div class="lab-status" id="status18">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab19_security_hardening.html" data-lab="19">
+          <div class="lab-num">Lab19</div>
+          <div class="lab-status" id="status19">▶ START</div>
+        </a>
+<a class="lab-card" href="./parrot_linux_lab20_capstone.html" data-lab="20">
+          <div class="lab-num">Lab20</div>
+          <div class="lab-status" id="status20">▶ START</div>
+        </a>
+</div>
+
+<div class="install">
+<strong>📱 スマホでアプリのように使う</strong><br>
+HTTPSで公開後、iPhoneはSafariの共有メニュー→「ホーム画面に追加」、
+AndroidはChromeのメニュー→「ホーム画面に追加 / アプリをインストール」。
+一度読み込めば、主要ページはオフラインでも開けます。
+</div>
+</main>
+
+<script>
+(function(){
+  var total = 20;
+  var completed = 0;
+  var firstIncomplete = null;
+  for (var i=1; i<=total; i++) {
+    var done = false;
+    try { done = localStorage.getItem('linux_lab' + String(i).padStart(2,'0') + '_complete') === 'true'
+              || localStorage.getItem('linux_lab' + i + '_complete') === 'true'; } catch(e) {}
+    var card = document.querySelector('[data-lab="' + i + '"]');
+    var st = document.getElementById('status' + i);
+    if (done) {
+      completed++;
+      if (card) card.classList.add('complete');
+      if (st) st.textContent = '✅ COMPLETE';
+    } else if (!firstIncomplete) {
+      firstIncomplete = card ? card.getAttribute('href') : null;
+    }
+  }
+  document.getElementById('progressText').textContent = completed + ' / ' + total + ' COMPLETE';
+  document.getElementById('progressFill').style.width = ((completed/total)*100) + '%';
+  document.getElementById('continueBtn').addEventListener('click', function(){
+    location.href = firstIncomplete || './parrot_linux_lab20_capstone.html';
+  });
+  document.getElementById('resetProgressBtn').addEventListener('click', function(){
+    if (!confirm('Lab01〜20の進捗をリセットしますか？')) return;
+    try {
+      for (var i=1;i<=total;i++) {
+        localStorage.removeItem('linux_lab' + i + '_complete');
+        localStorage.removeItem('linux_lab' + String(i).padStart(2,'0') + '_complete');
+      }
+    } catch(e) {}
+    location.reload();
+  });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
+})();
+</script>
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body>
+</html>

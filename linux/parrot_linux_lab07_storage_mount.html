@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux基盤ラボ 07 - Disk / Filesystem / Mount</title>
+<style>
+:root{
+  --panel:#121a2d;--text:#e8edf7;--muted:#9eabc0;--accent:#76e3b2;--warn:#ffd166;
+  --danger:#ff7b7b;--ok:#75e6a5;--line:#2a3858;--terminal:#071019
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#0a0f1d,#11182a);color:var(--text);min-height:100vh}
+main{width:min(1380px,calc(100% - 32px));margin:24px auto 56px}
+h1{font-size:clamp(26px,4vw,40px);margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{margin:0 0 7px}
+p{line-height:1.7}.muted{color:var(--muted)}code{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.card{background:rgba(18,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 36px rgba(0,0,0,.18)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.nav a,.nav span{min-height:40px;display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);text-decoration:none}.nav .current{background:#173a31;border-color:#3c8a6b;font-weight:800}
+.badge{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#17213a;border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}
+.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-danger{color:var(--danger)}
+.panel-title{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:6px}
+button,select,input{font:inherit}button{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#182441;color:var(--text);cursor:pointer;transition:.14s ease}
+button:hover{transform:translateY(-1px);border-color:#4e6b9d}button.primary{background:#173a31;border-color:#3c8a6b}button.danger{background:#3a1c25;border-color:#804343}button.warning{background:#392f18;border-color:#806c39}
+
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:13px}
+.flowbox{border:1px solid var(--line);background:#0f1728;border-radius:15px;padding:13px}
+.flow{display:grid;grid-template-columns:repeat(13,auto);gap:6px;align-items:center;justify-content:start;overflow-x:auto}
+.node{min-width:112px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#17213a;text-align:center;transition:.2s ease}
+.node.ok{border-color:#3f9d75}.node.fail{border-color:#a84f5b}.node.warn{border-color:#b59a45}.node.wait{opacity:.55}
+.arrow{color:var(--muted);font-weight:900}.flowmsg{min-height:24px;margin-top:8px;color:var(--muted)}
+.state-list{display:grid;gap:8px}.state-row{display:grid;grid-template-columns:160px 1fr;gap:8px;align-items:center;padding:8px 10px;background:#0f1728;border:1px solid var(--line);border-radius:11px}.state-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800}
+
+.lab-grid{display:grid;grid-template-columns:250px minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:13px}
+.controls{display:grid;align-content:start;gap:8px;padding:13px;background:#0f1728;border:1px solid var(--line);border-radius:15px}
+.screen{min-height:350px;border-radius:14px;background:#f2f5f8;color:#18202d;position:relative;padding:46px 18px 18px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.screenbar{position:absolute;left:0;top:0;right:0;padding:8px 12px;background:#dce3ec;color:#445064;border-bottom:1px solid #c5ceda;text-align:left;font-size:12px}.big{font-size:26px;font-weight:900}
+.terminal{min-height:350px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:14px;padding:14px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.lesson{margin-top:13px;display:grid;grid-template-columns:170px 1fr;gap:12px;background:#10182a}
+
+.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.deep{background:#0f1728;border:1px solid var(--line);border-radius:14px;padding:12px}.action-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.mini-console{margin-top:9px;min-height:155px;padding:11px;border:1px solid #1b3240;border-radius:11px;background:var(--terminal);color:#d9f7e6;white-space:pre-wrap;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+
+.disk-tree{display:grid;gap:7px;margin-top:10px}
+.disk-row{display:grid;grid-template-columns:130px 110px 110px 1fr;gap:8px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#121b30;font-size:12px}
+.disk-name{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--accent);font-weight:800}
+.mount-map{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px}
+.mount-node{padding:11px;background:#17213a;border:1px solid var(--line);border-radius:11px;text-align:center}
+
+.capacity-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}
+.cap{padding:10px;background:#121b30;border:1px solid var(--line);border-radius:11px;text-align:center}.cap strong{display:block;font-size:20px}
+.meter{height:18px;background:#0a0f1d;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:8px}.meter-fill{height:100%;background:linear-gradient(90deg,#284664,#3c8a6b);transition:.2s width}.meter-fill.hot{background:linear-gradient(90deg,#805c39,#804343)}
+.inode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.inode{padding:10px;background:#121b30;border:1px solid var(--line);border-radius:11px;text-align:center}.inode strong{display:block;font-size:20px}
+.fstab-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}.fstab-table th,.fstab-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left}.fstab-table th{color:var(--muted)}
+.fs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.fs-card{padding:10px;background:#121b30;border:1px solid var(--line);border-radius:11px}
+.lvm-grid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:center;margin-top:10px}.lvm-node{padding:10px;background:#17213a;border:1px solid var(--line);border-radius:11px;text-align:center}
+.diag-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:12px}.diag-buttons{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.diag-buttons button{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:center;padding:6px}.diag-console{min-height:285px;background:var(--terminal);color:#d9f7e6;border:1px solid #1b3240;border-radius:13px;padding:13px;white-space:pre-wrap;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.answer{display:grid;gap:9px;align-content:start}.answer select{width:100%;min-height:44px;background:#182441;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:8px}.score{border:1px solid var(--line);background:#0f1728;border-radius:12px;padding:11px}.score-big{font-size:30px;font-weight:900}
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.chips button{min-height:38px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center;padding:6px 9px}.breakdown{display:grid;gap:6px;margin-top:8px}.piece{display:grid;grid-template-columns:175px 1fr;gap:8px;padding:8px;background:#0f1728;border:1px solid var(--line);border-radius:10px}.graduation{text-align:center;margin-top:13px}.grad-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+@media(max-width:1050px){.hero-grid,.two-grid,.diag-grid,.cmd-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:220px 1fr}.lab-grid>section:last-child{grid-column:1/-1}.diag-buttons{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.lab-grid{grid-template-columns:1fr}.lab-grid>section:last-child{grid-column:auto}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);text-align:center}.lesson{grid-template-columns:1fr}.capacity-grid,.inode-grid,.fs-grid,.disk-row{grid-template-columns:1fr}.mount-map,.lvm-grid{grid-template-columns:1fr}.piece{grid-template-columns:1fr}.diag-buttons{grid-template-columns:1fr 1fr}}
+</style>
+<style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head>
+<body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab06_process_memory.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab07</div>
+  <a href="./parrot_linux_lab08_logs_troubleshooting.html">→</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html" class="current">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab06_process_memory.html">← Lab06</a><strong class="lab-title">Lab07 Storage / Mount</strong><span class="spacer"></span><a href="parrot_linux_lab08_logs_troubleshooting.html">Lab08 →</a></nav>
+<nav class="nav">
+<a href="parrot_linux_lab01_web_nginx.html">Lab01 Web / nginx</a>
+<a href="parrot_linux_lab02_firewall_complete.html">Lab02 Firewall</a>
+<a href="parrot_linux_lab03_ip_dns.html">Lab03 IP / DNS</a>
+<a href="parrot_linux_lab04_ssh.html">Lab04 SSH</a>
+<a href="parrot_linux_lab05_permissions.html">Lab05 Permissions</a>
+<a href="parrot_linux_lab06_process_memory.html">Lab06 Process / Memory</a>
+<span class="current">Lab07 Storage / Mount</span>
+</nav>
+
+<header>
+<h1>💽 Linux基盤ラボ 07 — Disk / Filesystem / Mount</h1>
+<p class="muted">
+「ディスク容量がない」「追加Diskが見えない」「再起動したらmountされない」「dfとduが合わない」を、
+<strong>Block Device → Partition → Filesystem → Mount → File/Directory</strong> に分解して切り分けます。
+</p>
+</header>
+
+<section class="card">
+<h2>まず構造：Diskを買っただけでは /data にはならない</h2>
+<div class="hero-grid">
+<div class="flowbox">
+<div class="flow">
+<div class="node wait" id="fDisk">💽<br>Disk</div><div class="arrow">→</div>
+<div class="node wait" id="fPartition">🧱<br>Partition</div><div class="arrow">→</div>
+<div class="node wait" id="fFs">🗂<br>Filesystem</div><div class="arrow">→</div>
+<div class="node wait" id="fMount">📌<br>Mount</div><div class="arrow">→</div>
+<div class="node wait" id="fPath">📁<br>/data</div><div class="arrow">→</div>
+<div class="node wait" id="fApp">⚙️<br>Application</div>
+</div>
+<div class="flowmsg" id="flowMsg">追加Diskを作ると、どの段階まで準備できているか表示します。</div>
+</div>
+<div class="state-list">
+<div class="state-row"><div>Root FS</div><div id="rootState" class="state-value">/dev/sda2 ext4 /</div></div>
+<div class="state-row"><div>Root Usage</div><div id="rootUsageState" class="state-value status-ok">42%</div></div>
+<div class="state-row"><div>Data Disk</div><div id="dataDiskState" class="state-value status-warn">/dev/sdb 未使用</div></div>
+<div class="state-row"><div>Mount</div><div id="mountState" class="state-value status-warn">/data not mounted</div></div>
+<div class="state-row"><div>Inode</div><div id="inodeState" class="state-value status-ok">12%</div></div>
+<div class="state-row"><div>Filesystem</div><div id="fsState" class="state-value">read-write</div></div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>操作してみる</h2>
+<div class="lab-grid">
+<aside class="controls">
+<div class="panel-title">追加Diskを準備</div>
+<button class="primary" data-action="partition">Partition作成</button>
+<button data-action="mkfs">ext4を作成</button>
+<button data-action="mount">/dataへmount</button>
+<button data-action="writeData">/dataへFile作成</button>
+<div class="panel-title" style="margin-top:7px">壊してみる</div>
+<button class="danger" data-action="unmount">umount /data</button>
+<button class="warning" data-action="fillRoot">/ を95%まで使う</button>
+<button class="warning" data-action="fillInodes">inodeを100%へ</button>
+<button class="danger" data-action="readonly">Filesystemをread-only化</button>
+<button data-action="fixReadonly">read-writeへ戻す</button>
+<div class="panel-title" style="margin-top:7px">確認</div>
+<button data-action="lsblk">lsblk</button>
+<button data-action="df">df -h</button>
+<button data-action="du">du -sh</button>
+<button data-action="reset">↻ 初期化</button>
+</aside>
+
+<section>
+<div class="panel-title">画面ではこう見える</div>
+<div class="screen" id="screen">
+<div class="screenbar">Storage Monitor / server01</div>
+<div><div class="big">Lab07 初期状態</div><p><code>/dev/sdb</code> はOSから見えているけど、まだ /data としては使えません。</p></div>
+</div>
+</section>
+
+<section>
+<div class="panel-title">裏ではこのコマンド</div>
+<div class="terminal" id="terminal">$</div>
+</section>
+</div>
+
+<div class="lesson card">
+<div><span class="badge">💡 ここがポイント</span></div>
+<div id="lesson">Diskが見えること、Filesystemがあること、Mountされていることは別の状態です。</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🧭 lsblk / blkid / findmnt — 「何がどこにmountされている？」</h2>
+<div class="two-grid">
+<div class="deep">
+<div class="panel-title">Block Device Tree</div>
+<div class="disk-tree" id="diskTree"></div>
+<div class="action-row">
+<button id="showBlkidBtn">blkid</button>
+<button id="showFindmntBtn">findmnt</button>
+</div>
+</div>
+<div class="deep">
+<div class="panel-title">DiskとPathをつなぐのがMount</div>
+<div class="mount-map">
+<div class="mount-node">/dev/sdb1<br><span class="muted">Block Device</span></div><div>→ mount →</div>
+<div class="mount-node">/data<br><span class="muted">Directory</span></div>
+</div>
+<div class="mini-console" id="mountConsole">$ lsblk -f
+NAME   FSTYPE UUID       MOUNTPOINTS
+sda
+└─sda2 ext4   ROOT-UUID  /
+sdb
+# まだpartitionもfilesystemもない</div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>📈 df と du — 「Filesystem使用量」と「Directory合計」は違う</h2>
+<div class="two-grid">
+<div class="deep">
+<div class="capacity-grid">
+<div class="cap"><strong id="capSize">50G</strong>Size</div>
+<div class="cap"><strong id="capUsed">21G</strong>Used</div>
+<div class="cap"><strong id="capAvail">27G</strong>Avail</div>
+<div class="cap"><strong id="capPct">42%</strong>Use%</div>
+</div>
+<div class="meter"><div id="capMeter" class="meter-fill" style="width:42%"></div></div>
+<div class="action-row">
+<button id="createBigLogBtn">10G logを作る</button>
+<button id="deleteOpenLogBtn">logを削除するがProcessはopenのまま</button>
+<button id="closeOpenLogBtn">Processを終了して領域解放</button>
+</div>
+</div>
+<div class="deep">
+<div class="mini-console" id="dfDuConsole">$ df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2        50G   21G   27G  42% /
+
+$ sudo du -shx /
+20G /
+
+# 近い値だが、常に完全一致するとは限らない</div>
+<p class="muted">削除済みFileをProcessがopenし続けると、Directoryからは消えて <code>du</code> が減っても、FilesystemのBlockはまだ使用中で <code>df</code> が減らないことがあります。</p>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🔢 inode枯渇 — 容量が余っていても「No space left on device」</h2>
+<div class="two-grid">
+<div class="deep">
+<div class="inode-grid">
+<div class="inode"><strong id="inodeTotal">3.2M</strong>Inodes</div>
+<div class="inode"><strong id="inodeUsed">0.4M</strong>IUsed</div>
+<div class="inode"><strong id="inodePct">12%</strong>IUse%</div>
+</div>
+<div class="action-row">
+<button id="createTinyFilesBtn">小Fileを300万個作る</button>
+<button id="deleteTinyFilesBtn">小Fileを削除</button>
+</div>
+</div>
+<div class="deep">
+<div class="mini-console" id="inodeConsole">$ df -i /
+Filesystem      Inodes  IUsed   IFree IUse% Mounted on
+/dev/sda2         3.2M   0.4M    2.8M   12% /
+
+# File/Directory 1個ごとにinodeを使う
+# 小File大量生成でBlock容量より先にinodeが尽きることがある</div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>📝 /etc/fstab — 再起動後もmountする</h2>
+<div class="two-grid">
+<div class="deep">
+<table class="fstab-table">
+<thead><tr><th>Source</th><th>Mountpoint</th><th>Type</th><th>Options</th></tr></thead>
+<tbody id="fstabBody"></tbody>
+</table>
+<div class="action-row">
+<button id="addFstabBtn">/dataをfstabへ追加</button>
+<button id="breakFstabBtn">UUIDを間違える</button>
+<button id="testFstabBtn">mount -aでテスト</button>
+<button id="simulateRebootBtn">再起動を疑似実行</button>
+</div>
+</div>
+<div class="deep">
+<div class="mini-console" id="fstabConsole">$ cat /etc/fstab
+UUID=ROOT-UUID / ext4 defaults 0 1
+
+# /data はまだ永続mount設定なし</div>
+<p class="muted"><strong>編集したら即rebootではなく <code>mount -a</code> 等で先に検証</strong>するのが安全。fstab不備は起動トラブルにつながることがあります。</p>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🗂 Filesystem — ext4 / XFS と fsckの考え方</h2>
+<div class="fs-grid">
+<div class="fs-card"><strong>ext4</strong><br><span class="muted">Linuxで広く使われるFilesystem。journalあり。</span></div>
+<div class="fs-card"><strong>XFS</strong><br><span class="muted">大容量・並列I/Oなどでよく使われる。運用コマンドはext4と一部異なる。</span></div>
+<div class="fs-card"><strong>Filesystem check</strong><br><span class="muted">壊れた疑いがある場合は対象FS・状態に応じた適切な修復手順を取る。</span></div>
+</div>
+<div class="two-grid">
+<div class="deep">
+<div class="action-row">
+<button id="simulateFsErrorBtn">Filesystem errorを発生</button>
+<button id="showKernelLogBtn">dmesgを見る</button>
+<button id="showFsckBtn">fsckの注意点を見る</button>
+</div>
+<div class="mini-console" id="fsConsole">$ dmesg -T | tail
+# Filesystem errorsが出ると、安全のためread-only化されるケースもある</div>
+</div>
+<div class="deep">
+<div class="mini-console">重要:
+mount中のFilesystemに対して
+何でもfsckすれば良いわけではない
+
+↓
+Filesystem種類
+mount状態
+バックアップ
+復旧手順
+業務影響
+を確認
+
+本番では安易な修復操作より
+まずログ・状態・手順確認</div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>📦 LVMの入口 — 容量拡張の会話についていく</h2>
+<div class="lvm-grid">
+<div class="lvm-node">PV<br>/dev/sdc</div><div>→</div>
+<div class="lvm-node">VG<br>vg_data</div><div>→</div>
+<div class="lvm-node">LV<br>lv_app</div>
+</div>
+<div class="two-grid">
+<div class="deep">
+<div class="action-row">
+<button id="showLvmBtn">pvs / vgs / lvs</button>
+<button id="extendLvBtn">LVを20G→30Gへ拡張</button>
+<button id="growFsBtn">Filesystemも拡張</button>
+</div>
+<div class="mini-console" id="lvmConsole">$ pvs
+PV         VG      PSize
+/dev/sdc   vg_data 100G
+
+$ vgs
+VG       VSize  VFree
+vg_data   100G    80G
+
+$ lvs
+LV      VG       LSize
+lv_app  vg_data   20G</div>
+</div>
+<div class="deep">
+<div class="mini-console">LVを大きくした
+≠
+Filesystemの容量が自動で必ず増えた
+
+Block Device側拡張
+↓
+Filesystem側のgrow
+↓
+dfで確認
+
+この「層が別」が重要</div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🕵 「No space left」障害切り分けゲーム</h2>
+<div class="diag-grid">
+<div>
+<div id="incidentPrompt"><strong>「Diskがおかしいです」</strong> — 新しい障害を発生させてください。</div>
+<div class="diag-buttons">
+<button data-diag="lsblk">lsblk</button>
+<button data-diag="df">df -h</button>
+<button data-diag="inode">df -i</button>
+<button data-diag="du">du</button>
+<button data-diag="lsof">lsof +L1</button>
+<button data-diag="mount">findmnt/fstab</button>
+</div>
+<div class="diag-console" id="diagConsole">$ まだ調査していません。</div>
+</div>
+<div class="answer">
+<button class="primary" id="newIncidentBtn">🎲 新しい障害</button>
+<select id="incidentAnswer">
+<option value="">原因を選ぶ</option>
+<option value="block_full">FilesystemのBlock容量不足</option>
+<option value="inode_full">inode枯渇</option>
+<option value="deleted_open">削除済み巨大FileをProcessがopen中</option>
+<option value="not_mounted">/dataがmountされていない</option>
+<option value="fstab_bad">fstabのUUID不正</option>
+<option value="readonly_fs">Filesystemがread-only</option>
+</select>
+<button id="answerIncidentBtn">回答する</button>
+<div class="score" id="scoreBox"><div class="muted">確認回数</div><div class="score-big">0</div></div>
+<div id="incidentExplain" class="muted"></div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:13px">
+<h2>🧩 コマンドを分解する</h2>
+<div class="cmd-grid">
+<div>
+<div class="chips">
+<button data-cmd="lsblk">lsblk -f</button>
+<button data-cmd="df">df -h</button>
+<button data-cmd="inode">df -i</button>
+<button data-cmd="du">du -xhd1 /var</button>
+<button data-cmd="findmnt">findmnt /data</button>
+<button data-cmd="lsof">lsof +L1</button>
+<button data-cmd="mounta">mount -a</button>
+</div>
+<div class="breakdown" id="cmdBreakdown">コマンドを押すと意味を分解します。</div>
+</div>
+<div class="deep">
+<div class="mini-console">容量障害の一次切り分け:
+
+1. lsblk -f / findmnt
+   そもそも正しいFSがmountされてる？
+
+2. df -h
+   Block容量は？
+
+3. df -i
+   inodeは？
+
+4. du
+   どのDirectoryが大きい？
+
+5. dfとduが合わない
+   lsof +L1
+
+6. dmesg / journalctl
+   read-only化やI/O errorは？</div>
+</div>
+</div>
+</section>
+
+<section class="card graduation">
+<h2>🎓 Lab07 卒業テスト</h2>
+<p><strong>「df -h は95%使用。でも du -sh /var を足しても30%程度。昨日巨大ログをrmした。」</strong><br>次に確認したいものは？</p>
+<div class="grad-actions">
+<button data-grad="firewall">Firewall</button>
+<button data-grad="open">lsof +L1 で削除済みopen File</button>
+<button data-grad="dns">DNS</button>
+</div>
+<div id="gradResult" style="margin-top:10px"></div>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+var state={
+  rootSize:50,rootUsed:21,rootDu:20,
+  dataDisk:true,partition:false,filesystem:false,mounted:false,dataFiles:0,
+  inodeTotal:3200000,inodeUsed:384000,
+  readOnly:false,
+  bigLog:false,deletedOpen:false,
+  fstab:false,fstabValid:true,
+  fsError:false,
+  lvSize:20,fsLvSize:20
+};
+var currentIncident=null,incidentSteps=0,incidentUsed={};
+
+var el={
+fDisk:document.getElementById("fDisk"),fPartition:document.getElementById("fPartition"),fFs:document.getElementById("fFs"),fMount:document.getElementById("fMount"),fPath:document.getElementById("fPath"),fApp:document.getElementById("fApp"),flowMsg:document.getElementById("flowMsg"),
+rootState:document.getElementById("rootState"),rootUsageState:document.getElementById("rootUsageState"),dataDiskState:document.getElementById("dataDiskState"),mountState:document.getElementById("mountState"),inodeState:document.getElementById("inodeState"),fsState:document.getElementById("fsState"),
+screen:document.getElementById("screen"),terminal:document.getElementById("terminal"),lesson:document.getElementById("lesson"),diskTree:document.getElementById("diskTree"),mountConsole:document.getElementById("mountConsole"),
+capSize:document.getElementById("capSize"),capUsed:document.getElementById("capUsed"),capAvail:document.getElementById("capAvail"),capPct:document.getElementById("capPct"),capMeter:document.getElementById("capMeter"),dfDuConsole:document.getElementById("dfDuConsole"),
+inodeTotal:document.getElementById("inodeTotal"),inodeUsed:document.getElementById("inodeUsed"),inodePct:document.getElementById("inodePct"),inodeConsole:document.getElementById("inodeConsole"),
+fstabBody:document.getElementById("fstabBody"),fstabConsole:document.getElementById("fstabConsole"),fsConsole:document.getElementById("fsConsole"),lvmConsole:document.getElementById("lvmConsole"),
+incidentPrompt:document.getElementById("incidentPrompt"),diagConsole:document.getElementById("diagConsole"),incidentAnswer:document.getElementById("incidentAnswer"),scoreBox:document.getElementById("scoreBox"),incidentExplain:document.getElementById("incidentExplain"),cmdBreakdown:document.getElementById("cmdBreakdown"),gradResult:document.getElementById("gradResult")
+};
+
+function setScreen(t,b){el.screen.replaceChildren();var bar=document.createElement("div");bar.className="screenbar";bar.textContent="Storage Monitor / server01";var box=document.createElement("div"),h=document.createElement("div"),p=document.createElement("p");h.className="big";h.textContent=t;p.textContent=b;box.appendChild(h);box.appendChild(p);el.screen.appendChild(bar);el.screen.appendChild(box)}
+function term(a){el.terminal.textContent=a.join("\n")}function lesson(t){el.lesson.textContent=t}
+function node(n,s){n.classList.remove("ok","fail","warn","wait");n.classList.add(s)}
+function resetFlow(m){[el.fDisk,el.fPartition,el.fFs,el.fMount,el.fPath,el.fApp].forEach(function(n){node(n,"wait")});el.flowMsg.textContent=m||"追加Diskを作ると、どの段階まで準備できているか表示します。"}
+function pct(){return Math.min(100,Math.round(state.rootUsed/state.rootSize*100))}
+function inodePct(){return Math.min(100,Math.round(state.inodeUsed/state.inodeTotal*100))}
+function updateUI(){
+  var p=pct(),ip=inodePct();
+  el.rootUsageState.textContent=p+"%";el.rootUsageState.className="state-value "+(p>=95?"status-danger":p>=80?"status-warn":"status-ok");
+  el.dataDiskState.textContent=!state.partition?"/dev/sdb 未使用":!state.filesystem?"/dev/sdb1 partitionのみ":"/dev/sdb1 ext4";
+  el.dataDiskState.className="state-value "+(state.filesystem?"status-ok":"status-warn");
+  el.mountState.textContent=state.mounted?"/dev/sdb1 → /data":" /data not mounted";el.mountState.className="state-value "+(state.mounted?"status-ok":"status-warn");
+  el.inodeState.textContent=ip+"%";el.inodeState.className="state-value "+(ip>=95?"status-danger":"status-ok");
+  el.fsState.textContent=state.readOnly?"read-only":"read-write";el.fsState.className="state-value "+(state.readOnly?"status-danger":"status-ok");
+  updateCapacity();updateInodes();renderDiskTree();renderFstab()
+}
+function animateStorage(){
+  resetFlow();node(el.fDisk,"ok");
+  if(!state.partition){el.flowMsg.textContent="Diskは見えるがPartition未作成。";return}
+  node(el.fPartition,"ok");
+  if(!state.filesystem){el.flowMsg.textContent="PartitionはあるがFilesystem未作成。";return}
+  node(el.fFs,"ok");
+  if(!state.mounted){el.flowMsg.textContent="Filesystemはあるが/mnt pointへmountされていない。";return}
+  node(el.fMount,"ok");node(el.fPath,"ok");node(el.fApp,"ok");el.flowMsg.textContent="/dev/sdb → partition → ext4 → /data までつながりました。"
+}
+function partition(){state.partition=true;term(["$ sudo fdisk /dev/sdb","n  # new partition","w  # write table","$ lsblk","sdb  20G","└─sdb1 20G"]);setScreen("🧱 Partition作成","/dev/sdb1 ができました。でもまだFilesystemがありません。");lesson("PartitionはDisk領域を区切る段階。まだfileを保存できるFilesystemではない。");updateUI();animateStorage()}
+function mkfs(){if(!state.partition){term(["$ sudo mkfs.ext4 /dev/sdb1","/dev/sdb1: No such file or directory"]);setScreen("❌ まだmkfsできません","先にPartitionを作成。");return}state.filesystem=true;term(["$ sudo mkfs.ext4 /dev/sdb1","Creating filesystem with ... blocks and ... inodes","Filesystem UUID: DATA-UUID"]);setScreen("🗂 ext4作成","Block Device上にFilesystemを作りました。次はmount。");updateUI();animateStorage()}
+function mountData(){if(!state.filesystem){term(["$ sudo mount /dev/sdb1 /data","mount: wrong fs type / no filesystem"]);setScreen("❌ mountできません","Filesystemがまだありません。");return}state.mounted=true;term(["$ sudo mkdir -p /data","$ sudo mount /dev/sdb1 /data","$ findmnt /data","/data /dev/sdb1 ext4 rw,relatime"]);setScreen("📌 /dataへmount","/data以下が/dev/sdb1のFilesystemになりました。");lesson("mountはBlock Device/FilesystemをDirectory treeの場所へ接続する操作。");updateUI();animateStorage()}
+function writeData(){if(!state.mounted){term(["$ echo hello > /data/hello.txt","bash: /data/hello.txt: No such file or directory / wrong underlying path"]);setScreen("❌ /dataが想定Diskではない","mountされているかfindmntで確認。");return}if(state.readOnly){term(["$ echo hello > /data/hello.txt","Read-only file system"]);setScreen("❌ read-only","Filesystemが書込不可。");return}state.dataFiles++;term(["$ echo hello > /data/hello.txt","$ ls -l /data","-rw-r--r-- hello.txt"]);setScreen("✅ File作成","/dataのext4上へ保存。")}
+function unmount(){state.mounted=false;term(["$ sudo umount /data","$ findmnt /data","# no output"]);setScreen("📌 /dataをunmount","Filesystemは存在するがDirectory treeから外れました。");lesson("umountしてもDisk内容が消えるわけではない。Pathから見えなくなる。");updateUI();animateStorage()}
+function fillRoot(){state.rootUsed=47.5;state.rootDu=46.5;term(["$ fallocate -l 26G /var/tmp/big.bin","$ df -h /","/dev/sda2 50G 48G 2.5G 95% /"]);setScreen("⚠ Root FS 95%","Logやtmp書込失敗、Package update失敗などにつながる余地。");lesson("100%になる前に監視・アラート・cleanup運用が重要。");updateUI()}
+function fillInodes(){state.inodeUsed=3199000;term(["$ for i in $(seq 1 3000000); do touch /var/tmp/files/$i; done","$ df -i /","/dev/sda2 3.2M 3.2M 1000 100% /"]);setScreen("❌ inode枯渇","容量Blockが空いていても新Fileを作れません。");lesson("No space left on deviceはBlock容量だけでなくinode不足でも起きる。");updateUI()}
+function readonly(){state.readOnly=true;term(["$ sudo mount -o remount,ro /","$ mount | grep ' on / '","/dev/sda2 on / type ext4 (ro,relatime)"]);setScreen("🔒 read-only","書込みがRead-only file systemで失敗。");updateUI()}
+function fixReadonly(){state.readOnly=false;state.fsError=false;term(["$ sudo mount -o remount,rw /","# 学習上の疑似復旧。実際はread-only化原因を先に確認。"]);setScreen("✅ read-writeへ","ただし実際の障害時は原因を確認せず戻すだけにしない。");updateUI()}
+function showLsblk(){term(["$ lsblk -f","NAME   FSTYPE UUID       SIZE MOUNTPOINTS","sda                     50G","└─sda2 ext4   ROOT-UUID 49G  /","sdb                     20G"].concat(state.partition?[state.filesystem?"└─sdb1 ext4   DATA-UUID 20G "+(state.mounted?"/data":""):"└─sdb1                20G"]:[ ]));setScreen("lsblk","Block Device / Partition / FS / Mountpointを一覧。")}
+function showDf(){term(["$ df -h /","Filesystem Size Used Avail Use% Mounted on","/dev/sda2 50G "+state.rootUsed.toFixed(1)+"G "+(state.rootSize-state.rootUsed).toFixed(1)+"G "+pct()+"% /"]);setScreen("df -h","Filesystem単位のBlock使用量。")}
+function showDu(){term(["$ sudo du -shx /",""+state.rootDu.toFixed(1)+"G /"]);setScreen("du","Directory treeを辿ってfile sizeを集計。")}
+function updateCapacity(){var p=pct();el.capSize.textContent=state.rootSize+"G";el.capUsed.textContent=state.rootUsed.toFixed(1)+"G";el.capAvail.textContent=(state.rootSize-state.rootUsed).toFixed(1)+"G";el.capPct.textContent=p+"%";el.capMeter.style.width=p+"%";el.capMeter.className="meter-fill "+(p>=90?"hot":"");el.dfDuConsole.textContent="$ df -h /\n/dev/sda2 50G "+state.rootUsed.toFixed(1)+"G "+(state.rootSize-state.rootUsed).toFixed(1)+"G "+p+"% /\n\n$ sudo du -shx /\n"+state.rootDu.toFixed(1)+"G /\n"+(state.deletedOpen?"\n# dfとdu差分が大きい。削除済みopen fileを疑う":"")}
+function createBigLog(){state.bigLog=true;state.deletedOpen=false;state.rootUsed+=10;state.rootDu+=10;term(["$ dd if=/dev/zero of=/var/log/app.log bs=1M count=10240","$ df -h /","Use% "+pct()+"%"]);lesson("大きいFileを作ればdfもduも増える。");updateUI()}
+function deleteOpenLog(){if(!state.bigLog){el.dfDuConsole.textContent="先に10G logを作ってください。";return}state.deletedOpen=true;state.bigLog=false;state.rootDu-=10;term(["$ rm /var/log/app.log","$ df -h /","# usedはほぼ減らない","$ du -sh /var/log","# 10G減る","$ lsof +L1","app  3333 root  5w REG ... 10737418240 /var/log/app.log (deleted)"]);lesson("unlinkされてもopen FDが残る限りBlockは解放されない。");updateUI()}
+function closeOpenLog(){if(!state.deletedOpen){el.dfDuConsole.textContent="削除済みopen fileはありません。";return}state.deletedOpen=false;state.rootUsed-=10;term(["$ sudo systemctl restart app","# または対象Processを安全に再open/終了","$ df -h /","# 10G解放"]);lesson("原因Processを特定して、安全にFDを閉じる/再openさせる。");updateUI()}
+function updateInodes(){var p=inodePct();el.inodeTotal.textContent=(state.inodeTotal/1000000).toFixed(1)+"M";el.inodeUsed.textContent=(state.inodeUsed/1000000).toFixed(1)+"M";el.inodePct.textContent=p+"%";el.inodeConsole.textContent="$ df -i /\nFilesystem Inodes IUsed IFree IUse% Mounted on\n/dev/sda2 3.2M "+(state.inodeUsed/1000000).toFixed(1)+"M "+((state.inodeTotal-state.inodeUsed)/1000000).toFixed(2)+"M "+p+"% /"}
+function createTiny(){state.inodeUsed=3199000;term(["$ # 小File大量生成","$ df -h /","# Block capacity still available","$ df -i /","# IUse% 100%"]);setScreen("❌ inode 100%","touchでNo space left on device。");updateUI()}
+function deleteTiny(){state.inodeUsed=384000;term(["$ rm -rf /var/tmp/files","$ df -i /","# IUse% 12%"]);updateUI()}
+
+function renderDiskTree(){el.diskTree.replaceChildren();var rows=[["sda","disk","50G",""],["└─sda2","ext4","49G","/"],["sdb","disk","20G",""],[state.partition?"└─sdb1":"(no partition)",state.filesystem?"ext4":"-",state.partition?"20G":"-",state.mounted?"/data":""]];rows.forEach(function(r){var row=document.createElement("div");row.className="disk-row";r.forEach(function(x,i){var d=document.createElement("div");d.textContent=x;if(i===0)d.className="disk-name";row.appendChild(d)});el.diskTree.appendChild(row)});el.mountConsole.textContent="$ lsblk -f\nsda\n└─sda2 ext4 ROOT-UUID /\nsdb\n"+(state.partition?("└─sdb1 "+(state.filesystem?"ext4 DATA-UUID ":"")+(state.mounted?"/data":"")):"# no partition")}
+function showBlkid(){el.mountConsole.textContent="$ sudo blkid\n/dev/sda2: UUID=\"ROOT-UUID\" TYPE=\"ext4\"\n"+(state.filesystem?"/dev/sdb1: UUID=\"DATA-UUID\" TYPE=\"ext4\"":"# /dev/sdb1 has no filesystem signature")}
+function showFindmnt(){el.mountConsole.textContent="$ findmnt\nTARGET SOURCE FSTYPE OPTIONS\n/ /dev/sda2 ext4 rw\n"+(state.mounted?"/data /dev/sdb1 ext4 rw":"# /data not mounted")}
+
+function renderFstab(){el.fstabBody.replaceChildren();var rows=[["UUID=ROOT-UUID","/","ext4","defaults"]];if(state.fstab)rows.push([state.fstabValid?"UUID=DATA-UUID":"UUID=WRONG-UUID","/data","ext4","defaults"]);rows.forEach(function(r){var tr=document.createElement("tr");r.forEach(function(x){var td=document.createElement("td");td.textContent=x;tr.appendChild(td)});el.fstabBody.appendChild(tr)});el.fstabConsole.textContent="$ cat /etc/fstab\nUUID=ROOT-UUID / ext4 defaults 0 1\n"+(state.fstab?(state.fstabValid?"UUID=DATA-UUID /data ext4 defaults 0 2":"UUID=WRONG-UUID /data ext4 defaults 0 2"):"# /data entryなし")}
+function addFstab(){state.fstab=true;state.fstabValid=true;term(["$ sudo blkid /dev/sdb1","UUID=DATA-UUID","$ sudoedit /etc/fstab","UUID=DATA-UUID /data ext4 defaults 0 2"]);lesson("Device名よりUUIDを使う運用が多い。変更後はmount -a等で検証。");updateUI()}
+function breakFstab(){state.fstab=true;state.fstabValid=false;term(["$ sudoedit /etc/fstab","UUID=WRONG-UUID /data ext4 defaults 0 2"]);updateUI()}
+function testFstab(){if(!state.fstab){el.fstabConsole.textContent="$ sudo mount -a\n# /data entryなし";return}if(!state.fstabValid){el.fstabConsole.textContent="$ sudo mount -a\nmount: /data: can't find UUID=WRONG-UUID";return}if(!state.filesystem){el.fstabConsole.textContent="$ sudo mount -a\nmount: /data: special device UUID=DATA-UUID does not exist";return}state.mounted=true;el.fstabConsole.textContent="$ sudo mount -a\n# no output = success\n$ findmnt /data\n/data /dev/sdb1 ext4 rw";updateUI();animateStorage()}
+function reboot(){state.mounted=!!(state.fstab&&state.fstabValid&&state.filesystem);el.fstabConsole.textContent="$ sudo reboot\n...\n"+(state.mounted?"/data mounted from fstab":"⚠ /data not mounted after boot");setScreen(state.mounted?"✅ 再起動後も/dataあり":"⚠ /dataがない","fstabが永続mountを決めます。");updateUI();animateStorage()}
+
+function fsError(){state.fsError=true;state.readOnly=true;el.fsConsole.textContent="$ dmesg -T | tail\nEXT4-fs error (device sda2): ext4_find_entry: ...\nAborting journal on device sda2\nRemounting filesystem read-only";setScreen("⚠ Filesystem error","安全のためread-onlyへremountされた想定。");lesson("read-onlyは原因ではなく結果のこともある。Kernel log/I/O errorを確認。");updateUI()}
+function kernelLog(){el.fsConsole.textContent="$ dmesg -T | tail\n"+(state.fsError?"EXT4-fs error ...\nBuffer I/O error ...\nRemounting filesystem read-only":"No filesystem errors")}
+function fsckInfo(){el.fsConsole.textContent="$ # fsck / repairを検討する前に\n# 1. Filesystem種類確認\n# 2. mount状態確認\n# 3. backup/復旧方針\n# 4. 業務影響\n# 5. 正しいoffline/maintenance手順\n\n# 学習教材では破壊的修復操作は実行しません。"}
+
+function showLvm(){el.lvmConsole.textContent="$ pvs\nPV /dev/sdc VG vg_data PSize 100G\n\n$ vgs\nVG vg_data VSize 100G VFree 80G\n\n$ lvs\nLV lv_app VG vg_data LSize "+state.lvSize+"G\n\n$ df -h /app\nFilesystem /dev/mapper/vg_data-lv_app Size "+state.fsLvSize+"G"}
+function extendLv(){state.lvSize=30;el.lvmConsole.textContent="$ sudo lvextend -L +10G /dev/vg_data/lv_app\nLogical volume successfully resized.\n\n$ lvs\nlv_app 30G\n\n$ df -h /app\n# Filesystem remains "+state.fsLvSize+"G";lesson("LV拡張とFilesystem拡張は別レイヤー。")}
+function growFs(){state.fsLvSize=state.lvSize;el.lvmConsole.textContent="$ sudo resize2fs /dev/vg_data/lv_app\nFilesystem resized.\n\n$ df -h /app\nSize "+state.fsLvSize+"G";}
+
+var INCIDENTS=[
+{cause:"block_full",prompt:"ApplicationがNo space left on deviceで停止。",e:{lsblk:"lsblk: root FS mounted normally",df:"df -h /\nUse% 100%",inode:"df -i /\nIUse% 20%",du:"du -xhd1 /\n/var 35G\n/home 5G",lsof:"lsof +L1\n(no large deleted files)",mount:"findmnt /\n/dev/sda2 / ext4 rw"},x:"Block容量が本当に100%。duで大きいDirectory/Fileを特定。"},
+{cause:"inode_full",prompt:"df -hは60%なのにtouchがNo space left on device。",e:{lsblk:"normal",df:"df -h /\nUse% 60%",inode:"df -i /\nIUse% 100%",du:"du: many tiny files under /var/spool",lsof:"no deleted files",mount:"mounted rw"},x:"inode枯渇。小File大量生成などを疑う。"},
+{cause:"deleted_open",prompt:"巨大ログをrmしたのにdfが減らない。",e:{lsblk:"normal",df:"df -h /\nUse% 95%",inode:"IUse% 20%",du:"du -sh /var/log\n2G",lsof:"lsof +L1\napp 3333 root REG 10G /var/log/app.log (deleted)",mount:"mounted rw"},x:"削除済みFileをProcessがopen中。FDが閉じるまでBlock未解放。"},
+{cause:"not_mounted",prompt:"再起動後、/dataのFileが消えたように見える。",e:{lsblk:"sdb1 ext4 DATA-UUID\nMOUNTPOINT blank",df:"df -h /data\n/dev/sda2 /",inode:"root FS inode",du:"du -sh /data\nsmall underlying directory",lsof:"none",mount:"findmnt /data\n(no output)"},x:"/dataに期待していたFilesystemがmountされていない。Data自体が消えたとは限らない。"},
+{cause:"fstab_bad",prompt:"再起動後/dataがmountされず、boot時にmount失敗ログ。",e:{lsblk:"sdb1 ext4 DATA-UUID",df:"/data not separate filesystem",inode:"normal",du:"normal",lsof:"none",mount:"cat /etc/fstab\nUUID=WRONG-UUID /data ext4 defaults\nmount -a: can't find UUID"},x:"fstab UUID不正。変更時はmount -a等で事前テスト。"},
+{cause:"readonly_fs",prompt:"容量は空いているのにFile書込みがRead-only file system。",e:{lsblk:"sda2 ext4 /",df:"Use% 50%",inode:"IUse% 20%",du:"normal",lsof:"normal",mount:"findmnt /\n/dev/sda2 / ext4 ro\n\ndmesg: EXT4-fs error"},x:"Filesystemがread-only。Kernel/FS errorを確認し、原因に応じた復旧を行う。"}
+];
+function newIncident(){var c=INCIDENTS.filter(function(i){return!currentIncident||i.cause!==currentIncident.cause});currentIncident=c[Math.floor(Math.random()*c.length)];incidentSteps=0;incidentUsed={};el.incidentAnswer.value="";el.diagConsole.textContent="$ 調査開始。どこから見る？";el.incidentPrompt.innerHTML="<strong>「"+currentIncident.prompt+"」</strong><br>原因は伏せられています。";el.incidentExplain.textContent="";score()}
+function score(final){el.scoreBox.replaceChildren();var a=document.createElement("div");a.className="muted";a.textContent=final==null?"確認回数":"スコア";var b=document.createElement("div");b.className="score-big";b.textContent=final==null?String(incidentSteps):String(final);el.scoreBox.appendChild(a);el.scoreBox.appendChild(b)}
+function diagnose(k){if(!currentIncident){el.diagConsole.textContent="$ 先に新しい障害を発生。";return}if(!incidentUsed[k]){incidentUsed[k]=true;incidentSteps++}el.diagConsole.textContent+="\n\n"+currentIncident.e[k];score()}
+function answerIncident(){if(!currentIncident||!el.incidentAnswer.value)return;if(el.incidentAnswer.value===currentIncident.cause){var s=Math.max(50,100-Math.max(0,incidentSteps-2)*10);score(s);el.incidentExplain.innerHTML='<strong class="status-ok">✅ 正解 '+s+'点</strong><br>'+currentIncident.x}else{score(0);el.incidentExplain.innerHTML='<strong class="status-danger">❌ まだ違う</strong><br>Mount → Block → inode → du → deleted-open → FS state の順で切り分け。'}}
+
+var CMDS={
+lsblk:[["lsblk","Block Deviceと階層構造を表示"],["-f","Filesystem種類・UUID・Mountpointも表示"]],
+df:[["df","mounted Filesystemの使用量"],["-h","人間が読みやすい単位"],["Use%","Block使用率"]],
+inode:[["df","Filesystem情報"],["-i","Blockではなくinode使用量"]],
+du:[["du","Directory/FileのDisk使用量を集計"],["-x","別Filesystemへ跨がない"],["-h","読みやすい単位"],["-d1","深さ1階層"]],
+findmnt:[["findmnt","現在のMount関係を表示"],["/data","確認したいMountpoint"]],
+lsof:[["lsof","Processがopen中のFile一覧"],["+L1","link countが1未満＝削除済みopen Fileを探す"]],
+mounta:[["mount","Filesystemをmount"],["-a","fstabに記載された対象をまとめてmountし検証"]]
+};
+function showCmd(k){el.cmdBreakdown.replaceChildren();CMDS[k].forEach(function(x){var r=document.createElement("div");r.className="piece";var c=document.createElement("code");c.textContent=x[0];var d=document.createElement("div");d.textContent=x[1];r.appendChild(c);r.appendChild(d);el.cmdBreakdown.appendChild(r)})}
+function graduate(a){if(a==="open"){el.gradResult.innerHTML='<strong class="status-ok">🎓 正解。Lab07 COMPLETE</strong><br>rm済みでもProcessがopenしていればdfのBlockは解放されません。';try{localStorage.setItem("linux_lab07_complete","true")}catch(e){}}else el.gradResult.innerHTML='<strong class="status-warn">△ dfとduの大きな差 + 直前にrm、が重要なヒントです。</strong>'}
+
+function resetLab(){state={rootSize:50,rootUsed:21,rootDu:20,dataDisk:true,partition:false,filesystem:false,mounted:false,dataFiles:0,inodeTotal:3200000,inodeUsed:384000,readOnly:false,bigLog:false,deletedOpen:false,fstab:false,fstabValid:true,fsError:false,lvSize:20,fsLvSize:20};term(["$"]);setScreen("Lab07 初期状態","/dev/sdb はOSから見えているけど、まだ/dataとしては使えません。");lesson("Disk / Partition / Filesystem / Mountは別レイヤー。");updateUI();resetFlow();showLvm()}
+
+document.querySelectorAll("[data-action]").forEach(function(b){b.addEventListener("click",function(){var a=b.getAttribute("data-action");if(a==="partition")partition();if(a==="mkfs")mkfs();if(a==="mount")mountData();if(a==="writeData")writeData();if(a==="unmount")unmount();if(a==="fillRoot")fillRoot();if(a==="fillInodes")fillInodes();if(a==="readonly")readonly();if(a==="fixReadonly")fixReadonly();if(a==="lsblk")showLsblk();if(a==="df")showDf();if(a==="du")showDu();if(a==="reset")resetLab()})});
+document.getElementById("showBlkidBtn").addEventListener("click",showBlkid);document.getElementById("showFindmntBtn").addEventListener("click",showFindmnt);
+document.getElementById("createBigLogBtn").addEventListener("click",createBigLog);document.getElementById("deleteOpenLogBtn").addEventListener("click",deleteOpenLog);document.getElementById("closeOpenLogBtn").addEventListener("click",closeOpenLog);
+document.getElementById("createTinyFilesBtn").addEventListener("click",createTiny);document.getElementById("deleteTinyFilesBtn").addEventListener("click",deleteTiny);
+document.getElementById("addFstabBtn").addEventListener("click",addFstab);document.getElementById("breakFstabBtn").addEventListener("click",breakFstab);document.getElementById("testFstabBtn").addEventListener("click",testFstab);document.getElementById("simulateRebootBtn").addEventListener("click",reboot);
+document.getElementById("simulateFsErrorBtn").addEventListener("click",fsError);document.getElementById("showKernelLogBtn").addEventListener("click",kernelLog);document.getElementById("showFsckBtn").addEventListener("click",fsckInfo);
+document.getElementById("showLvmBtn").addEventListener("click",showLvm);document.getElementById("extendLvBtn").addEventListener("click",extendLv);document.getElementById("growFsBtn").addEventListener("click",growFs);
+document.getElementById("newIncidentBtn").addEventListener("click",newIncident);document.getElementById("answerIncidentBtn").addEventListener("click",answerIncident);document.querySelectorAll("[data-diag]").forEach(function(b){b.addEventListener("click",function(){diagnose(b.getAttribute("data-diag"))})});document.querySelectorAll("[data-cmd]").forEach(function(b){b.addEventListener("click",function(){showCmd(b.getAttribute("data-cmd"))})});document.querySelectorAll("[data-grad]").forEach(function(b){b.addEventListener("click",function(){graduate(b.getAttribute("data-grad"))})});
+
+updateUI();resetFlow();showLvm();
+}());
+</script>
+
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body>
+</html>

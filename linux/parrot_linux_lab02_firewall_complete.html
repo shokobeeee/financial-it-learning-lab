@@ -1,0 +1,2200 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linux基盤ラボ 02 - Firewall Complete+</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2d;
+      --panel2: #17213a;
+      --text: #e8edf7;
+      --muted: #9eabc0;
+      --accent: #76e3b2;
+      --warn: #ffd166;
+      --danger: #ff7b7b;
+      --ok: #75e6a5;
+      --line: #2a3858;
+      --terminal: #071019;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #0a0f1d, #11182a);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    main {
+      width: min(1380px, calc(100% - 32px));
+      margin: 24px auto 56px;
+    }
+    h1 { font-size: clamp(26px, 4vw, 40px); margin: 0 0 8px; }
+    h2 { font-size: 19px; margin: 0 0 10px; }
+    h3 { margin: 0 0 8px; }
+    p { line-height: 1.7; }
+    code {
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    .muted { color: var(--muted); }
+    .card {
+      background: rgba(18, 26, 45, 0.97);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 17px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.18);
+    }
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .nav button, .nav a {
+      min-height: 40px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #182441;
+      color: var(--text);
+      text-decoration: none;
+      font: inherit;
+      cursor: pointer;
+    }
+    .nav .current {
+      background: #173a31;
+      border-color: #3c8a6b;
+      font-weight: 800;
+    }
+    .nav .disabled {
+      opacity: .45;
+      cursor: default;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      background: #17213a;
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .status-ok { color: var(--ok); }
+    .status-warn { color: var(--warn); }
+    .status-danger { color: var(--danger); }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 13px;
+      margin-top: 14px;
+    }
+    .diagram {
+      border-radius: 15px;
+      background: #0f1728;
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(11, auto);
+      gap: 7px;
+      align-items: center;
+      justify-content: start;
+      overflow-x: auto;
+      padding: 6px 0;
+    }
+    .node {
+      min-width: 112px;
+      padding: 11px 10px;
+      text-align: center;
+      border: 1px solid var(--line);
+      background: #17213a;
+      border-radius: 13px;
+      transition: .2s ease;
+    }
+    .node.ok {
+      border-color: #3f9d75;
+      box-shadow: 0 0 18px rgba(117,230,165,.12);
+    }
+    .node.fail {
+      border-color: #aa4e5a;
+      box-shadow: 0 0 18px rgba(255,123,123,.12);
+    }
+    .node.wait { opacity: .55; }
+    .arrow { color: var(--muted); font-weight: 900; }
+    .flow-message { min-height: 24px; margin-top: 8px; color: var(--muted); }
+
+    .state-box {
+      display: grid;
+      gap: 8px;
+    }
+    .state-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 9px;
+      align-items: center;
+      padding: 8px 10px;
+      background: #0f1728;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+    .state-value {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-weight: 800;
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: 235px minmax(0, 1fr) minmax(0, 1fr);
+      gap: 13px;
+      margin-top: 13px;
+      align-items: stretch;
+    }
+    .control-panel {
+      display: grid;
+      align-content: start;
+      gap: 8px;
+      padding: 13px;
+      background: #0f1728;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+    .panel-title {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+    button, select {
+      font: inherit;
+    }
+    button {
+      min-height: 48px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #182441;
+      color: var(--text);
+      cursor: pointer;
+      transition: .14s ease;
+    }
+    button:hover { transform: translateY(-1px); border-color: #4e6b9d; }
+    button.primary { background: #173a31; border-color: #3c8a6b; }
+    button.danger { background: #3a1c25; border-color: #804343; }
+    button.warning { background: #392f18; border-color: #806c39; }
+    button:disabled { opacity: .45; cursor: default; transform: none; }
+
+    .browser {
+      min-height: 330px;
+      border-radius: 14px;
+      background: #f2f5f8;
+      color: #18202d;
+      position: relative;
+      padding: 46px 18px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .browser-bar {
+      position: absolute;
+      left: 0; top: 0; right: 0;
+      padding: 8px 12px;
+      background: #dce3ec;
+      color: #445064;
+      border-bottom: 1px solid #c5ceda;
+      text-align: left;
+      font-size: 12px;
+    }
+    .big { font-size: 26px; font-weight: 900; }
+    .terminal {
+      min-height: 330px;
+      background: var(--terminal);
+      color: #d9f7e6;
+      border: 1px solid #1b3240;
+      border-radius: 14px;
+      padding: 14px;
+      white-space: pre-wrap;
+      overflow: auto;
+      font: 13px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    .lesson {
+      margin-top: 13px;
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 12px;
+      background: #10182a;
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+      margin-top: 13px;
+    }
+    .rule-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+    .rule {
+      display: grid;
+      grid-template-columns: 88px 95px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #0f1728;
+      font-size: 13px;
+    }
+    .rule-allow { color: var(--ok); font-weight: 800; }
+    .rule-deny { color: var(--danger); font-weight: 800; }
+    .rule-note { color: var(--muted); }
+    .rule button { min-height: 34px; padding: 5px 8px; }
+
+    .builder {
+      display: grid;
+      gap: 9px;
+      padding: 12px;
+      border-radius: 13px;
+      background: #0f1728;
+      border: 1px solid var(--line);
+    }
+    .builder-row {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 9px;
+      align-items: center;
+    }
+    .builder input, .builder select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      background: #182441;
+      color: var(--text);
+      border-radius: 11px;
+      padding: 8px 10px;
+    }
+    .builder-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .myth-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .myth {
+      background: #0f1728;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px;
+    }
+    .myth strong { display: block; margin-bottom: 6px; }
+
+    .diagnostic-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 13px;
+      margin-top: 12px;
+    }
+    .diag-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin-top: 8px;
+    }
+    .diag-buttons button {
+      text-align: center;
+      min-height: 42px;
+      padding: 7px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+    }
+    .diag-console {
+      min-height: 260px;
+      background: var(--terminal);
+      color: #d9f7e6;
+      border: 1px solid #1b3240;
+      border-radius: 13px;
+      padding: 13px;
+      white-space: pre-wrap;
+      overflow: auto;
+      font: 13px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    .answer-panel {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+    .answer-panel select {
+      width: 100%;
+      min-height: 44px;
+      background: #182441;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 8px;
+    }
+    .score {
+      border: 1px solid var(--line);
+      background: #0f1728;
+      border-radius: 12px;
+      padding: 11px;
+    }
+    .score-big { font-size: 30px; font-weight: 900; }
+
+    .command-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+      margin-top: 13px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 8px 0;
+    }
+    .chips button {
+      min-height: 38px;
+      text-align: center;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      padding: 6px 9px;
+    }
+    .breakdown {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .piece {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 8px;
+      padding: 8px;
+      background: #0f1728;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+
+    .advanced-fw-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-top:13px;
+    }
+    .advanced-fw-card {
+      background:#0f1728; border:1px solid var(--line); border-radius:14px; padding:12px;
+    }
+    .packet-path {
+      display:grid; grid-template-columns:repeat(7,auto); gap:6px; align-items:center;
+      justify-content:start; overflow-x:auto; margin-top:9px;
+    }
+    .packet-node {
+      min-width:110px; padding:9px; border-radius:11px; background:#17213a;
+      border:1px solid var(--line); text-align:center;
+    }
+    .packet-node.ok { border-color:#3f9d75; }
+    .packet-node.fail { border-color:#a84f5b; }
+    .fw-log {
+      min-height:170px; background:var(--terminal); color:#d9f7e6; border:1px solid #1b3240;
+      border-radius:12px; padding:11px; white-space:pre-wrap; overflow:auto;
+      font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; margin-top:8px;
+    }
+    .rule-hit { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-weight:800; color:var(--accent); }
+    .shadow-warning { display:block; color:var(--warn); font-size:11px; margin-top:3px; }
+    .rule-move { display:flex; gap:4px; }
+    .rule-move button { min-height:30px; padding:3px 6px; }
+    .drop-reject-demo { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:8px; }
+    .direction-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:9px; }
+    .direction-card { padding:9px; border:1px solid var(--line); border-radius:11px; background:#121b30; font-size:12px; }
+    @media (max-width:900px) {
+      .advanced-fw-grid { grid-template-columns:1fr; }
+      .direction-grid,.drop-reject-demo { grid-template-columns:1fr; }
+    }
+    .graduation {
+      margin-top: 13px;
+      text-align: center;
+    }
+    .graduation-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 1050px) {
+      .top-grid, .rules-grid, .diagnostic-grid, .command-grid {
+        grid-template-columns: 1fr;
+      }
+      .lab-grid {
+        grid-template-columns: 210px 1fr;
+      }
+      .lab-grid > section:last-child {
+        grid-column: 1 / -1;
+      }
+      .diag-buttons { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 760px) {
+      .lab-grid { grid-template-columns: 1fr; }
+      .lab-grid > section:last-child { grid-column: auto; }
+      .flow { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); text-align: center; }
+      .myth-grid { grid-template-columns: 1fr; }
+      .rule { grid-template-columns: 1fr; }
+      .builder-row { grid-template-columns: 1fr; }
+      .builder-actions { grid-template-columns: 1fr; }
+      .diag-buttons { grid-template-columns: 1fr 1fr; }
+      .piece { grid-template-columns: 1fr; }
+      .lesson { grid-template-columns: 1fr; }
+    }
+  </style>
+<style id="seriesNavStyle">.nav,.lab-nav{display:none!important}.series-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:9px 10px;background:rgba(7,16,25,.94);backdrop-filter:blur(8px);border:1px solid #2a3858;border-radius:13px}.series-nav a,.series-nav strong{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid #2a3858;border-radius:10px;background:#182441;color:#e8edf7;text-decoration:none}.series-nav strong{background:#173a31;border-color:#3c8a6b}.series-nav .spacer{flex:1}.series-nav a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffd166;outline-offset:2px}@media(max-width:650px){.series-nav .lab-title{order:5;width:100%;justify-content:center}}</style>
+<meta name="theme-color" content="#173a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linux基盤ラボ">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<style id="mobile-pwa-overrides">
+:root { --mobile-safe-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0 !important; }
+button, a, select, input { touch-action: manipulation; }
+button, .nav a, .lab-nav a { min-height: 44px; }
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.mobile-labbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 10px;
+  background: rgba(10,15,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3858;
+  gap: 7px;
+  align-items: center;
+}
+.mobile-labbar a,
+.mobile-labbar button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #182441;
+  color: #e8edf7;
+  text-decoration: none;
+  font: inherit;
+}
+.mobile-labbar .mobile-current {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-lab-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(3,7,15,.78);
+  padding: 12px;
+}
+.mobile-lab-drawer.open { display: block; }
+.mobile-lab-drawer-panel {
+  width: min(92vw, 480px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  margin: 0 auto;
+  background: #121a2d;
+  border: 1px solid #2a3858;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.mobile-lab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobile-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-lab-grid a {
+  display: block;
+  padding: 10px;
+  min-height: 48px;
+  border: 1px solid #2a3858;
+  border-radius: 10px;
+  background: #0f1728;
+  color: #e8edf7;
+  text-decoration: none;
+}
+.mobile-lab-grid a.current {
+  border-color: #3c8a6b;
+  background: #173a31;
+}
+
+.mobile-install-note {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2a3858;
+  border-radius: 12px;
+  background: #0f1728;
+  color: #9eabc0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  body { zoom: 1 !important; }
+  main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 10px calc(78px + var(--mobile-safe-bottom)) !important;
+  }
+  .nav, .lab-nav { display: none !important; }
+  .mobile-labbar { display: flex; }
+  .mobile-install-note { display: block; }
+
+  h1 { font-size: 25px !important; line-height: 1.2; }
+  h2 { font-size: 19px !important; }
+  p { line-height: 1.65; }
+
+  .card {
+    padding: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero-grid, .two-grid, .diag-grid, .cmd-grid,
+  .lab-grid, .web-deep-grid, .advanced-fw-grid,
+  .hostkey-grid, .time-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lab-grid > section:last-child { grid-column: auto !important; }
+
+  .controls {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+  .controls .panel-title {
+    grid-column: 1 / -1;
+  }
+  .controls button { width: 100%; }
+
+  .terminal, .diag-console, .mini-console, .log-view,
+  .nginx-log-view, .fw-log, .wire-box {
+    min-height: 210px !important;
+    max-height: 55dvh;
+    overflow: auto;
+    font-size: 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { min-height: 230px !important; }
+  .flow, .packet-path {
+    display: flex !important;
+    gap: 6px;
+    overflow-x: auto !important;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .flow .node, .packet-node {
+    min-width: 125px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .flow .arrow { transform: none !important; flex: 0 0 auto; align-self: center; }
+
+  .diag-buttons {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .chips, .action-row, .grad-actions, .builder-actions,
+  .request-controls, .bind-controls, .config-actions {
+    gap: 7px !important;
+  }
+  .chips button, .action-row button, .grad-actions button {
+    min-height: 44px;
+  }
+
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  pre, code { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 430px) {
+  .controls { grid-template-columns: 1fr !important; }
+  .mobile-lab-grid { grid-template-columns: 1fr; }
+  .diag-buttons { grid-template-columns: 1fr !important; }
+}
+</style>
+
+  <link rel="stylesheet" href="./ui-compact.css?v=12">
+  <link rel="stylesheet" href="./ui-live-terminal.css?v=12">
+  <link rel="stylesheet" href="./ui-learning.css?v=12">
+  <link rel="stylesheet" href="./ui-generic.css?v=12">
+  <link rel="stylesheet" href="./ui-incident-modes.css?v=12">
+</head>
+<body>
+<div class="mobile-labbar" id="mobileLabBar">
+  <a href="./parrot_linux_lab01_web_nginx.html">←</a>
+  <button type="button" id="mobileLabMenuBtn">☰ Labs</button>
+  <div class="mobile-current">Lab02</div>
+  <a href="./parrot_linux_lab03_ip_dns.html">→</a>
+</div>
+<div class="mobile-lab-drawer" id="mobileLabDrawer" aria-hidden="true">
+  <div class="mobile-lab-drawer-panel">
+    <div class="mobile-lab-drawer-head">
+      <strong>🐧 Linux基盤ラボ</strong>
+      <button type="button" id="mobileLabCloseBtn">閉じる</button>
+    </div>
+    <div class="mobile-lab-grid">
+      <a href="./index.html">🏠 Home</a>
+<a href="./parrot_linux_lab01_web_nginx.html">Lab01</a>
+<a href="./parrot_linux_lab02_firewall_complete.html" class="current">Lab02</a>
+<a href="./parrot_linux_lab03_ip_dns.html">Lab03</a>
+<a href="./parrot_linux_lab04_ssh.html">Lab04</a>
+<a href="./parrot_linux_lab05_permissions.html">Lab05</a>
+<a href="./parrot_linux_lab06_process_memory.html">Lab06</a>
+<a href="./parrot_linux_lab07_storage_mount.html">Lab07</a>
+<a href="./parrot_linux_lab08_logs_troubleshooting.html">Lab08</a>
+<a href="./parrot_linux_lab09_apt_packages.html">Lab09</a>
+<a href="./parrot_linux_lab10_boot_kernel.html">Lab10</a>
+<a href="./parrot_linux_lab11_bash_pipes.html">Lab11</a>
+<a href="./parrot_linux_lab12_scheduler.html">Lab12</a>
+<a href="./parrot_linux_lab13_backup_restore.html">Lab13</a>
+<a href="./parrot_linux_lab14_containers.html">Lab14</a>
+<a href="./parrot_linux_lab15_tls_https.html">Lab15</a>
+<a href="./parrot_linux_lab16_monitoring.html">Lab16</a>
+<a href="./parrot_linux_lab17_ansible_iac.html">Lab17</a>
+<a href="./parrot_linux_lab18_virtualization_cloud.html">Lab18</a>
+<a href="./parrot_linux_lab19_security_hardening.html">Lab19</a>
+<a href="./parrot_linux_lab20_capstone.html">Lab20</a>
+    </div>
+  </div>
+</div>
+
+<main><div class="mobile-install-note">📱 HTTPSで公開すると、Safari/Chromeの「ホーム画面に追加」からアプリのように起動できます。初回読込後はPWAキャッシュでオフライン利用にも対応します。</div><nav class="series-nav" aria-label="Lab navigation"><a href="index.html">🏠 Home</a><a href="parrot_linux_lab01_web_nginx.html">← Lab01</a><strong class="lab-title">Lab02 Firewall</strong><span class="spacer"></span><a href="parrot_linux_lab03_ip_dns.html">Lab03 →</a></nav>
+  <nav class="nav">
+    <a href="parrot_linux_lab01_web_nginx.html">← Lab01 Web / nginx</a>
+    <span class="current nav button">Lab02 Firewall</span>
+    <button type="button" class="disabled" disabled>Lab03 IP / DNS → Coming soon</button>
+  </nav>
+
+  <header>
+    <h1>🛡 Linux基盤ラボ 02 — Firewall</h1>
+    <p class="muted">
+      Firewallは「サービスを起動するもの」ではなく、<strong>通信を通す／止める門番</strong>。
+      nginx・ポート・通信の関係を、ルールを変えながら体験します。
+    </p>
+  </header>
+
+  <section class="card">
+    <h2>まず構造：Firewallはどこにいる？</h2>
+    <div class="top-grid">
+      <div class="diagram">
+        <div class="flow">
+          <div class="node wait" id="flowBrowser">🌐<br>Browser</div>
+          <div class="arrow">→</div>
+          <div class="node wait" id="flowIp">📍<br>192.168.1.20</div>
+          <div class="arrow">→</div>
+          <div class="node wait" id="flowFirewall">🛡<br>Firewall</div>
+          <div class="arrow">→</div>
+          <div class="node wait" id="flowPort">🔌<br>Port 80</div>
+          <div class="arrow">→</div>
+          <div class="node wait" id="flowNginx">🐧<br>nginx</div>
+          <div class="arrow">→</div>
+          <div class="node wait" id="flowHtml">📄<br>HTML</div>
+        </div>
+        <div class="flow-message" id="flowMessage">
+          「ブラウザでHTTP接続」を押すと、どこで通信が止まったか表示します。
+        </div>
+      </div>
+
+      <div class="state-box">
+        <div class="state-row">
+          <div>Firewall</div>
+          <div class="state-value" id="fwStateLabel">ON / default deny incoming</div>
+        </div>
+        <div class="state-row">
+          <div>nginx</div>
+          <div class="state-value" id="nginxStateLabel">active / :80 LISTEN</div>
+        </div>
+        <div class="state-row">
+          <div>HTTP :80</div>
+          <div class="state-value" id="port80StateLabel">ALLOW</div>
+        </div>
+        <div class="state-row">
+          <div>HTTPS :443</div>
+          <div class="state-value" id="port443StateLabel">DENY</div>
+        </div>
+        <div class="state-row">
+          <div>Ping / ICMP</div>
+          <div class="state-value" id="icmpStateLabel">ALLOW</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:13px">
+    <h2>操作してみる</h2>
+    <p class="muted">左で状態を変える → 中央で結果を見る → 右で裏のLinuxコマンドを見る。</p>
+
+    <div class="lab-grid">
+      <aside class="control-panel">
+        <div class="panel-title">Firewall操作</div>
+        <button type="button" class="primary" data-action="allow80">80/TCP を許可</button>
+        <button type="button" class="danger" data-action="deny80">80/TCP を拒否</button>
+        <button type="button" data-action="allow443">443/TCP を許可</button>
+        <button type="button" data-action="deny443">443/TCP を拒否</button>
+        <button type="button" class="warning" data-action="fwOff">FirewallをOFF</button>
+        <button type="button" data-action="fwOn">FirewallをON</button>
+
+        <div class="panel-title" style="margin-top:7px">サービス・通信</div>
+        <button type="button" data-action="http">🌐 ブラウザでHTTP接続</button>
+        <button type="button" data-action="https">🔒 ブラウザでHTTPS接続</button>
+        <button type="button" data-action="ping">📡 pingしてみる</button>
+        <button type="button" data-action="stopNginx">nginxを停止</button>
+        <button type="button" data-action="startNginx">nginxを起動</button>
+        <button type="button" data-action="status">Firewall状態を見る</button>
+        <button type="button" data-action="reset">↻ 初期状態に戻す</button>
+      </aside>
+
+      <section>
+        <div class="panel-title">画面ではこう見える</div>
+        <div class="browser" id="screenArea">
+          <div class="browser-bar">Browser / http://server01.lab.test</div>
+          <div>
+            <div class="big">Lab02 初期状態</div>
+            <p>Firewall ON / 80許可 / nginx稼働中。HTTP接続から試してみよう。</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="panel-title">裏ではこのコマンド</div>
+        <div class="terminal" id="terminalArea">$</div>
+      </section>
+    </div>
+
+    <div class="lesson card">
+      <div><span class="badge">💡 ここがポイント</span></div>
+      <div id="lessonText">
+        FirewallのALLOWは「通信を通してよい」という意味。Webサーバー自体を起動するわけではありません。
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:13px">
+    <h2>🧱 Firewallルールを自分で作る</h2>
+    <p class="muted">
+      ここでは学習用に「上から評価し、最初に一致したルールを採用」という単純モデルで可視化します。
+      実際のnftables/UFWにはより細かなチェーン・ポリシー・状態追跡があります。
+    </p>
+
+    <div class="rules-grid">
+      <div>
+        <div class="panel-title">現在のルール</div>
+        <div class="rule-list" id="ruleList"></div>
+      </div>
+
+      <div class="builder">
+        <div class="panel-title">ルール追加</div>
+
+        <div class="builder-row">
+          <label for="ruleAction">動作</label>
+          <select id="ruleAction">
+            <option value="allow">ALLOW</option>
+            <option value="deny">DROP / DENY</option>
+            <option value="reject">REJECT</option>
+          </select>
+        </div>
+
+        <div class="builder-row">
+          <label for="ruleProtocol">プロトコル</label>
+          <select id="ruleProtocol">
+            <option value="tcp">TCP</option>
+            <option value="udp">UDP</option>
+            <option value="icmp">ICMP</option>
+          </select>
+        </div>
+
+        <div class="builder-row">
+          <label for="rulePort">ポート</label>
+          <input id="rulePort" type="text" inputmode="numeric" maxlength="5" value="80" />
+        </div>
+
+        <div class="builder-row">
+          <label for="ruleSource">送信元</label>
+          <select id="ruleSource">
+            <option value="any">どこからでも</option>
+            <option value="client">自分のPCだけ (192.168.1.10)</option>
+            <option value="other">別PCだけ (192.168.1.99)</option>
+          </select>
+        </div>
+
+        <div class="builder-actions">
+          <button type="button" id="addRuleBtn">＋ ルール追加</button>
+          <button type="button" id="resetRulesBtn">標準ルールに戻す</button>
+        </div>
+
+        <div id="ruleBuilderMessage" class="muted">
+          ICMPはポート番号を使わないので、ICMP選択時はポート入力を無視します。
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="card" style="margin-top:13px">
+    <h2>🧠 Firewallをもう一段深く — Stateful / DROP・REJECT / Hit Counter</h2>
+    <div class="advanced-fw-grid">
+      <div class="advanced-fw-card">
+        <div class="panel-title">Stateful Firewall — 戻り通信はなぜ通る？</div>
+        <p class="muted">自分から外へ開始した接続の返事は、conntrackで既存接続のESTABLISHEDとして追跡できます。</p>
+        <div class="packet-path">
+          <div class="packet-node" id="ctClient">🐧 Linux Host</div><div>→</div>
+          <div class="packet-node" id="ctNew">NEW<br>TCP/443</div><div>→</div>
+          <div class="packet-node" id="ctInternet">🌐 Internet</div><div>←</div>
+          <div class="packet-node" id="ctEstablished">ESTABLISHED</div>
+        </div>
+        <div class="builder-actions" style="margin-top:9px">
+          <button type="button" id="outboundHttpsBtn">Linux Host → Internet:443 を開始</button>
+          <button type="button" id="unsolicitedInboundBtn">勝手な外部着信を試す</button>
+        </div>
+        <div id="conntrackResult" class="muted" style="margin-top:8px">まだ通信していません。</div>
+        <div class="direction-grid">
+          <div class="direction-card"><strong>INPUT</strong><br>外 → このLinux</div>
+          <div class="direction-card"><strong>OUTPUT</strong><br>このLinux → 外</div>
+          <div class="direction-card"><strong>FORWARD</strong><br>このLinuxを中継</div>
+        </div>
+      </div>
+
+      <div class="advanced-fw-card">
+        <div class="panel-title">DROP と REJECT の症状を比較</div>
+        <p class="muted">どちらも許可しませんが、クライアントからの見え方が違います。</p>
+        <div class="drop-reject-demo">
+          <button type="button" id="demoAllowBtn">ALLOW</button>
+          <button type="button" id="demoDropBtn">DROP</button>
+          <button type="button" id="demoRejectBtn">REJECT</button>
+        </div>
+        <div class="fw-log" id="dropRejectResult">ALLOW:
+HTTP/1.1 200 OK
+
+DROP:
+返答を捨てる → timeoutのように見える
+
+REJECT:
+拒否応答を返す → すぐ失敗が分かる</div>
+      </div>
+    </div>
+
+    <div class="advanced-fw-grid">
+      <div class="advanced-fw-card">
+        <div class="panel-title">Rule Hit Counter — そのルールに本当に当たった？</div>
+        <p class="muted">HTTP / HTTPS / pingを実行すると、マッチしたルールのHitsが増えます。Hit=0なら別の場所で止まっている可能性も。</p>
+        <div class="fw-log" id="firewallLogView">(まだFirewallログはありません)</div>
+        <button type="button" id="clearFirewallLogBtn" style="margin-top:8px">ログ / Hitをリセット</button>
+      </div>
+      <div class="advanced-fw-card">
+        <div class="panel-title">ルール順序と Shadowed Rule</div>
+        <p class="muted">上から最初に一致する学習モデル。上位の広いルールに隠された下位ルールには⚠を表示します。</p>
+        <div class="fw-log">例:
+1. ALLOW TCP/80 Anywhere
+2. DENY TCP/80 from 192.168.1.10
+
+→ 1番が先に一致するので2番は効かない
+→ ↑ ↓ で順序を入れ替えて挙動を確認</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:13px">
+    <h2>🧠 Firewallでよくある勘違いを潰す</h2>
+    <div class="myth-grid">
+      <div class="myth">
+        <strong>① 80番をALLOWすればWebは開く？</strong>
+        <div class="muted">❌ nginxなどが80番でLISTENしていなければ開きません。</div>
+      </div>
+      <div class="myth">
+        <strong>② pingが通ればWebも通る？</strong>
+        <div class="muted">❌ pingはICMP。HTTPはTCP/80。別の通信です。</div>
+      </div>
+      <div class="myth">
+        <strong>③ Firewall OFFなら安全に開通？</strong>
+        <div class="muted">△ 通りやすくなるだけ。不要な通信まで通すので本番では雑にOFFにしません。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:13px">
+    <h2>🕵 Firewallか？ nginxか？ 障害切り分けゲーム</h2>
+    <p class="muted">
+      「Webが開かない」だけでは原因は分かりません。証拠を集めて、
+      <strong>Firewall / サービス / ポート / 設定</strong> のどこに問題があるか切り分けます。
+    </p>
+
+    <div class="diagnostic-grid">
+      <div>
+        <div id="incidentPrompt"><strong>「Webが開きません」</strong> — 新しい障害を発生させてください。</div>
+        <div class="diag-buttons">
+          <button type="button" data-diag="ping">ping</button>
+          <button type="button" data-diag="status">systemctl</button>
+          <button type="button" data-diag="ss">ss -ltnp</button>
+          <button type="button" data-diag="fw">ufw status</button>
+          <button type="button" data-diag="curl">curl</button>
+        </div>
+        <div class="diag-console" id="incidentConsole">$ まだ調査していません。</div>
+      </div>
+
+      <div class="answer-panel">
+        <button type="button" class="primary" id="newIncidentBtn">🎲 新しい障害を発生</button>
+
+        <div>
+          <div class="panel-title">原因はどれ？</div>
+          <select id="incidentAnswer">
+            <option value="">原因を選ぶ</option>
+            <option value="fw_block">Firewallが80/TCPを拒否</option>
+            <option value="nginx_stop">nginxが停止</option>
+            <option value="wrong_port">nginxが8080で待受</option>
+            <option value="source_restrict">自分のPCだけFirewallで拒否</option>
+            <option value="https_no_service">443は許可されているがHTTPSサービスがない</option>
+          </select>
+        </div>
+
+        <button type="button" id="answerIncidentBtn">回答する</button>
+
+        <div class="score" id="scoreBox">
+          <div class="muted">確認回数</div>
+          <div class="score-big">0</div>
+        </div>
+
+        <div id="incidentExplanation" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:13px">
+    <h2>🧩 コマンドを分解する</h2>
+    <div class="command-grid">
+      <div>
+        <div class="chips">
+          <button type="button" data-cmd="ufw_status">sudo ufw status verbose</button>
+          <button type="button" data-cmd="ufw_allow">sudo ufw allow 80/tcp</button>
+          <button type="button" data-cmd="nft">sudo nft list ruleset</button>
+          <button type="button" data-cmd="ss">ss -ltnp</button>
+          <button type="button" data-cmd="curl">curl -I http://localhost</button>
+        </div>
+        <div class="breakdown" id="commandBreakdown">
+          コマンドを押すと、「何を見ている／変えているのか」を分解して表示します。
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-title">UFWとnftablesの関係</div>
+        <div class="myth">
+          <strong>nftables</strong>
+          <div class="muted">Linuxカーネルのパケットフィルタリングを管理する現行の仕組み。細かく制御できる。</div>
+        </div>
+        <div class="myth" style="margin-top:8px">
+          <strong>UFW</strong>
+          <div class="muted">Firewall操作を分かりやすくするフロントエンド。環境によっては未導入なので、この教材では「概念を学ぶ簡易操作」として使う。</div>
+        </div>
+        <div class="myth" style="margin-top:8px">
+          <strong>重要</strong>
+          <div class="muted">実機Linux Hostでは、まず <code>sudo nft list ruleset</code> や導入済みツールを確認してから操作する。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card graduation">
+    <h2>🎓 Lab02 卒業テスト</h2>
+    <p>
+      <strong>「pingは通る。nginxもactive。ssでは:80 LISTEN。でもブラウザは開かない。」</strong><br>
+      このとき次に疑うべきものは？
+    </p>
+    <div class="graduation-actions">
+      <button type="button" data-grad="os">OSが停止している</button>
+      <button type="button" data-grad="firewall">Firewall / 通信経路</button>
+      <button type="button" data-grad="install">nginx未インストール</button>
+    </div>
+    <div id="graduationResult" style="margin-top:10px"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var state = {
+    firewallOn: true,
+    nginxRunning: true,
+    nginxPort: 80,
+    rules: [],
+    clientIp: "192.168.1.10"
+  };
+
+  var DEFAULT_RULES = [
+    { id: 1, action: "allow", protocol: "tcp", port: 80, source: "any", note: "HTTP", hits: 0 },
+    { id: 2, action: "deny", protocol: "tcp", port: 443, source: "any", note: "HTTPS", hits: 0 },
+    { id: 3, action: "allow", protocol: "icmp", port: null, source: "any", note: "ping", hits: 0 }
+  ];
+
+  var el = {
+    flowBrowser: document.getElementById("flowBrowser"),
+    flowIp: document.getElementById("flowIp"),
+    flowFirewall: document.getElementById("flowFirewall"),
+    flowPort: document.getElementById("flowPort"),
+    flowNginx: document.getElementById("flowNginx"),
+    flowHtml: document.getElementById("flowHtml"),
+    flowMessage: document.getElementById("flowMessage"),
+    fwStateLabel: document.getElementById("fwStateLabel"),
+    nginxStateLabel: document.getElementById("nginxStateLabel"),
+    port80StateLabel: document.getElementById("port80StateLabel"),
+    port443StateLabel: document.getElementById("port443StateLabel"),
+    icmpStateLabel: document.getElementById("icmpStateLabel"),
+    screenArea: document.getElementById("screenArea"),
+    terminalArea: document.getElementById("terminalArea"),
+    lessonText: document.getElementById("lessonText"),
+    ruleList: document.getElementById("ruleList"),
+    ruleAction: document.getElementById("ruleAction"),
+    ruleProtocol: document.getElementById("ruleProtocol"),
+    rulePort: document.getElementById("rulePort"),
+    ruleSource: document.getElementById("ruleSource"),
+    addRuleBtn: document.getElementById("addRuleBtn"),
+    resetRulesBtn: document.getElementById("resetRulesBtn"),
+    ruleBuilderMessage: document.getElementById("ruleBuilderMessage"),
+    newIncidentBtn: document.getElementById("newIncidentBtn"),
+    incidentPrompt: document.getElementById("incidentPrompt"),
+    incidentConsole: document.getElementById("incidentConsole"),
+    incidentAnswer: document.getElementById("incidentAnswer"),
+    answerIncidentBtn: document.getElementById("answerIncidentBtn"),
+    scoreBox: document.getElementById("scoreBox"),
+    incidentExplanation: document.getElementById("incidentExplanation"),
+    commandBreakdown: document.getElementById("commandBreakdown"),
+    graduationResult: document.getElementById("graduationResult"),
+    outboundHttpsBtn: document.getElementById("outboundHttpsBtn"),
+    unsolicitedInboundBtn: document.getElementById("unsolicitedInboundBtn"),
+    conntrackResult: document.getElementById("conntrackResult"),
+    ctClient: document.getElementById("ctClient"),
+    ctNew: document.getElementById("ctNew"),
+    ctInternet: document.getElementById("ctInternet"),
+    ctEstablished: document.getElementById("ctEstablished"),
+    demoAllowBtn: document.getElementById("demoAllowBtn"),
+    demoDropBtn: document.getElementById("demoDropBtn"),
+    demoRejectBtn: document.getElementById("demoRejectBtn"),
+    dropRejectResult: document.getElementById("dropRejectResult"),
+    firewallLogView: document.getElementById("firewallLogView"),
+    clearFirewallLogBtn: document.getElementById("clearFirewallLogBtn")
+  };
+
+  var firewallLogs = [];
+
+  var currentIncident = null;
+  var incidentSteps = 0;
+  var incidentUsed = {};
+  var currentIncidentEvidence = null;
+
+  function cloneRules(rules) {
+    return rules.map(function (r) {
+      return {
+        id: r.id,
+        action: r.action,
+        protocol: r.protocol,
+        port: r.port,
+        source: r.source,
+        note: r.note,
+        hits: r.hits || 0
+      };
+    });
+  }
+
+  function sourceMatches(ruleSource, clientIp) {
+    if (ruleSource === "any") return true;
+    if (ruleSource === "client") return clientIp === "192.168.1.10";
+    if (ruleSource === "other") return clientIp === "192.168.1.99";
+    return false;
+  }
+
+  function writeFirewallLog(rule, protocol, port, clientIp) {
+    var target = protocol === "icmp" ? "ICMP" : protocol.toUpperCase() + "/" + port;
+    var action = rule ? rule.action.toUpperCase() : "DEFAULT-DENY";
+    firewallLogs.push(
+      "2026-08-17T16:08:00 FW " + action +
+      " SRC=" + clientIp +
+      " DST=192.168.1.20 PROTO=" + target +
+      (rule ? " RULE=#" + rule.id : "")
+    );
+    if (firewallLogs.length > 20) firewallLogs.shift();
+    renderFirewallLogs();
+  }
+
+  function evaluateFirewall(protocol, port, clientIp, countHit) {
+    if (!state.firewallOn) {
+      return { allowed: true, rejected: false, reason: "Firewall OFF", rule: null };
+    }
+
+    for (var i = 0; i < state.rules.length; i += 1) {
+      var rule = state.rules[i];
+      if (rule.protocol !== protocol) continue;
+      if (!sourceMatches(rule.source, clientIp)) continue;
+      if (protocol !== "icmp" && rule.port !== port) continue;
+
+      if (countHit) {
+        rule.hits = (rule.hits || 0) + 1;
+        writeFirewallLog(rule, protocol, port, clientIp);
+      }
+
+      return {
+        allowed: rule.action === "allow",
+        rejected: rule.action === "reject",
+        reason: rule.action.toUpperCase() + " rule #" + rule.id,
+        rule: rule
+      };
+    }
+
+    if (countHit) {
+      writeFirewallLog(null, protocol, port, clientIp);
+    }
+
+    return {
+      allowed: false,
+      rejected: false,
+      reason: "default deny incoming",
+      rule: null
+    };
+  }
+
+  function setScreen(title, body, url) {
+    el.screenArea.replaceChildren();
+
+    var bar = document.createElement("div");
+    bar.className = "browser-bar";
+    bar.textContent = "Browser / " + (url || "http://server01.lab.test");
+
+    var box = document.createElement("div");
+    var h = document.createElement("div");
+    h.className = "big";
+    h.textContent = title;
+
+    var p = document.createElement("p");
+    p.textContent = body;
+
+    box.appendChild(h);
+    box.appendChild(p);
+    el.screenArea.appendChild(bar);
+    el.screenArea.appendChild(box);
+  }
+
+  function setTerminal(lines) {
+    el.terminalArea.textContent = lines.join("\n");
+  }
+
+  function setLesson(text) {
+    el.lessonText.textContent = text;
+  }
+
+  function resetFlow(message) {
+    [el.flowBrowser, el.flowIp, el.flowFirewall, el.flowPort, el.flowNginx, el.flowHtml].forEach(function (n) {
+      n.classList.remove("ok", "fail");
+      n.classList.add("wait");
+    });
+    el.flowPort.innerHTML = "🔌<br>Port " + state.nginxPort;
+    el.flowNginx.innerHTML = "🐧<br>nginx";
+    el.flowMessage.textContent = message || "通信を実行すると、どこで止まるか表示します。";
+  }
+
+  function setNode(node, status) {
+    node.classList.remove("ok", "fail", "wait");
+    node.classList.add(status);
+  }
+
+  function animateTcpFlow(port, fwAllowed, serviceAvailable, serviceName) {
+    resetFlow();
+    el.flowPort.innerHTML = "🔌<br>Port " + port;
+
+    setTimeout(function () { setNode(el.flowBrowser, "ok"); }, 50);
+    setTimeout(function () { setNode(el.flowIp, "ok"); }, 150);
+
+    if (!fwAllowed) {
+      setTimeout(function () { setNode(el.flowFirewall, "fail"); }, 250);
+      el.flowMessage.textContent = "IPまでは到達。Firewallで遮断され、Port " + port + " へ届きません。";
+      return;
+    }
+
+    setTimeout(function () { setNode(el.flowFirewall, "ok"); }, 250);
+    setTimeout(function () { setNode(el.flowPort, serviceAvailable ? "ok" : "fail"); }, 350);
+
+    if (!serviceAvailable) {
+      el.flowMessage.textContent = "Firewallは通過。でもPort " + port + " で待っているサービスがありません。";
+      return;
+    }
+
+    setTimeout(function () {
+      setNode(el.flowNginx, "ok");
+      el.flowNginx.innerHTML = "🐧<br>" + (serviceName || "nginx");
+    }, 450);
+    setTimeout(function () { setNode(el.flowHtml, "ok"); }, 550);
+    el.flowMessage.textContent = "Firewall通過 → Port " + port + " → " + (serviceName || "nginx") + " → 応答成功。";
+  }
+
+  function animatePingFlow(allowed) {
+    resetFlow();
+    el.flowPort.innerHTML = "📡<br>ICMP";
+    el.flowNginx.innerHTML = "🖥<br>OS";
+
+    setTimeout(function () { setNode(el.flowBrowser, "ok"); }, 50);
+    setTimeout(function () { setNode(el.flowIp, "ok"); }, 150);
+
+    if (!allowed) {
+      setTimeout(function () { setNode(el.flowFirewall, "fail"); }, 250);
+      el.flowMessage.textContent = "ICMP Echo Request がFirewallで遮断されました。";
+      return;
+    }
+
+    setTimeout(function () { setNode(el.flowFirewall, "ok"); }, 250);
+    setTimeout(function () { setNode(el.flowPort, "ok"); }, 350);
+    setTimeout(function () { setNode(el.flowNginx, "ok"); }, 450);
+    el.flowMessage.textContent = "ping成功。ICMPが通っただけで、TCP/80が通るとは限りません。";
+  }
+
+  function findEffectiveRule(protocol, port) {
+    return evaluateFirewall(protocol, port, state.clientIp);
+  }
+
+  function renderFirewallLogs() {
+    if (!el.firewallLogView) return;
+    el.firewallLogView.textContent =
+      firewallLogs.length ? firewallLogs.join("\n") : "(まだFirewallログはありません)";
+  }
+
+  function sourceCovers(upper, lower) {
+    if (upper.protocol !== lower.protocol) return false;
+    if (upper.protocol !== "icmp" && upper.port !== lower.port) return false;
+    if (upper.source === "any") return true;
+    return upper.source === lower.source;
+  }
+
+  function isShadowed(index) {
+    var lower = state.rules[index];
+    for (var i = 0; i < index; i += 1) {
+      if (sourceCovers(state.rules[i], lower)) return true;
+    }
+    return false;
+  }
+
+  function moveRule(index, delta) {
+    var next = index + delta;
+    if (next < 0 || next >= state.rules.length) return;
+    var tmp = state.rules[index];
+    state.rules[index] = state.rules[next];
+    state.rules[next] = tmp;
+    updateStateUI();
+    setLesson("ルール順序を変更しました。上から最初に一致するルールが結果を決める学習モデルです。");
+  }
+
+  function updateStateUI() {
+    el.fwStateLabel.textContent = state.firewallOn ? "ON / default deny incoming" : "OFF / filtering bypassed";
+    el.fwStateLabel.className = "state-value " + (state.firewallOn ? "status-ok" : "status-warn");
+
+    el.nginxStateLabel.textContent =
+      (state.nginxRunning ? "active" : "inactive") + " / :" + state.nginxPort + " " + (state.nginxRunning ? "LISTEN" : "closed");
+    el.nginxStateLabel.className = "state-value " + (state.nginxRunning ? "status-ok" : "status-danger");
+
+    var p80 = evaluateFirewall("tcp", 80, state.clientIp);
+    var p443 = evaluateFirewall("tcp", 443, state.clientIp);
+    var icmp = evaluateFirewall("icmp", null, state.clientIp);
+
+    el.port80StateLabel.textContent = p80.allowed ? "ALLOW" : "DENY";
+    el.port80StateLabel.className = "state-value " + (p80.allowed ? "status-ok" : "status-danger");
+
+    el.port443StateLabel.textContent = p443.allowed ? "ALLOW" : "DENY";
+    el.port443StateLabel.className = "state-value " + (p443.allowed ? "status-ok" : "status-danger");
+
+    el.icmpStateLabel.textContent = icmp.allowed ? "ALLOW" : "DENY";
+    el.icmpStateLabel.className = "state-value " + (icmp.allowed ? "status-ok" : "status-danger");
+
+    renderRules();
+  }
+
+  function nextRuleId() {
+    var max = 0;
+    state.rules.forEach(function (r) { if (r.id > max) max = r.id; });
+    return max + 1;
+  }
+
+  function sourceLabel(value) {
+    if (value === "client") return "192.168.1.10";
+    if (value === "other") return "192.168.1.99";
+    return "Anywhere";
+  }
+
+  function renderRules() {
+    el.ruleList.replaceChildren();
+
+    if (!state.firewallOn) {
+      var off = document.createElement("div");
+      off.className = "rule";
+      off.textContent = "Firewall OFF：ルールは保存されていますが、学習シミュレーション上はフィルタリングしません。";
+      el.ruleList.appendChild(off);
+    }
+
+    state.rules.forEach(function (rule, index) {
+      var row = document.createElement("div");
+      row.className = "rule";
+
+      var action = document.createElement("div");
+      action.className =
+        rule.action === "allow" ? "rule-allow" :
+        rule.action === "reject" ? "status-warn" :
+        "rule-deny";
+      action.textContent = rule.action.toUpperCase();
+
+      var proto = document.createElement("div");
+      proto.innerHTML =
+        rule.protocol.toUpperCase() +
+        (rule.protocol === "icmp" ? "" : "/" + rule.port) +
+        '<div class="rule-hit">Hits ' + (rule.hits || 0) + "</div>";
+
+      var src = document.createElement("div");
+      src.innerHTML =
+        "<strong>" + sourceLabel(rule.source) + "</strong>" +
+        (rule.note ? '<div class="rule-note">' + rule.note + "</div>" : "") +
+        (isShadowed(index) ? '<span class="shadow-warning">⚠ SHADOWED：上位ルールが先に一致</span>' : "");
+
+      var controls = document.createElement("div");
+      controls.className = "rule-move";
+
+      var up = document.createElement("button");
+      up.type = "button";
+      up.textContent = "↑";
+      up.disabled = index === 0;
+      up.addEventListener("click", function () { moveRule(index, -1); });
+
+      var down = document.createElement("button");
+      down.type = "button";
+      down.textContent = "↓";
+      down.disabled = index === state.rules.length - 1;
+      down.addEventListener("click", function () { moveRule(index, 1); });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.textContent = "削除";
+      del.addEventListener("click", function () {
+        state.rules = state.rules.filter(function (r) { return r.id !== rule.id; });
+        updateStateUI();
+        setTerminal([
+          "$ sudo ufw delete " + rule.id,
+          "",
+          "Rule deleted"
+        ]);
+        setLesson("ルールを削除すると、その通信は次の一致ルール、またはdefault policyで判定されます。");
+      });
+
+      controls.appendChild(up);
+      controls.appendChild(down);
+      controls.appendChild(del);
+
+      row.appendChild(action);
+      row.appendChild(proto);
+      row.appendChild(src);
+      row.appendChild(controls);
+      el.ruleList.appendChild(row);
+    });
+
+    var policy = document.createElement("div");
+    policy.className = "rule";
+    policy.innerHTML = "<strong>DEFAULT</strong><span>INCOMING</span><span class=\"rule-note\">DENY（どのルールにも一致しない通信）</span><span></span>";
+    el.ruleList.appendChild(policy);
+  }
+
+  function setSimpleRule(protocol, port, action, note) {
+    state.rules = state.rules.filter(function (r) {
+      return !(r.protocol === protocol && r.port === port && r.source === "any");
+    });
+    state.rules.unshift({
+      id: nextRuleId(),
+      action: action,
+      protocol: protocol,
+      port: port,
+      source: "any",
+      note: note,
+      hits: 0
+    });
+  }
+
+  function allow80() {
+    setSimpleRule("tcp", 80, "allow", "HTTP");
+    setTerminal([
+      "$ sudo ufw allow 80/tcp",
+      "",
+      "Rule added",
+      "Rule added (v6)"
+    ]);
+    setLesson("80/TCPへの着信をFirewallが通す設定にしました。ただしnginxが停止していればWebは開きません。");
+    resetFlow("80/TCPをALLOWしました。HTTP接続を試してみよう。");
+    updateStateUI();
+  }
+
+  function deny80() {
+    setSimpleRule("tcp", 80, "deny", "HTTP blocked");
+    setTerminal([
+      "$ sudo ufw deny 80/tcp",
+      "",
+      "Rule added",
+      "Rule added (v6)"
+    ]);
+    setLesson("nginxが80番で待っていても、Firewallで遮断すると外からのHTTP通信はそこまで届きません。");
+    resetFlow("80/TCPをDENYしました。nginxはまだ動いています。");
+    updateStateUI();
+  }
+
+  function allow443() {
+    setSimpleRule("tcp", 443, "allow", "HTTPS");
+    setTerminal([
+      "$ sudo ufw allow 443/tcp",
+      "",
+      "Rule added"
+    ]);
+    setLesson("443/TCPを許可しました。でもこのLabでは443番でHTTPSサービスを起動していないので、それだけではHTTPSは開きません。");
+    updateStateUI();
+  }
+
+  function deny443() {
+    setSimpleRule("tcp", 443, "deny", "HTTPS blocked");
+    setTerminal([
+      "$ sudo ufw deny 443/tcp",
+      "",
+      "Rule added"
+    ]);
+    setLesson("443/TCPへの着信を遮断しました。");
+    updateStateUI();
+  }
+
+  function fwOff() {
+    state.firewallOn = false;
+    setTerminal([
+      "$ sudo ufw disable",
+      "",
+      "Firewall stopped and disabled on system startup"
+    ]);
+    setLesson("Firewall OFFは『安全になった』ではなく『フィルタリングをやめた』状態。本番障害対応で安易にOFFにするのは避けます。");
+    resetFlow("FirewallをOFFにしました。ルールに関係なく通信が通る状態を疑似再現します。");
+    updateStateUI();
+  }
+
+  function fwOn() {
+    state.firewallOn = true;
+    setTerminal([
+      "$ sudo ufw enable",
+      "",
+      "Firewall is active and enabled on system startup"
+    ]);
+    setLesson("FirewallをONに戻しました。保存されたルールとdefault policyで通信を判定します。");
+    resetFlow("FirewallをONにしました。");
+    updateStateUI();
+  }
+
+  function httpAccess() {
+    var fw = evaluateFirewall("tcp", 80, state.clientIp, true);
+    var service = state.nginxRunning && state.nginxPort === 80;
+
+    if (!fw.allowed) {
+      if (fw.rejected) {
+        setTerminal([
+          "$ curl -I http://192.168.1.20",
+          "",
+          "curl: (7) Failed to connect: Connection refused",
+          "",
+          "# Firewall: REJECT"
+        ]);
+        setScreen(
+          "❌ すぐ拒否されました",
+          "FirewallがREJECT応答を返したため、待たずに失敗が分かります。",
+          "http://server01.lab.test"
+        );
+        setLesson("DROPは返答を捨ててtimeoutのように見せ、REJECTは拒否を返します。症状の違いも切り分けのヒントです。");
+        animateTcpFlow(80, false, service, "nginx");
+        updateStateUI();
+        return;
+      }
+
+      setTerminal([
+        "$ curl -I http://192.168.1.20",
+        "",
+        "curl: (28) Connection timed out",
+        "",
+        "# Firewall: " + fw.reason
+      ]);
+      setScreen(
+        "❌ 接続タイムアウト",
+        "nginxは動いていても、FirewallがTCP/80をDROPしています。",
+        "http://server01.lab.test"
+      );
+      setLesson("FirewallでDROP/遮断されると、クライアントからはタイムアウトのように見えることがあります。まずFirewallと待受の両方を確認します。");
+      animateTcpFlow(80, false, service, "nginx");
+      updateStateUI();
+      return;
+    }
+
+    if (!service) {
+      setTerminal([
+        "$ curl -I http://192.168.1.20",
+        "",
+        "curl: (7) Failed to connect to 192.168.1.20 port 80: Connection refused",
+        "",
+        "# Firewallは通過。Port 80でLISTENするプロセスなし"
+      ]);
+      setScreen(
+        "❌ Connection refused",
+        "Firewallは80番を通しています。でもnginxが80番で待っていません。",
+        "http://server01.lab.test"
+      );
+      setLesson("ALLOWルールがあっても、サービスがLISTENしていなければ接続は成立しません。Firewallとサービスは別レイヤーです。");
+      animateTcpFlow(80, true, false, "nginx");
+      return;
+    }
+
+    setTerminal([
+      "$ curl -I http://192.168.1.20",
+      "",
+      "HTTP/1.1 200 OK",
+      "Server: nginx",
+      "",
+      "# Firewall: ALLOW TCP/80",
+      "# nginx: LISTEN :80"
+    ]);
+    setScreen(
+      "Welcome to nginx! 🎉",
+      "Firewallを通過し、80番で待つnginxからHTTPレスポンスが返りました。",
+      "http://server01.lab.test"
+    );
+    setLesson("通信成功には『経路が通る』『Firewallが許可』『ポートでサービスが待受』がそろう必要があります。");
+    animateTcpFlow(80, true, true, "nginx");
+    updateStateUI();
+  }
+
+  function httpsAccess() {
+    var fw = evaluateFirewall("tcp", 443, state.clientIp, true);
+    var service = false;
+
+    if (!fw.allowed) {
+      setTerminal([
+        "$ curl -I https://192.168.1.20",
+        "",
+        "curl: (28) Connection timed out",
+        "",
+        "# Firewall: DENY TCP/443"
+      ]);
+      setScreen(
+        "❌ HTTPS接続できません",
+        "Firewallが443/TCPを遮断しています。",
+        "https://server01.lab.test"
+      );
+      setLesson("443はHTTPSの標準ポート。Firewallが遮断しているので、HTTPSサービス以前の段階で止まっています。");
+      animateTcpFlow(443, false, service, "HTTPS");
+      updateStateUI();
+      return;
+    }
+
+    setTerminal([
+      "$ curl -I https://192.168.1.20",
+      "",
+      "curl: (7) Failed to connect to 192.168.1.20 port 443: Connection refused",
+      "",
+      "# Firewall: ALLOW TCP/443",
+      "# ss -ltnp | grep :443 → 出力なし"
+    ]);
+    setScreen(
+      "❌ 443は許可済み。でも接続不可",
+      "Firewallは通過しましたが、443番でHTTPSサービスが待っていません。",
+      "https://server01.lab.test"
+    );
+    setLesson("Firewallでポートを開けることと、そのポートでサービスを起動することは別。ここは現場でもよく混同されます。");
+    animateTcpFlow(443, true, false, "HTTPS");
+    updateStateUI();
+  }
+
+  function pingTest() {
+    var fw = evaluateFirewall("icmp", null, state.clientIp, true);
+
+    if (!fw.allowed) {
+      setTerminal([
+        "$ ping -c 3 192.168.1.20",
+        "",
+        "3 packets transmitted, 0 received, 100% packet loss"
+      ]);
+      setScreen(
+        "📡 ping 応答なし",
+        "ICMPがFirewallで遮断されています。",
+        "ping 192.168.1.20"
+      );
+      setLesson("pingはTCP/UDPのポート番号を使わず、ICMPという別のプロトコルです。");
+      animatePingFlow(false);
+      updateStateUI();
+      return;
+    }
+
+    setTerminal([
+      "$ ping -c 3 192.168.1.20",
+      "",
+      "64 bytes from 192.168.1.20: icmp_seq=1 ttl=64 time=0.42 ms",
+      "64 bytes from 192.168.1.20: icmp_seq=2 ttl=64 time=0.38 ms",
+      "64 bytes from 192.168.1.20: icmp_seq=3 ttl=64 time=0.40 ms",
+      "",
+      "3 packets transmitted, 3 received, 0% packet loss"
+    ]);
+    setScreen(
+      "✅ pingは通りました",
+      "でもこれはICMPが通った証拠。HTTP/TCP80が通る証拠ではありません。",
+      "ping 192.168.1.20"
+    );
+    setLesson("『ping通る＝WebもOK』ではありません。WebならTCP/80、HTTPSならTCP/443を別に確認します。");
+    animatePingFlow(true);
+    updateStateUI();
+  }
+
+  function stopNginx() {
+    state.nginxRunning = false;
+    setTerminal([
+      "$ sudo systemctl stop nginx",
+      "$ systemctl status nginx",
+      "",
+      "Active: inactive (dead)"
+    ]);
+    setScreen(
+      "⏹ nginx停止",
+      "Firewallルールはそのまま。でもWebサービスだけ止まりました。"
+    );
+    setLesson("Firewallとサービスは独立しています。80/TCPがALLOWでもnginx停止中ならWebは開きません。");
+    resetFlow("nginxを停止。80/TCPのFirewallルールは変わっていません。");
+    updateStateUI();
+  }
+
+  function startNginx() {
+    state.nginxRunning = true;
+    setTerminal([
+      "$ sudo systemctl start nginx",
+      "$ systemctl status nginx",
+      "",
+      "Active: active (running)",
+      "",
+      "$ ss -ltnp | grep :80",
+      "LISTEN 0 511 0.0.0.0:80 0.0.0.0:* users:((\"nginx\",pid=1234,fd=5))"
+    ]);
+    setScreen(
+      "▶ nginx起動",
+      "nginxは80番で待っています。次はFirewallが通すか確認します。"
+    );
+    setLesson("サービスがactiveでLISTENしていることと、外部から到達できることは別です。Firewall確認が必要です。");
+    resetFlow("nginxは起動済み。HTTP接続でFirewallまで含めて確認しよう。");
+    updateStateUI();
+  }
+
+  function showStatus() {
+    var p80 = evaluateFirewall("tcp", 80, state.clientIp);
+    var p443 = evaluateFirewall("tcp", 443, state.clientIp);
+
+    var lines = [
+      "$ sudo ufw status verbose",
+      "",
+      "Status: " + (state.firewallOn ? "active" : "inactive"),
+      "Default: deny (incoming), allow (outgoing)",
+      "",
+      "To                         Action      From"
+    ];
+
+    state.rules.forEach(function (r) {
+      var target = r.protocol === "icmp" ? "ICMP" : String(r.port) + "/" + r.protocol;
+      lines.push(
+        target.padEnd(27, " ") +
+        r.action.toUpperCase().padEnd(12, " ") +
+        sourceLabel(r.source)
+      );
+    });
+
+    lines.push("");
+    lines.push("# client 192.168.1.10 → 80/TCP: " + (p80.allowed ? "ALLOW" : "DENY"));
+    lines.push("# client 192.168.1.10 → 443/TCP: " + (p443.allowed ? "ALLOW" : "DENY"));
+
+    setTerminal(lines);
+    setScreen(
+      state.firewallOn ? "🛡 Firewall active" : "⚠ Firewall inactive",
+      "右側で現在のルールとdefault policyを確認できます。"
+    );
+    setLesson("障害時は『FirewallがON/OFFか』だけでなく、『対象ポート・プロトコル・送信元にどのルールが効くか』を確認します。");
+  }
+
+  function resetLab() {
+    state.firewallOn = true;
+    state.nginxRunning = true;
+    state.nginxPort = 80;
+    state.rules = cloneRules(DEFAULT_RULES);
+    setTerminal(["$"]);
+    setScreen(
+      "Lab02 初期状態",
+      "Firewall ON / 80許可 / nginx稼働中。HTTP接続から試してみよう。",
+      "http://server01.lab.test"
+    );
+    setLesson("FirewallのALLOWは『通信を通してよい』という意味。Webサーバー自体を起動するわけではありません。");
+    resetFlow();
+    updateStateUI();
+  }
+
+  function handleAction(action) {
+    if (action === "allow80") allow80();
+    if (action === "deny80") deny80();
+    if (action === "allow443") allow443();
+    if (action === "deny443") deny443();
+    if (action === "fwOff") fwOff();
+    if (action === "fwOn") fwOn();
+    if (action === "http") httpAccess();
+    if (action === "https") httpsAccess();
+    if (action === "ping") pingTest();
+    if (action === "stopNginx") stopNginx();
+    if (action === "startNginx") startNginx();
+    if (action === "status") showStatus();
+    if (action === "reset") resetLab();
+  }
+
+  function addCustomRule() {
+    var protocol = el.ruleProtocol.value;
+    var port = null;
+
+    if (protocol !== "icmp") {
+      var raw = String(el.rulePort.value).replace(/[^\d]/g, "").slice(0, 5);
+      el.rulePort.value = raw;
+      if (raw === "" || Number(raw) < 0 || Number(raw) > 65535) {
+        el.ruleBuilderMessage.innerHTML = "<span class=\"status-danger\">❌ ポート番号は0〜65535。</span>";
+        return;
+      }
+      port = Number(raw);
+    }
+
+    var rule = {
+      id: nextRuleId(),
+      action: el.ruleAction.value,
+      protocol: protocol,
+      port: port,
+      source: el.ruleSource.value,
+      note: "custom",
+      hits: 0
+    };
+
+    state.rules.unshift(rule);
+
+    var cmd;
+    if (protocol === "icmp") {
+      cmd = "# UFWの単純な allow port 構文ではICMPを同じ形では扱わない\n# 学習モデルとしてICMPルールを追加";
+    } else {
+      cmd =
+        "$ sudo ufw " + rule.action + " from " +
+        (rule.source === "any" ? "any" : sourceLabel(rule.source)) +
+        " to any port " + port + " proto " + protocol;
+    }
+
+    setTerminal(cmd.split("\n"));
+    el.ruleBuilderMessage.innerHTML = "<span class=\"status-ok\">✅ ルールを先頭に追加しました。</span>";
+    setLesson("送信元IPまで絞ると、『誰からの通信だけ通す／止める』という制御ができます。");
+    updateStateUI();
+  }
+
+  function resetRules() {
+    state.rules = cloneRules(DEFAULT_RULES);
+    el.ruleBuilderMessage.textContent = "標準ルールに戻しました。";
+    setTerminal([
+      "$ # 学習用ルールを初期化",
+      "# 80/tcp ALLOW",
+      "# 443/tcp DENY",
+      "# ICMP ALLOW",
+      "# default incoming DENY"
+    ]);
+    updateStateUI();
+  }
+
+
+  function resetConntrackNodes() {
+    [el.ctClient, el.ctNew, el.ctInternet, el.ctEstablished].forEach(function (n) {
+      n.classList.remove("ok", "fail");
+    });
+  }
+
+  function outboundHttpsStateful() {
+    resetConntrackNodes();
+    el.ctClient.classList.add("ok");
+    el.ctNew.classList.add("ok");
+    el.ctInternet.classList.add("ok");
+    el.ctEstablished.classList.add("ok");
+    el.conntrackResult.innerHTML =
+      '<strong class="status-ok">✅ OUTBOUND NEW → RETURN ESTABLISHED</strong><br>' +
+      "自分から開始したTCP/443接続の戻りパケットはconntrack上の既存接続として扱えます。";
+    setTerminal([
+      "$ sudo conntrack -L",
+      "",
+      "tcp 6 431999 ESTABLISHED src=192.168.1.20 dst=203.0.113.10 sport=53012 dport=443 ..."
+    ]);
+  }
+
+  function unsolicitedInbound() {
+    resetConntrackNodes();
+    el.ctInternet.classList.add("ok");
+    el.ctEstablished.classList.add("fail");
+    el.conntrackResult.innerHTML =
+      '<strong class="status-danger">❌ 既存接続ではない着信</strong><br>' +
+      "外部から突然来たNEW通信は、許可ルールがなければdefault denyの対象になります。";
+    setTerminal([
+      "$ # external → 192.168.1.20:5555 NEW",
+      "ct state new",
+      "policy: DROP"
+    ]);
+  }
+
+  function showDropReject(mode) {
+    if (mode === "allow") {
+      el.dropRejectResult.textContent =
+        "ALLOW\n\n$ curl -I http://192.168.1.20\nHTTP/1.1 200 OK\nServer: nginx\n\n→ 通信を通す";
+    } else if (mode === "drop") {
+      el.dropRejectResult.textContent =
+        "DROP / DENY\n\n$ curl -I http://192.168.1.20\n...\ncurl: (28) Connection timed out\n\n→ パケットを捨て、応答を返さない";
+    } else {
+      el.dropRejectResult.textContent =
+        "REJECT\n\n$ curl -I http://192.168.1.20\ncurl: (7) Connection refused\n\n→ 拒否したことを相手へ返す";
+    }
+  }
+
+  function clearFirewallCounters() {
+    state.rules.forEach(function (rule) { rule.hits = 0; });
+    firewallLogs = [];
+    renderFirewallLogs();
+    updateStateUI();
+    setTerminal([
+      "$ sudo nft reset counters",
+      "",
+      "# 教材ではHit Counterとログ表示をリセットしました。"
+    ]);
+  }
+
+  var INCIDENTS = [
+    {
+      cause: "fw_block",
+      prompt: "pingは通る。nginxもactive。でもHTTPだけ開かない。",
+      evidence: {
+        ping: "$ ping 192.168.1.20\n\n64 bytes ... reply\n0% packet loss",
+        status: "$ systemctl status nginx\n\nActive: active (running)",
+        ss: "$ ss -ltnp | grep :80\n\nLISTEN ... 0.0.0.0:80 ... nginx",
+        fw: "$ sudo ufw status\n\n80/tcp  DENY  Anywhere\nICMP    ALLOW Anywhere",
+        curl: "$ curl http://192.168.1.20\n\ncurl: (28) Connection timed out"
+      },
+      explanation: "OSもnginxも正常。80/TCPだけFirewallで遮断されています。pingはICMPなので通っていました。"
+    },
+    {
+      cause: "nginx_stop",
+      prompt: "pingは通る。Firewallでは80/TCPをALLOWしている。でもWebが開かない。",
+      evidence: {
+        ping: "$ ping 192.168.1.20\n\n64 bytes ... reply",
+        status: "$ systemctl status nginx\n\nActive: inactive (dead)",
+        ss: "$ ss -ltnp | grep :80\n\n(出力なし)",
+        fw: "$ sudo ufw status\n\n80/tcp  ALLOW Anywhere",
+        curl: "$ curl http://192.168.1.20\n\ncurl: (7) Connection refused"
+      },
+      explanation: "Firewallは通していますが、nginxが停止しているため80番で誰も待っていません。"
+    },
+    {
+      cause: "wrong_port",
+      prompt: "nginxはactive。Firewallも80/TCPをALLOW。でもWebが開かない。",
+      evidence: {
+        ping: "$ ping 192.168.1.20\n\n64 bytes ... reply",
+        status: "$ systemctl status nginx\n\nActive: active (running)",
+        ss: "$ ss -ltnp\n\nLISTEN ... 0.0.0.0:8080 ... nginx",
+        fw: "$ sudo ufw status\n\n80/tcp  ALLOW Anywhere",
+        curl: "$ curl http://192.168.1.20\n\ncurl: (7) Connection refused"
+      },
+      explanation: "nginxは8080番で待っています。ブラウザは省略時80番へ行くため、ポートが一致していません。"
+    },
+    {
+      cause: "source_restrict",
+      prompt: "別PCではWebが開くのに、自分のPCからだけ開かない。",
+      evidence: {
+        ping: "$ ping 192.168.1.20\n\n64 bytes ... reply",
+        status: "$ systemctl status nginx\n\nActive: active (running)",
+        ss: "$ ss -ltnp | grep :80\n\nLISTEN ... :80 ... nginx",
+        fw: "$ sudo ufw status\n\n80/tcp ALLOW from 192.168.1.99\n80/tcp DENY  from 192.168.1.10",
+        curl: "$ curl http://192.168.1.20\n\ncurl: (28) Connection timed out"
+      },
+      explanation: "自分の送信元IP 192.168.1.10 だけ拒否されています。Firewallはポートだけでなく送信元でも制御できます。"
+    },
+    {
+      cause: "https_no_service",
+      prompt: "443/TCPはFirewallでALLOW済み。それでもHTTPSが開かない。",
+      evidence: {
+        ping: "$ ping 192.168.1.20\n\n64 bytes ... reply",
+        status: "$ systemctl status nginx\n\nActive: active (running)",
+        ss: "$ ss -ltnp\n\nLISTEN ... :80 ... nginx\n# :443 はなし",
+        fw: "$ sudo ufw status\n\n443/tcp ALLOW Anywhere",
+        curl: "$ curl -I https://192.168.1.20\n\ncurl: (7) Failed to connect to port 443"
+      },
+      explanation: "Firewallは443を通しますが、443番でHTTPSサービスが待っていません。『ポートを開ける』と『サービスを起動する』は別です。"
+    }
+  ];
+
+  function newIncident() {
+    var choices = INCIDENTS.filter(function (x) {
+      return !currentIncident || x.cause !== currentIncident.cause;
+    });
+    currentIncident = choices[Math.floor(Math.random() * choices.length)];
+    currentIncidentEvidence = currentIncident.evidence;
+    incidentSteps = 0;
+    incidentUsed = {};
+    el.incidentAnswer.value = "";
+    el.incidentConsole.textContent = "$ 調査開始。どこから確認する？";
+    el.incidentPrompt.innerHTML = "<strong>「" + currentIncident.prompt + "」</strong><br>原因は伏せられています。";
+    el.incidentExplanation.textContent = "";
+    renderScore();
+  }
+
+  function renderScore(finalScore) {
+    el.scoreBox.replaceChildren();
+
+    var label = document.createElement("div");
+    label.className = "muted";
+    label.textContent = finalScore == null ? "確認回数" : "スコア";
+
+    var value = document.createElement("div");
+    value.className = "score-big";
+    value.textContent = finalScore == null ? String(incidentSteps) : String(finalScore);
+
+    el.scoreBox.appendChild(label);
+    el.scoreBox.appendChild(value);
+  }
+
+  function diagnose(kind) {
+    if (!currentIncident) {
+      el.incidentConsole.textContent = "$ 先に「新しい障害を発生」を押してください。";
+      return;
+    }
+
+    if (!incidentUsed[kind]) {
+      incidentUsed[kind] = true;
+      incidentSteps += 1;
+    }
+
+    el.incidentConsole.textContent += "\n\n" + currentIncidentEvidence[kind];
+    el.incidentConsole.scrollTop = el.incidentConsole.scrollHeight;
+    renderScore();
+  }
+
+  function answerIncident() {
+    if (!currentIncident) {
+      el.incidentExplanation.textContent = "先に障害を発生させてください。";
+      return;
+    }
+
+    if (!el.incidentAnswer.value) {
+      el.incidentExplanation.textContent = "原因を選んでください。";
+      return;
+    }
+
+    if (el.incidentAnswer.value === currentIncident.cause) {
+      var score = Math.max(50, 100 - Math.max(0, incidentSteps - 2) * 10);
+      renderScore(score);
+      el.incidentExplanation.innerHTML =
+        "<strong class=\"status-ok\">✅ 正解 " + score + "点</strong><br>" +
+        currentIncident.explanation +
+        "<br><span class=\"muted\">Firewallだけ決め打ちせず、service / LISTEN / rule を事実で切り分けるのがコツ。</span>";
+    } else {
+      renderScore(0);
+      el.incidentExplanation.innerHTML =
+        "<strong class=\"status-danger\">❌ まだ違う</strong><br>" +
+        "ping・systemctl・ss・Firewallの証拠を組み合わせてもう一度考えてみよう。";
+    }
+  }
+
+  var COMMANDS = {
+    ufw_status: [
+      ["sudo", "管理者権限で実行"],
+      ["ufw", "Uncomplicated Firewall。Firewallルール操作を簡略化するツール"],
+      ["status", "現在のルールと状態を確認"],
+      ["verbose", "default policyなども含めて詳しく表示"]
+    ],
+    ufw_allow: [
+      ["sudo", "管理者権限"],
+      ["ufw", "UFWを操作"],
+      ["allow", "一致する通信を許可するルールを追加"],
+      ["80/tcp", "TCPの80番ポート。HTTPの標準ポート"]
+    ],
+    nft: [
+      ["sudo", "管理者権限"],
+      ["nft", "nftablesを操作するコマンド"],
+      ["list", "現在の設定を一覧表示"],
+      ["ruleset", "ルールセット全体を見る"]
+    ],
+    ss: [
+      ["ss", "ソケット・接続状態を見る"],
+      ["-l", "LISTEN中のみ"],
+      ["-t", "TCP"],
+      ["-n", "名前解決せず番号表示"],
+      ["-p", "使用プロセスを表示"]
+    ],
+    curl: [
+      ["curl", "HTTPなどをCLIから試す"],
+      ["-I", "本文ではなくHTTPヘッダーのみ取得"],
+      ["http://localhost", "自分自身のTCP/80へHTTPアクセス"]
+    ]
+  };
+
+  function showCommand(key) {
+    var parts = COMMANDS[key];
+    el.commandBreakdown.replaceChildren();
+
+    parts.forEach(function (part) {
+      var row = document.createElement("div");
+      row.className = "piece";
+
+      var c = document.createElement("code");
+      c.textContent = part[0];
+
+      var d = document.createElement("div");
+      d.textContent = part[1];
+
+      row.appendChild(c);
+      row.appendChild(d);
+      el.commandBreakdown.appendChild(row);
+    });
+  }
+
+  function graduate(answer) {
+    if (answer === "firewall") {
+      el.graduationResult.innerHTML =
+        "<strong class=\"status-ok\">🎓 正解。Lab02 COMPLETE</strong><br>" +
+        "OS到達・nginx active・:80 LISTENまで確認済みなので、次はFirewallやその先の通信経路を疑うのが自然です。";
+
+      try {
+        localStorage.setItem("linux_lab02_complete", "true");
+      } catch (e) {
+        /* file:// 環境などで保存できなくても教材動作は継続 */
+      }
+    } else {
+      el.graduationResult.innerHTML =
+        "<strong class=\"status-warn\">△ そこはすでに確認済み。</strong><br>" +
+        "『ping OK / nginx active / :80 LISTEN』という証拠を使って候補を消していこう。";
+    }
+  }
+
+  document.querySelectorAll("[data-action]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      handleAction(button.getAttribute("data-action"));
+    });
+  });
+
+  el.ruleProtocol.addEventListener("change", function () {
+    if (this.value === "icmp") {
+      el.rulePort.disabled = true;
+      el.ruleBuilderMessage.textContent = "ICMPはTCP/UDPのポート番号を使いません。";
+    } else {
+      el.rulePort.disabled = false;
+      el.ruleBuilderMessage.textContent = "TCP/UDPは0〜65535のポート番号を指定します。";
+    }
+  });
+
+  el.rulePort.addEventListener("input", function () {
+    this.value = this.value.replace(/[^\d]/g, "").slice(0, 5);
+  });
+
+  el.outboundHttpsBtn.addEventListener("click", outboundHttpsStateful);
+  el.unsolicitedInboundBtn.addEventListener("click", unsolicitedInbound);
+  el.demoAllowBtn.addEventListener("click", function () { showDropReject("allow"); });
+  el.demoDropBtn.addEventListener("click", function () { showDropReject("drop"); });
+  el.demoRejectBtn.addEventListener("click", function () { showDropReject("reject"); });
+  el.clearFirewallLogBtn.addEventListener("click", clearFirewallCounters);
+
+  el.addRuleBtn.addEventListener("click", addCustomRule);
+  el.resetRulesBtn.addEventListener("click", resetRules);
+
+  el.newIncidentBtn.addEventListener("click", newIncident);
+  el.answerIncidentBtn.addEventListener("click", answerIncident);
+
+  document.querySelectorAll("[data-diag]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      diagnose(button.getAttribute("data-diag"));
+    });
+  });
+
+  document.querySelectorAll("[data-cmd]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      showCommand(button.getAttribute("data-cmd"));
+    });
+  });
+
+  document.querySelectorAll("[data-grad]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      graduate(button.getAttribute("data-grad"));
+    });
+  });
+
+  state.rules = cloneRules(DEFAULT_RULES);
+  updateStateUI();
+  renderFirewallLogs();
+  resetFlow();
+}());
+</script>
+
+<script id="mobile-pwa-script">
+(function () {
+  var menu = document.getElementById('mobileLabMenuBtn');
+  var close = document.getElementById('mobileLabCloseBtn');
+  var drawer = document.getElementById('mobileLabDrawer');
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (menu) menu.addEventListener('click', openDrawer);
+  if (close) close.addEventListener('click', closeDrawer);
+  if (drawer) drawer.addEventListener('click', function (e) {
+    if (e.target === drawer) closeDrawer();
+  });
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+
+  <script src="./ui-density.js?v=12"></script>
+  <script src="./ui-learning.js?v=12"></script>
+  <script src="./ui-generic.js?v=12"></script>
+  <script src="./ui-incident-modes.js?v=12"></script>
+</body>
+</html>
