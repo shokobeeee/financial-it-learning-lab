@@ -62,7 +62,7 @@ Financial War Roomでは、各Caseで以下を満たしたときのみ **TRI-ROL
 
 - DNS / TLS / Load Balancer
 - Route / NAT / Firewall
-- VPC / VNet / Subnet
+- VPC / VNet / VCN / Subnet
 - VM / Container / Serverless
 - Linux process / memory / disk / log
 - Hybrid connectivity / dedicated circuit / VPN
@@ -77,14 +77,17 @@ Financial War Roomでは、各Caseで以下を満たしたときのみ **TRI-ROL
 - Reconciliation
 - Count / Amount / Debit-Credit / Ledger invariant
 - Idempotency / duplicate / retry
+- DBMS product context: Db2 / Oracle Database / PostgreSQL / SQL Server
 
 ### D. Mainframe / Batch
 
 - COBOL data processing
-- Db2 / CICS boundary
+- Compiler / Runtime / Host platform boundary
+- Db2 / Oracle / CICS boundary
 - JOB / EXEC / DD
 - JES / RC / ABEND
-- GDG / PROC / Scheduler
+- GDG / PROC
+- Enterprise Scheduler: Control-M / JP1/AJS3 / IBM Z Workload Scheduler等の文脈
 - partial commit
 - checkpoint / restart / rerun safety
 - batch completion vs end-to-end business completion
@@ -94,7 +97,7 @@ Financial War Roomでは、各Caseで以下を満たしたときのみ **TRI-ROL
 - Shared responsibility
 - IAM / RBAC / workload identity
 - least privilege / MFA
-- KMS / Key Vault / Secret / Certificate
+- KMS / Key Vault / OCI Vault / Secret / Certificate
 - audit trail
 - WAF / network controls
 - data classification
@@ -116,14 +119,117 @@ Financial War Roomでは、各Caseで以下を満たしたときのみ **TRI-ROL
 
 ---
 
-## 4. Cloudの学ばせ方
+## 4. v16 Context Model — 分類軸を混ぜない
+
+Linux v16で導入した「同じ軸ではないものを分けて見せる」考え方を全教材へ展開する。
+
+### 4.1 Concept → Product / Platform → Operational Evidence
+
+学習者はまず共通概念を理解し、その後に製品固有の実装へ降りる。
+
+```text
+Concept
+  ↓
+Product / Platform implementation
+  ↓
+Operational Evidence
+  ↓
+Safe Decision / Change
+  ↓
+Business Verification
+```
+
+例:
+
+```text
+Lock / waiting                   ← Concept
+├ Db2: MON_GET_LOCKS            ← Product-specific evidence
+├ Oracle: V$LOCK + V$SESSION
+├ PostgreSQL: pg_locks
+└ SQL Server: sys.dm_tran_locks
+```
+
+製品間対応は `=` ではなく **`≒ conceptual mapping`**。  
+権限、粒度、仕様、運用、性能特性まで同じとはみなさない。
+
+### 4.2 Canonical Lab + Profile Adapter
+
+共通Labを製品ごとに複製しない。
+
+- Canonical Lab: 業務・概念・判断ロジックの正本
+- Profile Adapter: 製品名、代表構文、monitor/audit evidence、境界の差分
+
+これにより、Oracle等を追加しても「Db2版20 Labs」「Oracle版20 Labs」のような教材コピーを量産しない。
+
+### 4.3 Layer Guide
+
+各教材で「どのレイヤーか」を明示する。
+
+**Linux**
+
+```text
+Distribution → Package/Firewall management → systemd → App/Tool
+```
+
+**SQL**
+
+```text
+SQL Language → DBMS → Schema/Object → Transaction/Concurrency → Application/Batch
+```
+
+**COBOL**
+
+```text
+COBOL Language → Compiler/Runtime → Host Platform → Db/CICS/File → JCL/Batch
+```
+
+**JCL**
+
+```text
+Enterprise Scheduler → JES → JCL → Program/Utility → Dataset/DB/Downstream
+```
+
+**Cloud**
+
+```text
+Business → Responsibility → Network → Compute → Data → Identity/Security → Observe/Hybrid/DR
+```
+
+### 4.4 Product Profiles
+
+- SQL: IBM Db2 / Oracle Database / PostgreSQL / Microsoft SQL Server
+- COBOL: IBM Enterprise COBOL / GnuCOBOL / Oracle Pro*COBOL context
+- JCL周辺: Generic / BMC Control-M / JP1/AJS3 / IBM Z Workload Scheduler
+- Cloud translation: Common / AWS / Google Cloud / Azure / OCI
+
+OCIは現在、Cloud FundamentalsとFinancial War Roomのtranslation profileとする。  
+OCI固有の設計・運用を20段階で深掘りする必要が出た場合のみ、独立Packageへ昇格する。
+
+### 4.5 Scope Badge / Wrong Layer Coach
+
+操作やEvidenceへ所属レイヤーを表示する。
+
+例:
+
+- `EXPLAIN`はSQL性能/optimizerを見るEvidenceであり、Lock waitの直接Evidenceではない。
+- `systemctl`はHost OS/service管理であり、Cloud Security Group control planeとは別。
+- `RC=0`はJCL step正常終了Evidenceであり、金融業務完了を証明しない。
+- `S0C7`を見てJCL構文ミスと即断しない。
+
+「操作自体が正しい」ことと「今の仮説に適切」なことを分ける。
+
+---
+
+## 5. Cloudの学ばせ方
 
 順番は以下とする。
 
 1. **Cloud Fundamentals**
    - vendor名を使わず、責任・障害ドメイン・network・compute・data・IAM・observability・DRを理解。
+   - Common / AWS / Google Cloud / Azure / OCI profileで概念翻訳できる。
 2. **AWS / Google Cloud / Azure**
    - 同じ概念を各providerのサービス名へ翻訳。
+   - Context GuideでOCIを含む他providerとのconceptual mapも確認する。
 3. **Financial War Room**
    - provider名より先に、共通レイヤで仮説を立てる。
    - 必要な場合のみprovider固有のログ/サービスへ降りる。
@@ -133,7 +239,7 @@ Financial War Roomでは、各Caseで以下を満たしたときのみ **TRI-ROL
 
 ---
 
-## 5. Financial War Room の挑戦ロジック
+## 6. Financial War Room の挑戦ロジック
 
 ### Step 1 — Impact first
 
@@ -163,13 +269,24 @@ Financial War Roomでは、各Caseで以下を満たしたときのみ **TRI-ROL
 
 「全部見る」を防ぎ、仮説に対して証拠を取りにいく。
 
-### Step 3 — Evidence budget
+### Step 3 — Evidence budget + Evidence Diversity Gate
 
 Evidenceには時間コストを持たせる。
 
 - 高価値証拠を少数取るほど高評価
 - 無関係なログを全部読むとPM/Engineer評価を下げる
 - Evidenceを取らずに変更すると減点
+- **同じレイヤーのEvidenceを何個集めても、Cause確定の十分条件にはしない**
+
+Cause確定前に原則2レイヤー以上、最終Case 12では3レイヤー以上のEvidenceを要求する。
+
+例:
+
+```text
+Data evidence + App evidence
+Network evidence + Control-plane audit
+JES evidence + DB commit evidence + Dataset evidence
+```
 
 Evidenceは以下の順で価値を考える。
 
@@ -254,7 +371,7 @@ Primary causeと、再発を許したContributing factorを分ける。
 
 ---
 
-## 6. 12 War Room Cases
+## 7. 12 War Room Cases
 
 1. False Green Health Check
 2. Stale Balance / Replica Lag
@@ -274,14 +391,16 @@ Core ledger / JCL / export / Cloud ingest / reconciliationを横断して、**RC
 
 ---
 
-## 7. 三者レビューの判定
+## 8. 三者レビューの判定
 
 ### Financial Engineer — OK
 
 以下を満たすためOK。
 
 - Linux / DB / Mainframe / Batch / Cloudを横断
+- Concept / Product / Evidenceを分離
 - evidence-based troubleshooting
+- evidence diversity
 - data integrity / idempotency / partial commit
 - hybrid connectivity
 - safe change / rollback / verification
@@ -291,6 +410,7 @@ Core ledger / JCL / export / Cloud ingest / reconciliationを横断して、**RC
 以下を満たすためOK。
 
 - 技術を重要業務・顧客影響へ翻訳
+- provider/product名より共通判断軸で比較
 - RTO/RPO / SLO / residual risk
 - third-party / shared responsibility
 - Well-Architected trade-off
@@ -303,6 +423,7 @@ Core ledger / JCL / export / Cloud ingest / reconciliationを横断して、**RC
 
 - severity / timebox / deadline
 - dependency / owner / approval
+- product/team responsibility boundary
 - change / rollback
 - status communication
 - downstream / cutover / DR
