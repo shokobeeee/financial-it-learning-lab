@@ -4,6 +4,18 @@
 
 AWSを個別サービスのカタログではなく、VPC → Compute → Data → Identity → Observability → Hybrid → DR という金融システム導線として理解すること。
 
+## Context Model
+
+このPackageはAWS固有。ただし **🧭 Context** では常にCommon Conceptも併記し、Google Cloud / Azure / OCIとの `≒ conceptual mapping` を確認できる。
+
+例:
+
+- Amazon VPC ≒ virtual network concept ≒ VPC(GCP) / VNet(Azure) / VCN(OCI)
+- RDS/Aurora ≒ managed relational database concept
+- Direct Connect ≒ dedicated hybrid connectivity concept
+
+サービスが1:1で同じという意味ではない。AWSのEvidence・責任・制約はAWSの公式仕様で確認する。
+
 ## 20 Labs
 
 - 01–06: Account/Region/AZ, VPC/Subnet, IGW/NAT/Route, SG/NACL, EC2/Auto Scaling, ELB
@@ -15,6 +27,7 @@ AWSを個別サービスのカタログではなく、VPC → Compute → Data �
 
 - Lab01–20を修了
 - Cloud Fundamentalsの共通概念へAWSサービスをマッピング
+- Scope BadgeでNetwork / Compute / Data / Identity / Observe / Hybridを分離
 - AWS内GreenだけでなくHybrid/正本/後続処理まで確認
 - 進捗キー: `aws_labXX_complete`
 
@@ -25,5 +38,6 @@ AWSを個別サービスのカタログではなく、VPC → Compute → Data �
 - CloudWatchとCloudTrailのどちらが今回の証拠か
 - IAM Role/KMS/Secrets/ACMに直近変更はないか
 - Direct Connect/VPNからCoreまでEnd-to-Endで正常か
+- そのEvidenceはAWS固有実装か、共通概念か
 
 Next: **Google Cloud / Azure / Financial War Room**
