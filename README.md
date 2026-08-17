@@ -4,10 +4,10 @@
 
 ## Modules
 
-- 🐧 **Linux / Infrastructure** — 20 Labs（既存サイトから段階移植）
+- 🐧 **Linux / Infrastructure** — 20 Labs
 - 🟩 **COBOL / Business Systems** — 20 Labs
 - 💾 **SQL / Database** — 20 Labs
-- ⚙️ **JCL / Batch Operations** — Coming next
+- ⚙️ **JCL / Batch Operations** — 20 Labs
 
 ## Learning concept
 
@@ -22,7 +22,9 @@
 
 ## Goal
 
-ATM / Web / Linux / Database / COBOL / Batch といったレイヤを別々の単語として覚えるのではなく、**1つの金融システムとしてつなげて説明・一次切り分けできること**を目指します。
+ATM / Web / Linux / Database / COBOL / JCL / Batch といったレイヤを別々の単語として覚えるのではなく、**1つの金融システムとしてつなげて説明・一次切り分けできること**を目指します。
+
+JCL moduleでは、JOB / EXEC / DDからJES、DISP、PROC、GDG、ABEND、step restart、Night Batch War Roomまでを扱います。
 
 ## Structure
 
