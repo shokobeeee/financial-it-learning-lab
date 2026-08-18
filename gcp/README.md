@@ -1,42 +1,54 @@
-# Google Cloud for Financial IT — Complete Package
+# Google Cloud for Financial IT — Cloud Fundamentals Translation Package
 
 ## Goal
 
-Google Cloud固有名を、Network / Compute / Data / IAM / Observability / Messaging / Hybridという共通構造へ戻して説明できること。
+Cloud Fundamentalsで作った同じ銀行Webを、**同じLab番号・同じ概念順**でGoogle Cloudへ翻訳する。
 
-## Context Model
+```text
+共通概念      → Google Cloudの代表実装
+Compute       → Compute Engine / Cloud Run / GKE
+Virtual Net   → VPC
+Managed DB    → Cloud SQL / AlloyDB
+Identity      → Cloud IAM / Service Account
+Observe       → Monitoring / Logging / Audit Logs
+Hybrid        → Interconnect / VPN
+```
 
-このPackageはGoogle Cloud固有。ただし **🧭 Context** ではCommon Conceptを正面に置き、AWS / Azure / OCIとの `≒ conceptual mapping` を確認できる。
+## Learning Step 0
 
-- VPC ≒ virtual network concept
-- Cloud SQL / AlloyDB ≒ managed relational database concept
-- Cloud Interconnect ≒ dedicated hybrid connectivity concept
-- Cloud Audit Logs ≒ control-plane/audit evidence concept
+**「Cloud Fundamentalsで作った銀行Webを、Google Cloudでは何と呼ぶ？」**から始める。
 
-製品差分は残し、サービス名の置換表としては扱わない。
+## 20 Labs — Cloud Fundamentalsと番号を揃える
 
-## 20 Labs
+- 01 Webサービスの流れ
+- 02 Compute — Compute Engine / Cloud Run / GKE
+- 03 Data — Cloud SQL / AlloyDB / Cloud Storage
+- 04 Network — VPC
+- 05 Public / Private — Subnet
+- 06 Route / NAT — Routes / Cloud NAT
+- 07 Entry — Cloud DNS / Cloud Load Balancing
+- 08 Firewall — VPC Firewall Rules
+- 09 HA — Region / Zone / MIG
+- 10 Storage — Cloud Storage / Persistent Disk / Filestore
+- 11 Managed DB — Cloud SQL / AlloyDB
+- 12 IAM — Cloud IAM / Service Account
+- 13 Secret / Key — Cloud KMS / Secret Manager
+- 14 Observe — Monitoring / Logging / Audit Logs
+- 15 Backup — Backup / Restore
+- 16 Region / DR — Multi-zone / Multi-region
+- 17 Hybrid — Interconnect / VPN
+- 18 Common Concept Translation
+- 19 Change / Governance — Terraform / Organization / Project / Billing
+- 20 Google Cloud Financial War Room
 
-- 01–06: Resource hierarchy/Region/Zone, VPC/Subnet, Firewall/Route/NAT, Compute/LB
-- 07–10: Cloud Storage/Persistent Disk/Filestore, Cloud SQL等, IAM/Service Account, KMS/Secret Manager
-- 11–14: Cloud DNS, Monitoring/Logging/Audit Logs, Pub/Sub, Cloud Run/GKE等
-- 15–20: Interconnect/VPN, Private Service access, Backup/DR, IaC/Change, Cost/Architecture, War Room
+## Provider Extras
+
+- Pub/Sub — 非同期message / retry / duplicate
+- Private Service Connect / VPC Service Controls — Private接続とData境界
+- Cloud Run / GKE — Managed Container / Kubernetesの選択
 
 ## Completion
 
-- Lab01–20を修了
-- runtime evidenceとaudit evidenceを使い分ける
-- Scope BadgeでNetwork / Compute / Data / Identity / Observe / Async / Hybridを分離
-- 非同期処理をduplicate / retry / idempotencyと結び付ける
-- 進捗キー: `gcp_labXX_complete`
-
-## Field Questions
-
-- Organization/Folder/ProjectとIAM境界はどうなっているか
-- VPC route/firewall/NATからbackendまで到達しているか
-- Cloud SQL等の正本/replicaとfreshness要件は一致するか
-- Monitoring/LoggingとAudit Logsのどれが今回の証拠か
-- Interconnect/VPNからCoreまでEnd-to-Endで正常か
-- そのEvidenceはGoogle Cloud固有実装か、共通概念か
+Google Cloud名を共通概念へ戻し、共通概念を代表サービスへ翻訳できること。Google Cloud側だけでなくCore・顧客導線・金融データまで確認する。
 
 Next: **Azure / Financial War Room**

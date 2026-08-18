@@ -1,43 +1,58 @@
-# AWS for Financial IT — Complete Package
+# AWS for Financial IT — Cloud Fundamentals Translation Package
 
 ## Goal
 
-AWSを個別サービスのカタログではなく、VPC → Compute → Data → Identity → Observability → Hybrid → DR という金融システム導線として理解すること。
+Cloud Fundamentalsで作った同じ銀行Webを、**同じLab番号・同じ概念順**でAWSへ翻訳する。
 
-## Context Model
+AWSを新しい20個の仕組みとして覚えない。
 
-このPackageはAWS固有。ただし **🧭 Context** では常にCommon Conceptも併記し、Google Cloud / Azure / OCIとの `≒ conceptual mapping` を確認できる。
+```text
+共通概念      → AWSの代表実装
+Compute       → EC2 / ECS / Lambda
+Virtual Net   → Amazon VPC
+Managed DB    → RDS / Aurora
+Identity      → AWS IAM
+Observe       → CloudWatch / CloudTrail
+Hybrid        → Direct Connect / VPN
+```
 
-例:
+## Learning Step 0
 
-- Amazon VPC ≒ virtual network concept ≒ VPC(GCP) / VNet(Azure) / VCN(OCI)
-- RDS/Aurora ≒ managed relational database concept
-- Direct Connect ≒ dedicated hybrid connectivity concept
+**「Cloud Fundamentalsで作った銀行Webを、AWSでは何と呼ぶ？」**から始める。
 
-サービスが1:1で同じという意味ではない。AWSのEvidence・責任・制約はAWSの公式仕様で確認する。
+## 20 Labs — Cloud Fundamentalsと番号を揃える
 
-## 20 Labs
+- 01 Webサービスの流れ
+- 02 Compute — EC2 / ECS / Lambda
+- 03 Data — RDS / Aurora / S3
+- 04 Network — Amazon VPC
+- 05 Public / Private — Subnet
+- 06 Route / NAT — Route Table / IGW / NAT Gateway
+- 07 Entry — Route 53 / Elastic Load Balancing
+- 08 Firewall — Security Group / NACL
+- 09 HA — Availability Zone / Auto Scaling
+- 10 Storage — S3 / EBS / EFS
+- 11 Managed DB — RDS / Aurora
+- 12 IAM — AWS IAM / IAM Role
+- 13 Secret / Key — KMS / Secrets Manager / ACM
+- 14 Observe — CloudWatch / CloudTrail
+- 15 Backup — AWS Backup / Restore
+- 16 Region / DR — Multi-AZ / Multi-Region
+- 17 Hybrid — Direct Connect / VPN
+- 18 Common Concept Translation
+- 19 Change / Governance — CloudFormation / Organizations / Cost
+- 20 AWS Financial War Room
 
-- 01–06: Account/Region/AZ, VPC/Subnet, IGW/NAT/Route, SG/NACL, EC2/Auto Scaling, ELB
-- 07–10: S3/EBS/EFS, RDS/Aurora, IAM, KMS/Secrets/ACM
-- 11–14: Route 53, CloudWatch/CloudTrail, SQS/SNS/EventBridge, Lambda/ECS/EKS
-- 15–20: Direct Connect/VPN, PrivateLink/Endpoint, Backup/DR, CloudFormation/IaC, Cost/Well-Architected, War Room
+## Provider Extras
+
+主導線を崩さないよう独立Labにはしないが、Guide / Contextで以下も扱う。
+
+- SQS / SNS / EventBridge — 非同期・Event連携
+- VPC Endpoint / PrivateLink — Private接続
+- ECS / EKS / Lambda — Container / Kubernetes / Serverlessの選択
 
 ## Completion
 
-- Lab01–20を修了
-- Cloud Fundamentalsの共通概念へAWSサービスをマッピング
-- Scope BadgeでNetwork / Compute / Data / Identity / Observe / Hybridを分離
-- AWS内GreenだけでなくHybrid/正本/後続処理まで確認
-- 進捗キー: `aws_labXX_complete`
-
-## Field Questions
-
-- VPC/Subnet/Route/SGのどこまで到達しているか
-- RDS/Auroraのprimary/replicaとfreshness要件は一致するか
-- CloudWatchとCloudTrailのどちらが今回の証拠か
-- IAM Role/KMS/Secrets/ACMに直近変更はないか
-- Direct Connect/VPNからCoreまでEnd-to-Endで正常か
-- そのEvidenceはAWS固有実装か、共通概念か
+AWS名を見て共通概念へ戻せ、共通概念から代表AWSサービスを挙げられること。AWS側GreenだけでなくCore・顧客導線・金融データまで確認する。
 
 Next: **Google Cloud / Azure / Financial War Room**
