@@ -1,0 +1,72 @@
+name: QA Cloud Zero Base
+on:
+  push:
+    branches: ["cloud-zero-base-v2"]
+    paths:
+      - "assets/js/cloud-zero-base.js"
+      - "assets/js/cloud-lab-engine.js"
+      - "assets/css/cloud-zero-base.css"
+      - "cloud/**"
+      - "aws/**"
+      - "gcp/**"
+      - "azure/**"
+      - ".github/workflows/qa-cloud-zero-base.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: |
+          node --check assets/js/cloud-zero-base.js
+          node --check assets/js/cloud-lab-engine.js
+          for f in cloud/spec.js aws/spec.js gcp/spec.js azure/spec.js; do node --check "$f"; done
+      - name: Runtime curriculum alignment
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const adapter=fs.readFileSync('assets/js/cloud-zero-base.js','utf8');
+          for(const d of ['cloud','aws','gcp','azure']){
+            const box={window:{}};vm.createContext(box);
+            vm.runInContext(fs.readFileSync(`${d}/spec.js`,'utf8'),box);
+            vm.runInContext(adapter,box);
+            const s=box.window.CLOUD_SPEC;
+            if(s.topics.length!==20)throw new Error(`${d}: ${s.topics.length} topics`);
+            if(!s.journey||s.journey.focus.length!==20)throw new Error(`${d}: journey missing`);
+            const title=n=>s.topics[n-1][1];
+            if(!/Appを動かす/.test(title(1)))throw new Error(`${d}: Lab01 ${title(1)}`);
+            if(!/ネットワーク|Network|VPC|VNet/.test(title(2)))throw new Error(`${d}: Lab02 ${title(2)}`);
+            if(!/Database/.test(title(9))&&!/DBを借りる/.test(title(9)))throw new Error(`${d}: Lab09 ${title(9)}`);
+            if(!/銀行内|Direct Connect|Interconnect|ExpressRoute/.test(title(15)))throw new Error(`${d}: Lab15 ${title(15)}`);
+            if(!/War Room/.test(title(20)))throw new Error(`${d}: Lab20 ${title(20)}`);
+            for(const t of s.topics){if(!t[11]||!t[12])throw new Error(`${d}: plain/why missing ${t[1]}`)}
+            console.log(d,'OK:',title(1),'|',title(2),'|',title(9),'|',title(15),'|',title(20));
+          }
+          const box={window:{}};vm.createContext(box);vm.runInContext(fs.readFileSync('cloud/spec.js','utf8'),box);vm.runInContext(adapter,box);
+          if(box.window.CLOUD_SPEC.stage.title!=='クラウドって、そもそも何？')throw new Error('Cloud Step0 title not zero-base');
+          NODE
+      - name: Page wiring
+        run: |
+          set -e
+          for d in cloud aws gcp azure; do
+            grep -q 'cloud-zero-base.css?v=2' "$d/index.html"
+            grep -q 'cloud-zero-base.js?v=2' "$d/index.html"
+            grep -q 'cloud-lab-engine.js?v=2' "$d/index.html"
+            python - "$d/index.html" <<'PY'
+          import sys
+          s=open(sys.argv[1],encoding='utf-8').read()
+          assert s.index('spec.js') < s.index('cloud-zero-base.js') < s.index('cloud-lab-engine.js')
+          PY
+          done
+      - name: UX structure
+        run: |
+          set -e
+          grep -q 'SYSTEM BUILDER' assets/js/cloud-lab-engine.js
+          grep -q 'ひと言でいうと' assets/js/cloud-lab-engine.js
+          grep -q 'なぜ今これを学ぶ' assets/js/cloud-lab-engine.js
+          grep -q '最初はこれ' assets/js/cloud-lab-engine.js
+          grep -q '.systemBuilder' assets/css/cloud-zero-base.css
+          grep -q '.plainIntro' assets/css/cloud-zero-base.css
