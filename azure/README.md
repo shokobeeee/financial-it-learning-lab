@@ -1,42 +1,36 @@
-# Azure for Financial IT — Complete Package
+# Azure for Financial IT — Translation Complete Package
 
 ## Goal
 
-Azureを VNet / Compute / Data / Microsoft Entra / RBAC / Key Vault / Monitor / Hybrid という金融システム導線として理解し、共通クラウド概念へ戻して説明できること。
+Cloud Fundamentalsで作った銀行Webを、**同じLab番号・同じ概念順**でAzureのサービス名へ翻訳する。
 
-## Context Model
+```text
+Cloud共通概念 → Azureでの代表実装
+App            → Virtual Machines / App Service
+Network        → VNet
+DB             → Azure SQL
+権限           → Microsoft Entra ID / Azure RBAC
+監視/監査      → Azure Monitor / Activity Log
+Hybrid         → ExpressRoute / VPN
+```
 
-このPackageはAzure固有。ただし **🧭 Context** ではCommon Conceptを併記し、AWS / Google Cloud / OCIとの `≒ conceptual mapping` を確認できる。
+## Learning Step 0
 
-- VNet ≒ virtual network concept
-- Azure SQL等 ≒ managed relational database concept
-- Microsoft Entra ID + Azure RBAC ≒ identity / authorization concept
-- ExpressRoute ≒ dedicated hybrid connectivity concept
-
-製品・責任・Evidenceの差は残し、単なる名称置換にしない。
+**「Cloud Fundamentalsで作った銀行Webを、Azureでは何と呼ぶ？」**から開始する。
 
 ## 20 Labs
 
-- 01–06: Tenant/Subscription/Region/AZ, VNet/Subnet, NSG/Route/NAT, VM/Scale, Load Balancer/Application Gateway
-- 07–10: Blob/Disk/Files, Azure SQL系, Entra/RBAC/Managed Identity, Key Vault
-- 11–14: DNS, Azure Monitor/Log Analytics/Activity Log, Service Bus/Event系, Functions/Container/AKS
-- 15–20: ExpressRoute/VPN, Private Link/Endpoint, Backup/DR, Bicep/ARM/IaC, Cost/Well-Architected, War Room
+Cloud Fundamentalsと概念順を揃える。
+
+- 01–07: App / VNet / Subnet / Route-NAT / NSG / DNS-LB / AZ-HA
+- 08–14: Storage / Azure SQL / Entra-RBAC / Key Vault / Secrets-Certs / Monitor-Audit / Messaging
+- 15–19: ExpressRoute / Private Link / Backup-DR / Bicep-IaC / Responsibility-Cost-Governance
+- 20: Azure Financial War Room
 
 ## Completion
 
-- Lab01–20を修了
-- identity / key / runtime / auditを役割で分離
-- Scope BadgeでNetwork / Compute / Data / Identity / Observe / Async / Hybridを分離
-- Azure側の正常だけでなくHybrid / 正本 / customer journeyまで確認
-- 進捗キー: `azure_labXX_complete`
-
-## Field Questions
-
-- Tenant/Subscription/Resource Group/RBACの管理境界はどうなっているか
-- VNet/NSG/Route/Private Endpointからbackendまで到達しているか
-- Managed Identity/Key Vault/証明書rotationに変更はないか
-- Azure Monitor/Log AnalyticsとActivity Logのどれが今回の証拠か
-- ExpressRoute/VPNからCoreまでEnd-to-Endで正常か
-- そのEvidenceはAzure固有実装か、共通概念か
+- Azure名を共通概念へ戻せる
+- 共通概念を代表Azureサービスへ翻訳できる
+- Azure側だけでなくCore・顧客導線・金融データまで確認する
 
 Next: **Financial War Room**
