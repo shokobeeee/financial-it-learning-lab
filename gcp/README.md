@@ -1,42 +1,36 @@
-# Google Cloud for Financial IT — Complete Package
+# Google Cloud for Financial IT — Translation Complete Package
 
 ## Goal
 
-Google Cloud固有名を、Network / Compute / Data / IAM / Observability / Messaging / Hybridという共通構造へ戻して説明できること。
+Cloud Fundamentalsで作った銀行Webを、**同じLab番号・同じ概念順**でGoogle Cloudのサービス名へ翻訳する。
 
-## Context Model
+```text
+Cloud共通概念 → Google Cloudでの代表実装
+App            → Compute Engine / Cloud Run
+Network        → VPC
+DB             → Cloud SQL / AlloyDB
+権限           → Cloud IAM / Service Account
+監視/監査      → Monitoring / Logging / Audit Logs
+Hybrid         → Interconnect / VPN
+```
 
-このPackageはGoogle Cloud固有。ただし **🧭 Context** ではCommon Conceptを正面に置き、AWS / Azure / OCIとの `≒ conceptual mapping` を確認できる。
+## Learning Step 0
 
-- VPC ≒ virtual network concept
-- Cloud SQL / AlloyDB ≒ managed relational database concept
-- Cloud Interconnect ≒ dedicated hybrid connectivity concept
-- Cloud Audit Logs ≒ control-plane/audit evidence concept
-
-製品差分は残し、サービス名の置換表としては扱わない。
+**「Cloud Fundamentalsで作った銀行Webを、Google Cloudでは何と呼ぶ？」**から開始する。
 
 ## 20 Labs
 
-- 01–06: Resource hierarchy/Region/Zone, VPC/Subnet, Firewall/Route/NAT, Compute/LB
-- 07–10: Cloud Storage/Persistent Disk/Filestore, Cloud SQL等, IAM/Service Account, KMS/Secret Manager
-- 11–14: Cloud DNS, Monitoring/Logging/Audit Logs, Pub/Sub, Cloud Run/GKE等
-- 15–20: Interconnect/VPN, Private Service access, Backup/DR, IaC/Change, Cost/Architecture, War Room
+Cloud Fundamentalsと概念順を揃える。
+
+- 01–07: App / VPC / Subnet / Route-NAT / Firewall / DNS-LB / Zone-HA
+- 08–14: Storage / Cloud SQL / IAM / KMS / Secrets / Monitoring-Audit / Pub/Sub
+- 15–19: Interconnect / Private Service Connect / Backup-DR / Terraform / Responsibility-Cost-Governance
+- 20: Google Cloud Financial War Room
 
 ## Completion
 
-- Lab01–20を修了
-- runtime evidenceとaudit evidenceを使い分ける
-- Scope BadgeでNetwork / Compute / Data / Identity / Observe / Async / Hybridを分離
-- 非同期処理をduplicate / retry / idempotencyと結び付ける
-- 進捗キー: `gcp_labXX_complete`
-
-## Field Questions
-
-- Organization/Folder/ProjectとIAM境界はどうなっているか
-- VPC route/firewall/NATからbackendまで到達しているか
-- Cloud SQL等の正本/replicaとfreshness要件は一致するか
-- Monitoring/LoggingとAudit Logsのどれが今回の証拠か
-- Interconnect/VPNからCoreまでEnd-to-Endで正常か
-- そのEvidenceはGoogle Cloud固有実装か、共通概念か
+- Google Cloud名を共通概念へ戻せる
+- 共通概念を代表Google Cloudサービスへ翻訳できる
+- Cloud側だけでなくCore・顧客導線・金融データまで確認する
 
 Next: **Azure / Financial War Room**
