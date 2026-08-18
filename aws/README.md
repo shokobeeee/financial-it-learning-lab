@@ -1,43 +1,38 @@
-# AWS for Financial IT — Complete Package
+# AWS for Financial IT — Translation Complete Package
 
 ## Goal
 
-AWSを個別サービスのカタログではなく、VPC → Compute → Data → Identity → Observability → Hybrid → DR という金融システム導線として理解すること。
+Cloud Fundamentalsで作った銀行Webを、**同じLab番号・同じ概念順**でAWSのサービス名へ翻訳する。
 
-## Context Model
+AWSを新しい20概念として覚えない。
 
-このPackageはAWS固有。ただし **🧭 Context** では常にCommon Conceptも併記し、Google Cloud / Azure / OCIとの `≒ conceptual mapping` を確認できる。
+```text
+Cloud共通概念 → AWSでの代表実装
+App            → EC2 / ECS / Lambda
+Network        → Amazon VPC
+DB             → RDS / Aurora
+権限           → AWS IAM
+監視/監査      → CloudWatch / CloudTrail
+Hybrid         → Direct Connect / VPN
+```
 
-例:
+## Learning Step 0
 
-- Amazon VPC ≒ virtual network concept ≒ VPC(GCP) / VNet(Azure) / VCN(OCI)
-- RDS/Aurora ≒ managed relational database concept
-- Direct Connect ≒ dedicated hybrid connectivity concept
-
-サービスが1:1で同じという意味ではない。AWSのEvidence・責任・制約はAWSの公式仕様で確認する。
+**「Cloud Fundamentalsで作った銀行Webを、AWSでは何と呼ぶ？」**から開始する。
 
 ## 20 Labs
 
-- 01–06: Account/Region/AZ, VPC/Subnet, IGW/NAT/Route, SG/NACL, EC2/Auto Scaling, ELB
-- 07–10: S3/EBS/EFS, RDS/Aurora, IAM, KMS/Secrets/ACM
-- 11–14: Route 53, CloudWatch/CloudTrail, SQS/SNS/EventBridge, Lambda/ECS/EKS
-- 15–20: Direct Connect/VPN, PrivateLink/Endpoint, Backup/DR, CloudFormation/IaC, Cost/Well-Architected, War Room
+Cloud Fundamentalsと揃える。
+
+- 01–07: App / VPC / Subnet / Route-NAT / SG / Route53-LB / AZ-HA
+- 08–14: S3-EBS-EFS / RDS / IAM / KMS / Secrets-ACM / CloudWatch-CloudTrail / Messaging
+- 15–19: Direct Connect / PrivateLink / Backup-DR / CloudFormation / Responsibility-Cost-Governance
+- 20: AWS Financial War Room
 
 ## Completion
 
-- Lab01–20を修了
-- Cloud Fundamentalsの共通概念へAWSサービスをマッピング
-- Scope BadgeでNetwork / Compute / Data / Identity / Observe / Hybridを分離
-- AWS内GreenだけでなくHybrid/正本/後続処理まで確認
-- 進捗キー: `aws_labXX_complete`
-
-## Field Questions
-
-- VPC/Subnet/Route/SGのどこまで到達しているか
-- RDS/Auroraのprimary/replicaとfreshness要件は一致するか
-- CloudWatchとCloudTrailのどちらが今回の証拠か
-- IAM Role/KMS/Secrets/ACMに直近変更はないか
-- Direct Connect/VPNからCoreまでEnd-to-Endで正常か
-- そのEvidenceはAWS固有実装か、共通概念か
+- AWS名を見て共通概念へ戻せる
+- 共通概念を見て代表AWSサービスを挙げられる
+- AWS側Greenだけでなく、Core・顧客導線・金融データまで確認する
 
 Next: **Google Cloud / Azure / Financial War Room**
