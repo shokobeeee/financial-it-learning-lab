@@ -1,0 +1,9 @@
+(function(){
+'use strict';
+const m=(location.pathname.match(/\/(cloud|aws|gcp|azure)\//i)||[])[1];if(!m)return;
+const provider=m==='cloud'?'Cloud Fundamentals':m==='aws'?'AWS':m==='gcp'?'Google Cloud':'Azure';
+const phases=[['01–07','まず1つのWebサービスを作る','App → Network → Subnet → Route → Firewall → 入口 → HA'],['08–14','データと安全な運用','Storage → DB → IAM → 暗号化 → Secrets → Observe → Async'],['15–19','銀行システムとしてつなぐ','Hybrid → Private Access → Backup/DR → IaC → Responsibility/Governance'],['20','War Room','複数レイヤのEvidence → Safe Recovery → 金融データ照合']];
+function html(){return phases.map(x=>'<div class="pkg-phase"><div class="pkg-range">'+x[0]+'</div><div><b>'+x[1]+'</b><span>'+x[2]+'</span></div></div>').join('')}
+function patch(){const o=document.getElementById('modulePackageOverlay');if(!o||o.dataset.cloudZero==='1')return;o.dataset.cloudZero='1';const ps=o.querySelector('.pkg-phases');if(ps)ps.innerHTML=html();const body=o.querySelector('.pkg-body'),grid=o.querySelector('.pkg-grid');if(body&&grid){const d=document.createElement('div');d.className='pkg-card cloudZeroGuide';d.innerHTML=m==='cloud'?'<h3>☁️ Learning Step 0 — クラウドって、そもそも何？</h3><p>Appを動かすコンピュータ・Network・Data保存場所を、自社ですべて買う代わりにCloud事業者から借りて使うところから始めます。VPC / IAM / AZ / KMSは必要になったLabで初めて名前を付けます。</p><div class="cloudZeroMini"><span>📱 利用者</span><span>🖥 App</span><span>🗄 Data</span><span>☁️ Cloud</span><span>🔒 守る</span><span>🧯 戻す</span></div>':'<h3>🔁 '+provider+'は「新しい20概念」ではない</h3><p>Cloud Fundamentalsで作った同じ銀行Webを、'+provider+'のサービス名へ翻訳します。Lab番号も同じ概念順なので、迷ったらCloud Fundamentalsへ戻ります。</p><div class="cloudZeroMini"><span>共通Concept</span><span>→</span><span>'+provider+'名</span><span>→</span><span>Evidence</span></div>';body.insertBefore(d,grid)}}
+patch();new MutationObserver(patch).observe(document.body,{subtree:true,childList:true});
+})();
