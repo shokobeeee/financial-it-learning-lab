@@ -5,6 +5,19 @@ on:
     paths:
       - "assets/js/cloud-zero-base.js"
       - "assets/js/cloud-lab-engine.js"
+      - "assets/js/cloud-guide-zero.js"
+      - "assets/css/cloud-zero-base.css"
+      - "cloud/**"
+      - "aws/**"
+      - "gcp/**"
+      - "azure/**"
+      - ".github/workflows/qa-cloud-zero-base.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "assets/js/cloud-zero-base.js"
+      - "assets/js/cloud-lab-engine.js"
+      - "assets/js/cloud-guide-zero.js"
       - "assets/css/cloud-zero-base.css"
       - "cloud/**"
       - "aws/**"
@@ -23,6 +36,7 @@ jobs:
         run: |
           node --check assets/js/cloud-zero-base.js
           node --check assets/js/cloud-lab-engine.js
+          node --check assets/js/cloud-guide-zero.js
           for f in cloud/spec.js aws/spec.js gcp/spec.js azure/spec.js; do node --check "$f"; done
       - name: Runtime curriculum alignment
         run: |
@@ -55,10 +69,12 @@ jobs:
             grep -q 'cloud-zero-base.css?v=2' "$d/index.html"
             grep -q 'cloud-zero-base.js?v=2' "$d/index.html"
             grep -q 'cloud-lab-engine.js?v=2' "$d/index.html"
+            grep -q 'cloud-guide-zero.js?v=2' "$d/index.html"
             python - "$d/index.html" <<'PY'
           import sys
           s=open(sys.argv[1],encoding='utf-8').read()
           assert s.index('spec.js') < s.index('cloud-zero-base.js') < s.index('cloud-lab-engine.js')
+          assert s.index('module-package.js') < s.index('cloud-guide-zero.js')
           PY
           done
       - name: UX structure
@@ -68,5 +84,6 @@ jobs:
           grep -q 'ひと言でいうと' assets/js/cloud-lab-engine.js
           grep -q 'なぜ今これを学ぶ' assets/js/cloud-lab-engine.js
           grep -q '最初はこれ' assets/js/cloud-lab-engine.js
+          grep -q 'クラウドって、そもそも何' assets/js/cloud-guide-zero.js
           grep -q '.systemBuilder' assets/css/cloud-zero-base.css
           grep -q '.plainIntro' assets/css/cloud-zero-base.css
