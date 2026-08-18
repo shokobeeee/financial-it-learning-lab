@@ -1,0 +1,50 @@
+name: QA Cloud Zero Base
+
+on:
+  push:
+    branches: ["cloud-zero-base"]
+    paths:
+      - "cloud/**"
+      - ".github/workflows/qa-cloud-zero-base.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: |
+          node --check cloud/zero-base.js
+          node --check cloud/zero-base-ui.js
+          node --check assets/js/cloud-lab-engine.js
+      - name: Zero-base spec invariants
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const box={window:{}};vm.createContext(box);
+          vm.runInContext(fs.readFileSync('cloud/spec.js','utf8'),box);
+          vm.runInContext(fs.readFileSync('cloud/zero-base.js','utf8'),box);
+          const s=box.window.CLOUD_SPEC;
+          if(!s)throw new Error('CLOUD_SPEC missing');
+          if(s.topics.length!==20)throw new Error('topics='+s.topics.length);
+          if(s.maps.length!==20)throw new Error('maps='+s.maps.length);
+          if(s.stage.title!=='クラウドって、そもそも何？')throw new Error('step0 title');
+          if(s.topics[0][1]!=='Webサービスはどう動く？')throw new Error('lab01 not zero-base');
+          if(s.topics[10][1]!=='DB運用の一部をクラウドに任せる')throw new Error('shared responsibility placement');
+          if(s.topics[17][1].indexOf('各クラウド')<0)throw new Error('provider translation missing');
+          if(s.topics[19][1]!=='Cloud War Room')throw new Error('lab20');
+          console.log('Zero-base Cloud 20 Labs OK');
+          NODE
+      - name: Wiring and UX invariants
+        run: |
+          set -e
+          grep -q 'zero-base.css?v=1' cloud/index.html
+          grep -q 'zero-base.js?v=1' cloud/index.html
+          grep -q 'zero-base-ui.js?v=1' cloud/index.html
+          grep -q 'いま作っている銀行システム' cloud/zero-base-ui.js
+          grep -q '困る → 部品を足す → 名前を知る' cloud/README.md
+          grep -q '@media(max-width:680px)' cloud/zero-base.css
