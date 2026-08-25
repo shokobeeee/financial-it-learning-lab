@@ -1,0 +1,32 @@
+window.WARROOM_BEGINNER_GUIDE={
+  glossary:[
+    ['SEV','障害の深刻さ。SEV1ほど重大。まず「何が・誰に・どれだけ影響しているか」で考える。'],
+    ['Hypothesis / 仮説','原因の候補。まだ正解ではない。「この可能性を確認しよう」という置き方。'],
+    ['Evidence / 証拠','ログ・メトリクス・監査記録・業務データなど、仮説を残す／消すための確認材料。'],
+    ['Recovery / 復旧','サービスを安全に戻す行動。直りそうかだけでなく、副作用・rollback・データ整合性も見る。'],
+    ['Reconciliation / 照合','件数・金額・残高などを突き合わせ、「技術的に動いた」だけでなく業務が正しく完了したことを確かめる。']
+  ],
+  flow:[
+    ['01','影響を見る','何が止まり、誰に影響している？'],
+    ['02','原因候補を置く','まだ断定せず、最大3つに絞る'],
+    ['03','証拠を取る','どの候補が残るか確認する'],
+    ['04','原因を判断','主原因と背景要因を分ける'],
+    ['05','安全に戻す','副作用とrollbackを考える'],
+    ['06','本当に戻ったか確認','技術＋件数・金額・顧客導線を見る'],
+    ['07','共有する','事実・未確定・次Actionを伝える']
+  ],
+  cases:{
+    1:{layer:'🚪 Entry / 🖥 App',plain:'残高照会だけ一部失敗しているのに、入口の監視画面は「正常」と表示されています。',focus:'「監視が正常」と「お客さんの操作が正常」は同じなのか？を切り分ける。',map:'📱 お客さん\n   ↓\n🚪 入口 / Health Check   ✅?\n   ↓\n🖥 App A / App B         ❓\n   ↓\n🗄 DB\n\n症状: 残高照会の一部だけ失敗'},
+    2:{layer:'🗄 Data / Read path',plain:'振込そのものは成功しているのに、その直後の残高表示だけ数秒古く見えます。',focus:'「書き込み」と「読み取り」が同じデータ・同じタイミングを見ているか確認する。',map:'振込 ✍️\n   ↓\n🗄 正本DB\n   ├─ Write: 成功\n   └─ Read path → 📱 残高表示が古い ❓'},
+    3:{layer:'🔁 API / Data integrity',plain:'通信が一度タイムアウトしたあと、同じ振込が2件として記録されたという申告です。',focus:'「再送しても1回だけ処理される」仕組みと、正本データの重複を確認する。',map:'📱 振込ボタン\n   ↓ request\n🌐 timeout\n   ↓ retry\n🔁 API  ──→ 🗄 Ledger\n              ❓ 同じ振込が2件?'},
+    4:{layer:'🔗 Hybrid / Core',plain:'クラウド内の処理は普通なのに、銀行の社内・勘定系へ問い合わせる処理だけ遅くなっています。',focus:'Cloud単体ではなく、CloudからCoreまでのEnd-to-End経路を見る。',map:'📱 Customer\n   ↓\n☁️ Cloud App   ✅\n   ↓\n🔗 Hybrid Link ❓\n   ↓\n🏢 Core / 勘定系'},
+    5:{layer:'🔐 Identity / Credential',plain:'アプリやサービス同士が使う認証情報を更新したあと、一部の接続だけ認証に失敗しています。',focus:'誰のCredentialが、どこで使われ、更新前後で何が変わったかを見る。',map:'🤖 App / Service\n   ↓ credential\n🔐 Identity / Secret   🔄 更新\n   ↓\n☁️ / 🗄 接続先\n\n症状: 一部だけ認証失敗'},
+    6:{layer:'🔒 TLS / Certificate',plain:'それまで普通に使えていた通信が、証明書に関係するエラーで突然つながらなくなっています。',focus:'通信経路のどこでTLSを終端し、どの証明書が期限・信頼・更新の対象かを見る。',map:'📱 Client\n   ↓ HTTPS\n🔒 TLS / Certificate ❓\n   ↓\n🚪 Entry / App'},
+    7:{layer:'🌐 DNS / Cutover',plain:'新しい環境へ切り替えたのに、一部の利用者だけ古い環境へ到達しています。',focus:'「正しいDNS設定」と「実際に各利用者がどこへ名前解決しているか」を分ける。',map:'📱 利用者\n   ↓ DNS\n   ├─ 90% → ☁️ 新環境\n   └─ 10% → 🏚 旧環境 ❓'},
+    8:{layer:'🏦 Batch / Data',plain:'夜間バッチが途中で異常終了しました。しかも、停止する前に一部データはすでに確定済みです。',focus:'「どこまで終わったか」「何がcommit済みか」を確認して、安全な再開位置を決める。',map:'🌙 Night Batch\nSTEP01 ✅\nSTEP02 ✅\nSTEP03 ── 45,000件commit済み ── 💥 S0C7\n残り 75,000件\n\n❓ 頭から再実行してよい？'},
+    9:{layer:'📨 Queue / Async',plain:'振込受付は成功しているのに、実際の反映が15分ほど遅れています。処理待ちが大量に積み上がっています。',focus:'受付件数と処理能力の差、待ち時間、未処理取引を失わずに追いつける方法を見る。',map:'📱 振込受付 ✅\n   ↓\n📨 Queue  ███████████  backlog\n   ↓\n⚙ Consumer  ❓ 処理が追いつかない\n   ↓\n🗄 反映'},
+    10:{layer:'🛡 Security / WAF',plain:'不正通信を防ぐルールを強くした直後、正規の法人APIまで一部403で止められています。',focus:'攻撃を防ぎ続けながら、どの正規通信が誤検知されているかを確認する。',map:'🌐 Internet\n   ↓\n🛡 WAF  ← rule変更\n   ├─ 攻撃通信 🚫\n   └─ 正規APIも一部 🚫?\n        ↓\n🖥 Backend ✅'},
+    11:{layer:'🌏 Region / DR',plain:'利用中のRegion規模で大きな障害が起き、別Regionへ切り替えるかを判断する場面です。',focus:'「切り替えれば直る」ではなく、RTO/RPO・データ差分・切替リスクを含めて判断する。',map:'🌏 Region A  💥 大規模障害\n   │\n   └── DR判断 ❓ ──→ 🌏 Region B\n                         ↓\n                    🗄 Data / 業務照合'},
+    12:{layer:'🏦 Core → Batch → Cloud',plain:'月末処理。基幹・JCLは正常終了に見えるのに、Cloud側へ届いた明細の件数と金額が足りません。',focus:'1つのRCだけで完了とせず、正本から最終利用先までEnd-to-Endで「どこまで届いたか」を追う。',map:'🏦 Core Ledger\n   ↓\n⚙ JCL / Export   ✅ RC=0\n   ↓\n📦 Export / Publish ❓\n   ↓\n☁️ Cloud Ingest\n   ↓\n✅ Reconciliation\n\n症状: 件数・金額が不足'}
+  }
+};
