@@ -4,6 +4,47 @@
 
 原因当てではなく、時間制約下で `Impact → Hypothesis → Evidence Diversity → Primary/Contributing Cause → Safe Recovery → Verification/Reconciliation → Communication` を完遂する。
 
+## Beginner Entry / 覗いた人が状況を理解できる入口
+
+War Roomは最終Capstoneだが、**Caseを開いた瞬間に試験を開始しない**。
+
+```text
+War Room Home
+  ↓
+Caseを選ぶ
+  ↓
+初見ガイド（採点なし）
+  ├ 何が起きている？
+  ├ Systemのどこ？
+  ├ 今わかっている事実
+  ├ まだ原因は未確定
+  └ このあと何をする？
+  ↓
+「状況は分かった → 挑戦を始める」
+  ↓
+Challenge / Scoring
+```
+
+Homeでは最初に、War Roomを
+
+**「銀行システムで障害が起き、原因未確定の状態から、影響・証拠・安全な復旧・業務確認を順番に進める教材」**
+
+として説明する。
+
+初見ガイドでは `SEV / Hypothesis / Evidence / Recovery / Reconciliation` の5語を短く確認できる。Case固有の答えは教えず、**症状・位置・既知の事実だけ**を理解してから挑戦へ入る。
+
+Challenge画面の7段階も、専門英語を主見出しにせず次の日本語を先に表示する。
+
+1. まず「どれくらい困っているか」を決める — Business impact / Severity
+2. 原因の候補を置く — Hypothesis tree
+3. 確認材料を取りに行く — Evidence request
+4. 集めた証拠から原因を判断する — Primary / Contributing cause
+5. 安全な戻し方を選ぶ — Recovery decision
+6. 本当に業務が戻ったか確認する — Verification / Reconciliation
+7. 関係者へ今の状況を共有する — Status communication
+
+採点ロジック・Case内容・合格基準は変更しない。
+
 ## v16 Incident Model
 
 ### Evidence Diversity Gate
