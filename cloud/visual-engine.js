@@ -101,9 +101,19 @@ function canvas(id,revealed){
   return `<section class="vlCanvasCard"><div class="vlCanvasHead"><div><strong>🏦 いま作っている銀行システム</strong><small>${revealed?'今回の部品を足した後':'まず「今どうなっているか」だけ見ればOK'}</small></div><span class="vlEyebrow">SYSTEM BUILDER</span></div><div class="vlBeforeAfter"><div class="vlMapPane"><div class="vlMapLabel">BEFORE</div><pre class="vlMap dim">${esc(previousMap(id))}</pre></div><div class="vlMapPane"><div class="vlMapLabel"><span class="new">AFTER / NEW</span></div>${revealed?`<pre class="vlMap">${esc(currentMap(id))}</pre>`:`<div class="vlMap hiddenAfter"><div><b>まだ部品を足していません</b>下のボタンを1回押すだけでOK。</div></div>`}</div></div></section>`;
 }
 
+function axisCompanion(lab){
+  if(lab.concept.key==='failure-domain'){
+    return `<div class="vlAxisCompare"><small>同じ「止めない設計」で一緒に使う。でも別の分類軸。</small><div class="vlAxisRows"><div><b>🧭 Failure Domain</b><span>Availability Zone / Zone = 「どこまで一緒に壊れるか」を分ける。</span></div><div><b>🖥 Compute管理 / Orchestration</b><span>Auto Scaling / MIG / VM Scale Sets = 台数・配置・置換・自動復旧を管理する。</span></div></div></div>`;
+  }
+  if(lab.concept.key==='managed-db'){
+    return `<div class="vlAxisCompare"><small>ここも2つの話を混ぜない。</small><div class="vlAxisRows"><div><b>🗄 Managed DB</b><span>DataレイヤーのService。DB基盤運用の一部をProviderへ任せる。</span></div><div><b>🧭 Shared Responsibility</b><span>「Providerに任せた責任 / 自分たちに残る責任」を分ける考え方。</span></div></div></div>`;
+  }
+  return '';
+}
+
 function termReveal(lab){
   const row=lab.concept,layer=R.layers[row.layer],model=R.models[row.model];
-  return `<div class="vlTermCard"><div class="vlTermIcon">${layer.icon}</div><div><small>今日の1語 / ${esc(layer.name)}</small><h3>${esc(row.term)}</h3><p>${esc(row.plain)}</p></div></div><div class="vlProviderMini"><div><small>AWS</small><b>${esc(row.products?.aws||'-')}</b></div><div><small>Google Cloud</small><b>${esc(row.products?.gcp||'-')}</b></div><div><small>Azure</small><b>${esc(row.products?.azure||'-')}</b></div><div><small>OCI</small><b>${esc(row.products?.oci||'-')}</b></div></div><div class="vlConceptNote">☁️ 各社名は「同じ製品」という意味ではなく、<b>同じ共通Conceptを見る代表例</b>です。細かい違いはCloud Mapで後から確認できます。<br>提供モデルの目安：${esc(model.name)}</div>`;
+  return `<div class="vlTermCard"><div class="vlTermIcon">${layer.icon}</div><div><small>今日の1語 / ${esc(layer.name)}</small><h3>${esc(row.term)}</h3><p>${esc(row.plain)}</p></div></div><div class="vlConceptNote">提供モデルの目安：<b>${esc(model.name)}</b>。まず共通Conceptを理解できれば十分です。</div>${axisCompanion(lab)}<details class="vlProviderDetails"><summary>↔ 各Cloudでは何て呼ぶ？（必要なら開く）</summary><div class="vlProviderMini"><div><small>AWS</small><b>${esc(row.products?.aws||'-')}</b></div><div><small>Google Cloud</small><b>${esc(row.products?.gcp||'-')}</b></div><div><small>Azure</small><b>${esc(row.products?.azure||'-')}</b></div><div><small>OCI</small><b>${esc(row.products?.oci||'-')}</b></div></div><div class="vlConceptNote">各社名は「同じ製品」という意味ではなく、<b>同じ共通Conceptを見る代表例</b>です。細かい違いはCloud Mapで後から確認できます。</div></details>`;
 }
 
 function choiceOrder(lab){
@@ -122,20 +132,21 @@ function markComplete(lab){
 }
 
 function renderBuild(lab){
-  const meta=LEARNING_META[lab.id-1];
-  document.getElementById('app').innerHTML=commonHero(lab)+`<div id="vlCanvas">${canvas(lab.id,false)}</div><section class="vlProblem"><div class="vlProblemIcon">😵</div><div><strong>いま困っていること</strong><p>${esc(meta[0])}<br>${esc(meta[1])}</p></div></section><div class="vlActionZone"><button class="vlBuildBtn" id="vlBuild">＋ ${esc(meta[2])}</button><span class="vlHint">正解を知っている必要はありません。押して、何が変わるかを見るLabです。</span></div><section class="vlReveal" id="vlReveal"><div class="vlRevealTitle">✅ こうなった。ここで初めて名前を覚える。</div>${termReveal(lab)}</section><section class="vlCheck" id="vlCheck" hidden><h2>30秒だけ確認</h2><p class="vlQuestion">${esc(lab.q)}</p><div class="vlChoices">${choiceOrder(lab).map((x,i)=>'<button class="vlChoice" data-answer="'+i+'">'+esc(x)+'</button>').join('')}</div><div class="vlFeedback" id="vlFeedback"></div>${completeBox(lab)}</section>`;
+  const meta=LEARNING_META[lab.id-1],done=isDone(lab.id),choices=choiceOrder(lab);
+  document.getElementById('app').innerHTML=commonHero(lab)+`<div id="vlCanvas">${canvas(lab.id,done)}</div><section class="vlProblem"><div class="vlProblemIcon">😵</div><div><strong>いま困っていること</strong><p>${esc(meta[0])}<br>${esc(meta[1])}</p></div></section><div class="vlActionZone"><button class="vlBuildBtn" id="vlBuild" ${done?'disabled':''}>${done?'✅ 体験済み':'＋ '+esc(meta[2])}</button><span class="vlHint">${done?'修了済み。BEFORE / AFTERを見返して復習できます。':'正解を知っている必要はありません。押して、何が変わるかを見るLabです。'}</span></div><section class="vlReveal ${done?'show':''}" id="vlReveal"><div class="vlRevealTitle">✅ こうなった。ここで初めて名前を覚える。</div>${termReveal(lab)}</section><section class="vlCheck" id="vlCheck" ${done?'':'hidden'}><h2>30秒だけ確認</h2><p class="vlQuestion">${esc(lab.q)}</p><div class="vlChoices">${choices.map((x,i)=>'<button class="vlChoice '+(done&&x===lab.correct?'correct':'')+'" data-answer="'+i+'" '+(done?'disabled':'')+'>'+esc(x)+'</button>').join('')}</div><div class="vlFeedback ${done?'ok':''}" id="vlFeedback">${done?'✅ '+esc(lab.explain):''}</div>${completeBox(lab)}</section>`;
   const build=document.getElementById('vlBuild');
-  build.onclick=()=>{
+  if(!done)build.onclick=()=>{
     document.getElementById('vlCanvas').innerHTML=canvas(lab.id,true);
     document.getElementById('vlReveal').classList.add('show');
     document.getElementById('vlCheck').hidden=false;
     build.disabled=true;build.textContent='✅ 部品を足しました';
     document.getElementById('vlReveal').scrollIntoView({behavior:'smooth',block:'nearest'});
   };
-  bindQuiz(lab);
+  bindQuiz(lab,done);
 }
 
-function bindQuiz(lab){
+function bindQuiz(lab,locked=false){
+  if(locked)return;
   const choices=choiceOrder(lab);
   document.querySelectorAll('[data-answer]').forEach(btn=>btn.onclick=()=>{
     const selected=choices[Number(btn.dataset.answer)];
@@ -150,9 +161,9 @@ function bindQuiz(lab){
 }
 
 function renderGuided(lab){
-  const meta=LEARNING_META[lab.id-1];
-  const choices=choiceOrder(lab);
-  document.getElementById('app').innerHTML=commonHero(lab)+`<section class="vlGuidedLayout"><div class="vlSituation"><div class="vlEyebrow">SITUATION</div><h2>😵 いま困っていること</h2><p><b>${esc(meta[0])}</b><br>${esc(meta[1])}</p><pre class="vlMiniMap">${esc(previousMap(lab.id))}</pre></div><div class="vlDecision"><div class="vlEyebrow">GUIDED DECISION</div><h2>どう考える？</h2><p class="vlQuestion">${esc(lab.q)}</p><div class="vlChoices">${choices.map((x,i)=>'<button class="vlChoice" data-guided="'+i+'">'+esc(x)+'</button>').join('')}</div><div class="vlFeedback" id="vlFeedback"></div><div class="vlWhyBox" id="vlWhy"></div></div></section><section class="vlReveal" id="vlReveal"><div class="vlRevealTitle">✅ 判断の意味をSystemに戻して見る</div><pre class="vlMap" style="margin-bottom:10px">${esc(currentMap(lab.id))}</pre>${termReveal(lab)}</section>${completeBox(lab)}`;
+  const meta=LEARNING_META[lab.id-1],choices=choiceOrder(lab),done=isDone(lab.id);
+  document.getElementById('app').innerHTML=commonHero(lab)+`<section class="vlGuidedLayout"><div class="vlSituation"><div class="vlEyebrow">SITUATION</div><h2>😵 いま困っていること</h2><p><b>${esc(meta[0])}</b><br>${esc(meta[1])}</p><pre class="vlMiniMap">${esc(previousMap(lab.id))}</pre></div><div class="vlDecision"><div class="vlEyebrow">GUIDED DECISION</div><h2>どう考える？</h2><p class="vlQuestion">${esc(lab.q)}</p><div class="vlChoices">${choices.map((x,i)=>'<button class="vlChoice '+(done&&x===lab.correct?'correct':'')+'" data-guided="'+i+'" '+(done?'disabled':'')+'>'+esc(x)+'</button>').join('')}</div><div class="vlFeedback ${done?'ok':''}" id="vlFeedback">${done?'✅ その考え方でOK。':''}</div><div class="vlWhyBox ${done?'show':''}" id="vlWhy">${done?'<b>なぜ？</b><br>'+esc(lab.explain):''}</div></div></section><section class="vlReveal ${done?'show':''}" id="vlReveal"><div class="vlRevealTitle">✅ 判断の意味をSystemに戻して見る</div><pre class="vlMap" style="margin-bottom:10px">${esc(currentMap(lab.id))}</pre>${termReveal(lab)}</section>${completeBox(lab)}`;
+  if(done)return;
   document.querySelectorAll('[data-guided]').forEach(btn=>btn.onclick=()=>{
     const selected=choices[Number(btn.dataset.guided)];const ok=selected===lab.correct;
     document.querySelectorAll('[data-guided]').forEach(b=>b.classList.remove('correct','wrong'));
@@ -165,9 +176,9 @@ function renderGuided(lab){
 }
 
 function renderOperate(lab){
-  const meta=LEARNING_META[lab.id-1],ops=OPS_META[lab.id];
-  const choices=choiceOrder(lab);
-  document.getElementById('app').innerHTML=commonHero(lab)+`<section class="vlProblem"><div class="vlProblemIcon">🚨</div><div><strong>運用シナリオ</strong><p>${esc(meta[0])}<br>${esc(meta[1])}</p></div></section><section class="vlOperateFlow"><div class="vlOperateStep active" id="vlStep1"><div class="vlOperateNum">STEP 1 / EVIDENCE</div><h3>まず事実を固定する</h3><p>原因を決める前に、影響・直近正常・経路・Dataなどを確認します。</p><div class="vlEvidenceBox" id="vlEvidence">まだEvidenceを取得していません。</div><button class="vlStepBtn" id="vlEvidenceBtn">🧾 Evidenceを見る</button></div><div class="vlOperateStep" id="vlStep2"><div class="vlOperateNum">STEP 2 / DECISION</div><h3>Evidenceを見て判断する</h3><p>${esc(lab.q)}</p><div class="vlChoices">${choices.map((x,i)=>'<button class="vlChoice" data-ops-answer="'+i+'" disabled>'+esc(x)+'</button>').join('')}</div><div class="vlFeedback" id="vlFeedback"></div></div><div class="vlOperateStep" id="vlStep3"><div class="vlOperateNum">STEP 3 / VERIFY</div><h3>「直った」で終わらせない</h3><p>${esc(ops.verify)}</p><button class="vlStepBtn" id="vlVerify" disabled>✅ 業務まで検証する</button></div></section><section class="vlOpsSummary" id="vlSummary"><strong>💡 このLabの判断軸</strong><p>${esc(lab.explain)}</p><pre class="vlMiniMap">${esc(currentMap(lab.id))}</pre>${termReveal(lab)}</section>${completeBox(lab)}`;
+  const meta=LEARNING_META[lab.id-1],ops=OPS_META[lab.id],choices=choiceOrder(lab),done=isDone(lab.id);
+  document.getElementById('app').innerHTML=commonHero(lab)+`<section class="vlProblem"><div class="vlProblemIcon">🚨</div><div><strong>運用シナリオ</strong><p>${esc(meta[0])}<br>${esc(meta[1])}</p></div></section><section class="vlOperateFlow"><div class="vlOperateStep ${done?'done':'active'}" id="vlStep1"><div class="vlOperateNum">STEP 1 / EVIDENCE</div><h3>まず事実を固定する</h3><p>原因を決める前に、影響・直近正常・経路・Dataなどを確認します。</p><div class="vlEvidenceBox" id="vlEvidence">${done?esc(ops.evidence):'まだEvidenceを取得していません。'}</div><button class="vlStepBtn" id="vlEvidenceBtn" ${done?'disabled':''}>${done?'✅ Evidence確認済み':'🧾 Evidenceを見る'}</button></div><div class="vlOperateStep ${done?'done':''}" id="vlStep2"><div class="vlOperateNum">STEP 2 / DECISION</div><h3>Evidenceを見て判断する</h3><p>${esc(lab.q)}</p><div class="vlChoices">${choices.map((x,i)=>'<button class="vlChoice '+(done&&x===lab.correct?'correct':'')+'" data-ops-answer="'+i+'" '+(done?'disabled':'disabled')+'>'+esc(x)+'</button>').join('')}</div><div class="vlFeedback ${done?'ok':''}" id="vlFeedback">${done?'✅ '+esc(lab.explain):''}</div></div><div class="vlOperateStep ${done?'done':''}" id="vlStep3"><div class="vlOperateNum">STEP 3 / VERIFY</div><h3>「直った」で終わらせない</h3><p>${esc(ops.verify)}</p><button class="vlStepBtn" id="vlVerify" disabled>${done?'✅ 業務検証済み':'✅ 業務まで検証する'}</button></div></section><section class="vlOpsSummary ${done?'show':''}" id="vlSummary"><strong>💡 このLabの判断軸</strong><p>${esc(lab.explain)}</p><pre class="vlMiniMap">${esc(currentMap(lab.id))}</pre>${termReveal(lab)}</section>${completeBox(lab)}`;
+  if(done)return;
   document.getElementById('vlEvidenceBtn').onclick=()=>{
     document.getElementById('vlEvidence').textContent=ops.evidence;
     document.getElementById('vlStep1').classList.remove('active');document.getElementById('vlStep1').classList.add('done');
