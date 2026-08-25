@@ -43,17 +43,14 @@ def golden_path(case):
 
         for action in safe_actions:
             scores={'eng':20.0,'con':20.0,'pm':20.0}
-            # Correct Impact decision.
             scores['con']+=10;scores['pm']+=10
             for e in picked:add_points(scores,e.get('points'))
-            # Learner tracks and marks the correct hypothesis hot, then declares both causes correctly.
             scores['eng']+=8+5+18;scores['con']+=8+10;scores['pm']+=6
             add_points(scores,action.get('points'))
             if any(req not in picked_ids for req in action.get('need',[])):
                 scores['eng']-=8;scores['pm']-=5
             for verification in correct_verifications:
                 add_points(scores,verification.get('points'))
-            # Correct status communication.
             scores['con']+=8;scores['pm']+=15
             over=max(0,len(picked)-4);low=max(0,7-time)
             scores['eng']-=over*3+low*0.5
@@ -61,12 +58,12 @@ def golden_path(case):
             scores['pm']-=over*4+low
             rounded={k:min(100,js_round_nonnegative(v)) for k,v in scores.items()}
             candidate=(min(rounded.values()),sum(rounded.values()),time,rounded,sorted(picked_ids))
-            if best is None or candidate[:3]>best[:3]:
-                best=candidate
+            if best is None or candidate[:3]>best[:3]:best=candidate
     return best
 
 cases_files=[f'field-casebook/cases-{i}.js' for i in range(1,6)]
 read('field-casebook/cases.js')
+supplements=read('field-casebook/source-supplements.js')
 app=read('field-casebook/app.js')
 index=read('field-casebook/index.html')
 style=read('field-casebook/style.css')
@@ -80,7 +77,7 @@ package=read('PACKAGE_STANDARD.md')
 curriculum=read('CURRICULUM.md')
 
 try:
-    script="global.window={};require('./field-casebook/cases.js');"+''.join(f"require('./{x}');" for x in cases_files)+"process.stdout.write(JSON.stringify(window.FIELD_CASES));"
+    script="global.window={};require('./field-casebook/cases.js');"+''.join(f"require('./{x}');" for x in cases_files)+"require('./field-casebook/source-supplements.js');process.stdout.write(JSON.stringify(window.FIELD_CASES));"
     out=subprocess.run(['node','-e',script],cwd=ROOT,text=True,capture_output=True,check=True).stdout
     cases=json.loads(out)
 except Exception as e:
@@ -105,7 +102,7 @@ for c in cases:
     expect(all(str(s.get('url','')).startswith('https://') for s in c.get('sources',[])),f'case {cid}: source URLs must be HTTPS')
     expect(any('Official' in s.get('kind','') or 'Regulator' in s.get('kind','') for s in c.get('sources',[])),f'case {cid}: official or regulator source required')
     for module,lab_ids in c.get('recommended',{}).items():
-        expect(module in allowed_modules-{ 'pm' },f'case {cid}: recommended unknown module {module}')
+        expect(module in allowed_modules-{'pm'},f'case {cid}: recommended unknown module {module}')
         expect(all(isinstance(x,int) and 1<=x<=20 for x in lab_ids),f'case {cid}: recommended Labs must be 1..20')
     best=golden_path(c)
     expect(best is not None,f'case {cid}: no playable Evidence/action path')
@@ -113,10 +110,18 @@ for c in cases:
         golden_results.append((cid,best[3]))
         expect(best[0]>=80,f'case {cid}: best verified path cannot reach 80x3; best={best[3]}, evidence={best[4]}')
 
-kinds=' '.join(s.get('kind','') for c in cases for s in c.get('sources',[]))
+all_sources=[s for c in cases for s in c.get('sources',[])]
+kinds=' '.join(s.get('kind','') for s in all_sources)
+urls=' '.join(s.get('url','') for s in all_sources)
 expect('Qiita' in kinds,'At least one Qiita source required')
 expect('note' in kinds,'At least one note source required')
 expect('Newspaper' in kinds,'At least one newspaper-operated source required')
+expect(kinds.count('Zenn')>=6,'At least six Zenn companion sources required')
+expect('Technical /' in kinds,'Technical-site companion sources required')
+expect('zenn.dev/' in urls,'Zenn URLs must be present in Result source data')
+expect('builder.aws.com/' in urls or 'aws.amazon.com/blogs/architecture/' in urls,'AWS technical architecture source required')
+expect('techcommunity.microsoft.com/' in urls,'Microsoft technical recovery source required')
+expect(all(s.get('why') for c in cases for s in c.get('sources',[]) if 'Supplementary' in s.get('kind','') or 'Concept' in s.get('kind','') or 'Technical /' in s.get('kind','') or 'Engineering' in s.get('kind','') or 'Architecture' in s.get('kind','') or 'Hands-on' in s.get('kind','')),'Every companion source must explain why it is included')
 
 for marker in (
     "const key=id=>'field_case_'+id+'_result'",
@@ -124,8 +129,7 @@ for marker in (
     'Source reveal','SOURCE REVEAL',
     "st.scores.eng>=80&&st.scores.con>=80&&st.scores.pm>=80",
     'function preview(c)','function renderInvestigation()','function renderResolution()',
-):
-    expect(marker in app,f'field-casebook app invariant missing: {marker}')
+):expect(marker in app,f'field-casebook app invariant missing: {marker}')
 
 preview_segment=app.split('function preview(c)',1)[1].split('function start(c)',1)[0] if 'function preview(c)' in app else ''
 expect('.sources' not in preview_segment and 'SOURCE REVEAL' not in preview_segment,'Preview must not expose source identity before result')
@@ -133,19 +137,19 @@ expect('c.confidence' not in preview_segment and 'c.recommended' not in preview_
 
 for marker in ('.fgCaseGrid{','.fgInvestigationGrid{','.fgEvidenceBoard{','.fgHypothesisBoard{','.fgSources{'):
     expect(marker in style,f'Field Case CSS missing: {marker}')
-for marker in ('cases.js','cases-5.js','app.js','style.css'):
+for marker in ('cases.js','cases-5.js','source-supplements.js','app.js','style.css'):
     expect(marker in index,f'field-casebook/index.html missing {marker}')
 expect('field-casebook/' in home,'Root home must link Field Incident Gate')
 expect('data-route-step="field"' in home,'Root learning route must include Field Incident Gate')
 expect('field_case_' in home_js,'Root progress script must track Field Incident Gate')
-expect('Field Incident Gate' in readme and '10 Public-Report Reconstructions' in readme,'Field Case README incomplete')
-expect('Case 10' in sources and 'Qiita' in sources and 'note' in sources,'Source register incomplete')
+expect('Field Incident Gate' in readme and 'Zenn' in readme and 'AWS Builders’ Library' in readme,'Field Case README source policy incomplete')
+expect('Case 10' in sources and 'Zenn' in sources and 'Microsoft Intune Customer Success' in sources and 'Amazon Builders’ Library' in sources,'Source register missing technical companion references')
+expect('Zenn / Supplementary' in supplements and 'Technical / Distributed Systems' in supplements,'Source supplement registry incomplete')
 expect('War Room Link / Public Incident Transfer' in package,'Package Standard must require public-incident transfer')
 expect('Field Incident Gate' in curriculum and '80 / 100' in curriculum,'Curriculum must document Field Incident Gate sign-off')
 
 for module in ('sql','cobol','jcl','cloud','aws','gcp','azure'):
-    body=read(f'{module}/index.html')
-    expect('field-case-links.js' in body,f'{module}: War Room Link script missing')
+    body=read(f'{module}/index.html');expect('field-case-links.js' in body,f'{module}: War Room Link script missing')
 linux_bridge=read('linux/integration-bridge.js')
 expect('field-case-links.js' in linux_bridge,'Linux integration bridge must load War Room Link')
 expect('field-casebook/' in links and 'cases-5.js' in links,'War Room Link must load canonical Field Case chunks')
@@ -157,12 +161,13 @@ expect('field-link-panel' in links and '.field-link-panel{' in link_css,'War Roo
 
 if errors:
     print('Field Incident Gate QA FAILED')
-    for e in errors: print(' - '+e)
+    for e in errors:print(' - '+e)
     sys.exit(1)
 
 print('Field Incident Gate QA PASSED')
 print(' - 10 source-grounded reconstructed cases')
 print(' - official source per case + Qiita/note/newspaper source mix')
+print(' - Zenn / Microsoft / AWS / engineering companion source mix')
 print(' - no-spoiler Lab links and case previews')
 print(' - free investigation / Evidence / Hypothesis / cause declaration')
 print(' - verified golden path reaches tri-role 80 for every case')
