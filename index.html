@@ -4,21 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Financial IT Learning Lab</title>
-<meta name="description" content="金融ITを、基盤からクラウド・障害対応まで順番に身につけるインタラクティブ学習ラボ">
+<meta name="description" content="金融ITを、基盤から公開事例・障害対応まで順番に身につけるインタラクティブ学習ラボ">
 <link rel="stylesheet" href="assets/css/common.css">
-<link rel="stylesheet" href="assets/css/home-v3.css?v=3">
+<link rel="stylesheet" href="assets/css/home-v3.css?v=4">
+<style>
+@media(min-width:1101px){.route{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(max-width:1100px) and (min-width:701px){.route{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
 </head>
 <body>
 <main class="homeShell">
   <header class="sitebar">
     <a class="sitebrand" href="./"><span>Financial IT</span> Learning Lab</a>
-    <div class="siteMeta">160 Labs + 12 War Rooms</div>
+    <div class="siteMeta">160 Labs + 10 Field Cases + 12 War Rooms</div>
   </header>
 
   <section class="homeHero">
-    <div class="homeKicker">LEARN THE SYSTEM, NOT THE BUZZWORDS</div>
+    <div class="homeKicker">LEARN THE SYSTEM, THEN TEST IT AGAINST REAL INCIDENTS</div>
     <h1>金融ITを、<br>順番に身につける。</h1>
-    <p>基盤 → データ → 基幹処理 → クラウド → 障害対応。迷ったら、上から順に進めればOK。</p>
+    <p>基盤 → データ → 基幹処理 → クラウド → 公開事例 → 障害対応。迷ったら、上から順に進めればOK。</p>
   </section>
 
   <section class="resumeCard" aria-label="次におすすめの学習">
@@ -30,23 +34,24 @@
     <div class="resumeSide">
       <div class="resumeCount"><strong><span data-home-total>0</span></strong><span>/ 160 Labs</span></div>
       <div class="homeProgress" aria-label="全体進捗"><div data-home-total-progress></div></div>
-      <div class="progressText"><span data-home-percent>0%</span> COMPLETE</div>
+      <div class="progressText"><span data-home-percent>0%</span> LABS COMPLETE</div>
       <a class="primaryHomeCta" data-next-link href="linux/"><span data-next-link-text>ここから始める</span><span>→</span></a>
     </div>
   </section>
 
   <section class="homeSection">
-    <div class="sectionTitleRow"><h2>学習ルート</h2><span>迷ったら左上から</span></div>
+    <div class="sectionTitleRow"><h2>学習ルート</h2><span>知識 → 公開事例 → 実戦</span></div>
     <div class="routeCard">
       <div class="route">
         <div class="routeStep" data-route-step="foundation"><span class="routeNum">01</span><b>基盤とデータ</b><small>Linux → SQL</small></div>
         <div class="routeStep" data-route-step="core"><span class="routeNum">02</span><b>基幹処理</b><small>COBOL → JCL</small></div>
-        <div class="routeStep" data-route-step="cloud"><span class="routeNum">03</span><b>Cloud共通</b><small>まず構造を理解</small></div>
+        <div class="routeStep" data-route-step="cloud"><span class="routeNum">03</span><b>Cloud共通</b><small>構造を理解</small></div>
         <div class="routeStep" data-route-step="providers"><span class="routeNum">04</span><b>3クラウド</b><small>AWS / GCP / Azure</small></div>
-        <div class="routeStep" data-route-step="war"><span class="routeNum">05</span><b>War Room</b><small>横断障害対応</small></div>
-        <div class="routeStep" data-route-step="finish"><span class="routeNum">06</span><b>説明できる</b><small>Engineer / Consult / PM</small></div>
+        <div class="routeStep" data-route-step="field"><span class="routeNum">05</span><b>公開事例</b><small>10 Field Cases</small></div>
+        <div class="routeStep" data-route-step="war"><span class="routeNum">06</span><b>War Room</b><small>12横断事件</small></div>
+        <div class="routeStep" data-route-step="finish"><span class="routeNum">07</span><b>説明できる</b><small>Engineer / Consult / PM</small></div>
       </div>
-      <p class="routeHint">Oracle / OCI / Control-M / JP1 / IBM MQ / HULFT などの製品差分は、対応する教材の「🧭 Context」で確認できます。</p>
+      <p class="routeHint">各Labの下に「🚨 War Room Link」を表示。いま学んだ知識が、どの公開事例ベースCaseで使えるか確認できます。</p>
     </div>
   </section>
 
@@ -93,8 +98,12 @@
       </a>
     </div>
 
-    <div class="moduleSectionLabel">Final</div>
+    <div class="moduleSectionLabel">Final Practice</div>
     <div class="compactGrid">
+      <a class="compactModule warModule" data-module-card="field" href="field-casebook/">
+        <div class="moduleIcon">📰</div><div><h3>Field Incident Gate</h3><p class="moduleOneLine">公開報告・Qiita・note・新聞を基にした10事件</p></div>
+        <div class="moduleMeta"><span class="moduleState" data-module-state="field">未挑戦</span><div class="compactProgress"><div data-progress="field"></div></div><div class="moduleScore" data-progress-text="field">0 / 10</div></div>
+      </a>
       <a class="compactModule warModule" data-module-card="war" href="financial-war-room/">
         <div class="moduleIcon">🚨</div><div><h3>Financial War Room</h3><p class="moduleOneLine">12事件で金融ITを横断して判断する</p></div>
         <div class="moduleMeta"><span class="moduleState" data-module-state="war">未挑戦</span><div class="compactProgress"><div data-progress="war"></div></div><div class="moduleScore" data-progress-text="war">0 / 12</div></div>
@@ -106,8 +115,8 @@
     <summary>この教材の考え方・設計情報を見る</summary>
     <div class="moreContent">
       <div>
-        <h3>Concept → Product → Evidence</h3>
-        <p>Linux v16の「分類軸を混ぜない」思想を全教材へ展開。Db2 / Oracle / PostgreSQL / SQL Server、AWS / Google Cloud / Azure / OCIなどは、共通概念に対する製品実装として比較します。</p>
+        <h3>Concept → Product → Evidence → Public Incident</h3>
+        <p>Linux v16の「分類軸を混ぜない」思想を全教材へ展開し、公開事例ベースCaseで知識を現場判断へ変換します。</p>
         <div class="contextFlow"><span>Concept</span><span>Product / Platform</span><span>Evidence</span><span>Safe Change</span><span>Business Verify</span></div>
         <div class="roleMini">
           <div><b>🧑‍💻 Engineer</b><span>証拠で切り分ける</span></div>
@@ -118,15 +127,15 @@
       <nav class="docLinks" aria-label="設計ドキュメント">
         <a href="PACKAGE_STANDARD.md">Complete Package Standard →</a>
         <a href="CURRICULUM.md">Curriculum / Sign-off →</a>
-        <a href="docs/V16_INTEGRATION_PLAN.md">v16 Context Design →</a>
+        <a href="docs/FIELD_CASE_SOURCES.md">Field Case Public Sources →</a>
         <a href="REFERENCES.md">Official References →</a>
       </nav>
     </div>
   </details>
 
-  <footer class="homeFooter">Learning simulator. 本番環境では所属組織の規程・権限・変更管理・Runbook・最新の公式ドキュメントに従ってください。</footer>
+  <footer class="homeFooter">Learning simulator. 公開事例Caseは匿名化・再構成です。本番環境では所属組織の規程・権限・変更管理・Runbook・最新の公式情報に従ってください。</footer>
 </main>
 <script src="assets/js/common.js"></script>
-<script src="assets/js/home-v3.js?v=3"></script>
+<script src="assets/js/home-v3.js?v=4"></script>
 </body>
 </html>
