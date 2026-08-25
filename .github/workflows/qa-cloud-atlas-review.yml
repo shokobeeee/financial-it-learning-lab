@@ -1,0 +1,52 @@
+name: QA Cloud Map Review Fixes
+
+on:
+  push:
+    branches: ["cloud-atlas-review-fixes"]
+    paths:
+      - "assets/js/cloud-atlas.js"
+      - "assets/css/cloud-atlas*.css"
+      - "cloud/**"
+      - "aws/**"
+      - "gcp/**"
+      - "azure/**"
+      - ".github/workflows/qa-cloud-atlas-review.yml"
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: node --check assets/js/cloud-atlas.js
+      - name: Review fixes present
+        run: |
+          set -e
+          grep -q "state.query=''" assets/js/cloud-atlas.js
+          grep -q "Availability Zone / Failure Domain" assets/js/cloud-atlas.js
+          grep -q "Managed Instance Group (MIG)" assets/js/cloud-atlas.js
+          grep -q "mappingMode:'examples'" assets/js/cloud-atlas.js
+          grep -q "e.key==='Escape'" assets/js/cloud-atlas.js
+          grep -q "aria-selected" assets/js/cloud-atlas.js
+      - name: Cloud Map wiring
+        run: |
+          set -e
+          for d in cloud aws gcp azure; do
+            grep -q 'cloud-atlas.css?v=1' "$d/index.html"
+            grep -q 'cloud-atlas.js?v=1' "$d/index.html"
+          done
+      - name: Guard against mixed failure-domain axis
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('assets/js/cloud-atlas.js').read_text(encoding='utf-8')
+          assert "aws:'Availability Zone / Auto Scaling'" not in s
+          assert "gcp:'Zone / Managed Instance Group'" not in s
+          assert "azure:'Availability Zone / VM Scale Sets'" not in s
+          assert "r.mappingMode!=='examples'" in s
+          PY
