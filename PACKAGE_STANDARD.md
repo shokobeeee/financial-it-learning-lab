@@ -8,8 +8,8 @@
 
 1. **Start from Zero** — 初学者が「そもそも何をする技術か」から入れる。
 2. **20 Labs** — 基礎 → 実務 → 障害対応/Capstoneまで段階がある。
-3. **3 Learning Modes** — 基本 / 選択 / 入力で、見る→判断→自分で書くへ進む。
-4. **State / Evidence** — 何が変わったか、何を証拠とするかが見える。
+3. **Progressive Learning Modes** — 学習段階に合わせて、見る/作る → 選ぶ/判断する → 入力/Evidenceで実践するへ難度を上げる。全Labで同じ3モードを強制しない。
+4. **State / Evidence at the Right Time** — 何が変わったか・何を証拠とするかを学ぶ。ただし初学者の最初のLabへEvidence UIを先回りさせず、概念理解後に段階的に解禁する。
 5. **Layer Guide** — 「同じ軸ではないもの」を分離し、今どのレイヤーを見ているか説明できる。
 6. **Concept → Product → Evidence** — 共通概念・製品実装・運用Evidenceを分ける。製品間対応は `=` ではなく `≒ conceptual mapping` とする。
 7. **Product / Platform Profile** — 必要な領域では、正本Labを複製せずprofile adapterで主要製品差分を学べる。
@@ -21,6 +21,24 @@
 13. **Tri-role View** — Engineer / Consultant / PM・PMOの3視点で修了像を定義する。
 14. **Final Capstone** — 正解当てではなく Evidence → Safe Action → Verification を行う。
 15. **Completion / Next Path** — 進捗、修了状態、次教材・関連教材が分かる。
+
+### Progressive Learning Modes の考え方
+
+教材ごとに「難しくなる順番」は変えてよい。重要なのはUIを統一することではなく、認知負荷を学習者の理解段階へ合わせること。
+
+例:
+
+```text
+SQL / COBOL / JCL
+見る（基本） → 選択 → 入力
+
+Cloud Fundamentals
+Lab01–07  見る → 困る → 部品を足す → 名前を知る
+Lab08–15  状況を見る → 選ぶ → 理由を理解する
+Lab16–20  Evidence → 判断 → Verify / Reconcile
+```
+
+「高度なUIがあるほど良い教材」とはしない。問題を解けるところまで教材が教えてから問う。
 
 ## v16 Context Model
 
