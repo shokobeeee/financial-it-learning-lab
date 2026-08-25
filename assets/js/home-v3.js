@@ -31,9 +31,9 @@ if(next){
   if(ctaText)ctaText.textContent=next.done>0?'続きを開く':'ここから始める';
 }else if(war.done<12){
   if(title)title.textContent='仕上げ：Financial War Room';
-  if(note)note.textContent='160 Labsの知識を使って、金融IT障害を横断的に切り分けます。';
-  if(cta)cta.href='financial-war-room/#case'+String(war.first).padStart(2,'0');
-  if(ctaText)ctaText.textContent=war.done>0?'War Roomの続きを開く':'最終試験へ進む';
+  if(note)note.textContent='160 Labsの知識を使って、金融IT障害を横断的に切り分けます。まずCaseの状況を確認してから挑戦します。';
+  if(cta)cta.href='financial-war-room/#preview'+String(war.first).padStart(2,'0');
+  if(ctaText)ctaText.textContent=war.done>0?'次のCaseの状況を見る':'War Roomを覗いてみる';
 }else{
   if(title)title.textContent='全カリキュラム修了 🎉';
   if(note)note.textContent='必要な教材やWar Roomへ戻って、弱いレイヤを復習できます。';
