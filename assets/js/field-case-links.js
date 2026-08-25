@@ -49,9 +49,12 @@ function render(){
 }
 function ensureData(){
   loadCss();
-  if(window.FIELD_CASES){render();return}
+  if(window.FIELD_CASES&&window.FIELD_CASES.length){render();return}
   if(document.querySelector('script[data-field-cases]'))return;
-  const s=document.createElement('script');s.src='../field-casebook/cases.js?v=1';s.dataset.fieldCases='1';s.onload=render;document.body.appendChild(s);
+  const files=['cases.js','cases-1.js','cases-2.js','cases-3.js','cases-4.js','cases-5.js'];
+  let i=0;
+  const next=()=>{if(i>=files.length){render();return}const s=document.createElement('script');s.src='../field-casebook/'+files[i++]+'?v=1';s.dataset.fieldCases='1';s.onload=next;document.body.appendChild(s)};
+  next();
 }
 window.addEventListener('hashchange',()=>setTimeout(render,0));
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureData);else ensureData();
