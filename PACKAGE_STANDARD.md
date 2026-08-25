@@ -8,7 +8,7 @@
 
 1. **Start from Zero** — 初学者が「そもそも何をする技術か」から入れる。
 2. **20 Labs** — 基礎 → 実務 → 障害対応/Capstoneまで段階がある。
-3. **Progressive Learning Modes** — 見る/作る → 選ぶ/判断する → 入力/Evidenceへ、理解段階に合わせて難度を上げる。全Labへ同じUIを強制しない。
+3. **Progressive Learning Modes** — 見る/作る → 選ぶ/判断する → 入力/Evidenceへ、理解段階に合わせて難度を上げる。**全Labで同じ3モードを強制しない。**
 4. **State / Evidence at the Right Time** — 何が変わったか・何を証拠とするかを学ぶ。初学者の最初のLabへ高度なEvidence UIを先回りさせない。
 5. **Layer Guide** — 同じ軸ではないものを分離し、いま何のレイヤーを見ているか説明できる。
 6. **Concept → Product → Evidence** — 共通概念・製品実装・運用Evidenceを分ける。製品間対応は `=` ではなく `≒ conceptual mapping` とする。
