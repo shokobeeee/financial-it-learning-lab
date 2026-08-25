@@ -32,3 +32,15 @@ jobs:
 
       - name: Repository invariants
         run: python3 scripts/qa_repository.py
+
+      - name: Provider input stays concept-first
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='assets/js/cloud-provider-aligned.js'
+          grep -Fq "t[4]=[...originalScope.filter(x=>x!==name),name];" "$file"
+          grep -Fq "t[4]=['failure domain','redundancy',name,fleet];" "$file"
+          if grep -Fq "t[4]=[name,...originalScope" "$file"; then
+            echo 'Provider product name was reintroduced as a leading input-mode must token.' >&2
+            exit 1
+          fi
