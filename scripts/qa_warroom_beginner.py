@@ -30,6 +30,9 @@ home=read('assets/js/home-v3.js')
 ids={int(x) for x in re.findall(r'(?m)^\s{4}(\d+):\{',guide)}
 expect(ids==set(range(1,13)),f'War Room guide must cover case ids 1..12; got {sorted(ids)}')
 expect('rootExplain' not in guide and 'root:' not in guide,'Preview guide must not embed root-cause answers/spoilers')
+expect('flow:[' not in guide,'Preview guide must not retain the prescribed 7-step flow')
+expect('focus:' not in guide and 'layer:' not in guide,'Preview guide must not carry suspicious-layer/focus hints')
+expect('❓' not in guide,'Preview maps must be neutral and must not mark a suspicious component with question marks')
 
 for marker in ('W.preview=function(sc)','事件現場 / まだ採点されません','🔍 捜査を始める','どこから調べるかは、あなたが決める'):
     expect(marker in core,f'War Room core missing: {marker}')
@@ -73,7 +76,6 @@ expect('investigation-game.css' in index,'War Room entrypoint must load investig
 expect('app.js' not in index,'Superseded linear app.js must not be wired')
 expect(not (ROOT/'financial-war-room/app.js').exists(),'Superseded linear financial-war-room/app.js should be removed')
 
-# Protect user-visible investigation structure, not one specific wrapper-selector implementation.
 for marker in ('.wrInvestigationGrid{','.wrEvidenceCards{','.wrHypothesisBoard{','.wrAccuseBtn{','.wrResolutionPanel{'):
     expect(marker in style,f'Investigation-game CSS missing: {marker}')
 expect('financial-war-room/#preview' in home,'Home Next Step must enter War Room preview before investigation')
@@ -86,7 +88,7 @@ if errors:
     for e in errors: print(' - '+e)
     sys.exit(1)
 print('War Room investigation QA PASSED')
-print(' - non-spoiler incident preview')
+print(' - neutral non-spoiler incident preview')
 print(' - free-order evidence investigation')
 print(' - learner-managed hypothesis board')
 print(' - explicit Evidence layer metadata')
