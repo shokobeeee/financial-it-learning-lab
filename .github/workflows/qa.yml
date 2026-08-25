@@ -44,3 +44,14 @@ jobs:
             echo 'Provider product name was reintroduced as a leading input-mode must token.' >&2
             exit 1
           fi
+
+      - name: Cloud beginner UX review guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='cloud/visual-engine.js'
+          grep -Fq 'vlProviderDetails' "$file"
+          grep -Fq 'function axisCompanion(lab)' "$file"
+          grep -Fq 'Availability Zone / Zone = 「どこまで一緒に壊れるか」' "$file"
+          grep -Fq "done=isDone(lab.id)" "$file"
+          grep -Fq "const meta=LEARNING_META[lab.id-1],ops=OPS_META[lab.id],choices=choiceOrder(lab),done=isDone(lab.id);" "$file"
