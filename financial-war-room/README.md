@@ -2,57 +2,78 @@
 
 ## Goal
 
-原因当てではなく、時間制約下で `Impact → Hypothesis → Evidence Diversity → Primary/Contributing Cause → Safe Recovery → Verification/Reconciliation → Communication` を完遂する。
+原因当てではなく、時間制約下で **Impact → Investigation → Hypothesis elimination → Evidence Diversity → Cause declaration → Safe Recovery → Verification / Reconciliation → Communication** を完遂する。
 
-## Beginner Entry / 覗いた人が状況を理解できる入口
+## Investigation Game Model
 
-War Roomは最終Capstoneだが、**Caseを開いた瞬間に試験を開始しない**。
+War Roomは「手順を上から押す試験」ではない。
 
 ```text
-War Room Home
+Incident Brief
   ↓
-Caseを選ぶ
+自由に調査する
   ↓
-初見ガイド（採点なし）
-  ├ 何が起きている？
-  ├ Systemのどこ？
-  ├ 今わかっている事実
-  ├ まだ原因は未確定
-  └ このあと何をする？
+Evidence Boardへ証拠が増える
   ↓
-「状況は分かった → 挑戦を始める」
+原因候補を
+  調査中 / 有力 / 除外
+  に自分で整理する
   ↓
-Challenge / Scoring
+「原因を指摘する」
+  ↓
+Safe Recovery
+  ↓
+Technical + Business Verification
+  ↓
+Communication / Sign-off
 ```
 
-Homeでは最初に、War Roomを
+Caseを開いた直後は採点しない。まず事件現場として、症状・System Map・既知の事実だけを見る。
 
-**「銀行システムで障害が起き、原因未確定の状態から、影響・証拠・安全な復旧・業務確認を順番に進める教材」**
+**「どこを調べるべきか」「何番目に何をするか」は最初から表示しない。**
 
-として説明する。
+Challenge開始後は、Evidenceを好きな順番で取得する。Evidenceごとに時間コストがあり、全部を見るより、いま考えている仮説を確認・反証できるEvidenceを選ぶ方が高評価になる。
 
-初見ガイドでは `SEV / Hypothesis / Evidence / Recovery / Reconciliation` の5語を短く確認できる。Case固有の答えは教えず、**症状・位置・既知の事実だけ**を理解してから挑戦へ入る。
+### Evidence Board
 
-Challenge画面の7段階も、専門英語を主見出しにせず次の日本語を先に表示する。
+取得したEvidenceはカードとしてBoardへ蓄積する。
 
-1. まず「どれくらい困っているか」を決める — Business impact / Severity
-2. 原因の候補を置く — Hypothesis tree
-3. 確認材料を取りに行く — Evidence request
-4. 集めた証拠から原因を判断する — Primary / Contributing cause
-5. 安全な戻し方を選ぶ — Recovery decision
-6. 本当に業務が戻ったか確認する — Verification / Reconciliation
-7. 関係者へ今の状況を共有する — Status communication
+Board自体は「このEvidenceはこの仮説を否定する」と答えを教えない。学習者自身がEvidenceを読み、Hypothesis Boardを更新する。
 
-採点ロジック・Case内容・合格基準は変更しない。
+### Hypothesis Board
 
-## v16 Incident Model
+Scenarioにある原因候補を次の状態へ自分で動かす。
 
-### Evidence Diversity Gate
+- 🟡 調査中
+- 🔥 有力
+- ✕ 除外
+- 未整理
+
+同時に追跡する仮説は最大3つ。証拠が増えるたびに「これは違う」「こちらが怪しい」を整理する。
+
+### Cause Declaration
+
+十分だと思ったら **「☝ 原因を指摘する」** を押す。
+
+Primary causeとContributing factorを宣言し、確定後はRecoveryへ進む。一度指摘した原因は戻せない。
+
+行き詰まった場合だけ `📓 捜査メモ` を開ける。捜査メモは正解順ではなく、
+
+- 事実と推測を分ける
+- 仮説が正しいなら何が見えるか考える
+- 仮説を消せるEvidenceを探す
+- 同じレイヤーばかり見ない
+
+という問いだけを提供する。
+
+## Evidence Diversity Gate
 
 Cause確定前に、同じログを複数見るだけではなく**異なるレイヤーのEvidence**を要求する。
 
 - Case01–11: 2レイヤー以上
 - Final Case12: 3レイヤー以上
+
+Evidence button自身が `data-layer` を持ち、Gateは表示文言のregex推定ではなく明示layer metadataを読む。
 
 Evidence layer例:
 
@@ -65,11 +86,28 @@ Evidence layer例:
 - Control / Change
 - Business / Reconciliation
 
-### Wrong Layer Coach
+## Scoring / Sign-off
 
-操作自体が妥当でも、現在の仮説とレイヤーが違う場合に理由を表示する。
+既存の採点思想は維持する。
 
-### Provider Context
+各Caseで以下すべて85点以上。
+
+- Financial Engineer ≥ 85
+- Financial Consultant ≥ 85
+- PM / PMO ≥ 85
+
+評価対象:
+
+- 初期Impact判断
+- 高価値Evidenceの選択
+- 仮説を絞れているか
+- Primary / Contributing cause
+- 必要Evidenceを揃えたSafe Recovery
+- Technical + Financial / Business verification
+- Status communication
+- Evidenceの取りすぎ / timebox
+
+## Provider Context
 
 **🧭 Context**でCommon / AWS / Google Cloud / Azure / OCIへ翻訳できる。ただし製品を1:1同一視せず、まず共通レイヤーで仮説を作る。
 
@@ -79,14 +117,6 @@ Evidence layer例:
 - 04–07: Hybrid Core Link / Credential Rotation / TLS / DNS Cutover
 - 08–10: Night Batch Partial Commit / Queue Backlog / WAF False Positive
 - 11–12: Regional DR / Month-End Financial Mega War Room
-
-## Sign-off
-
-各Caseで以下すべて85点以上。
-
-- Financial Engineer ≥ 85
-- Financial Consultant ≥ 85
-- PM / PMO ≥ 85
 
 ## Anti-patterns
 
