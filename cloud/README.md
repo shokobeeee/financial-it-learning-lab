@@ -24,6 +24,44 @@ Webサービスには何が必要？
 
 VPC / IAM / AZ / KMS 等はStep 0では暗記させない。必要になったLabで初めて名前を付ける。
 
+## Progressive Learning UX
+
+Cloud Fundamentalsでは、全20 Labsへ同じ演習UIを強制しない。理解が育つにつれて画面自体を難しくする。
+
+```text
+Lab01–07
+見る → 困る → 部品を足す → 変化を見る → 名前を知る → 30秒確認
+
+Lab08–15
+状況を見る → 3択で判断 → なぜか理解する → Systemへ戻す
+
+Lab16–20
+Evidenceを取る → 判断する → Technical + BusinessでVerifyする
+```
+
+### Lab01–07 — Build / Visual
+
+- 最初からEvidence ConsoleやState DIFFを出さない
+- BEFORE / AFTERの銀行Systemを見せる
+- 1 Labにつき主Actionは原則1つ
+- Action後に初めて「今日の1語」を表示
+- 用語の意味 → Layer → Provider名の順で理解する
+- 問題は学習後の30秒確認として使う
+
+### Lab08–15 — Guided Decision
+
+- 「いま何に困っている？」を先に固定
+- 3択は知識テストではなく、問題に合う考え方を選ぶ練習
+- 正解後にSystem図と用語の位置へ戻す
+
+### Lab16–20 — Evidence / Operations
+
+- ここで初めてEvidenceを前面に出す
+- 原因断定より先にImpact / Last Known Good / Path / Data等を見る
+- Decision後にTechnicalだけでなくCustomer Journey / 件数 / 金額 / 正本までVerifyする
+
+Provider教材（AWS / Google Cloud / Azure）はCloud Fundamentals修了後の「翻訳・演習」なので、従来の実務寄りLab Engineを利用する。
+
 ## 20 Labs — 銀行Webシステムを育てる
 
 ### 01–07 まず仕組みをつくる
@@ -56,7 +94,7 @@ VPC / IAM / AZ / KMS 等はStep 0では暗記させない。必要になったLa
 19. 金融で使う前に運用を決める — IaC / Change / Audit / FinOps / Third Party
 20. Cloud War Room
 
-各Labでは **「🏗 いま作っている銀行システム」** と **「🧭 今回の位置」** を表示し、今回増えた部品と所属レイヤーを確認する。
+各Labでは **「🏦 いま作っている銀行システム」** と **「🧭 今回の位置」** を表示し、今回増えた部品と所属レイヤーを確認する。
 
 ## Canonical Lab + Provider Adapter
 
