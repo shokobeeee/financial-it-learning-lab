@@ -21,19 +21,23 @@ app=read('financial-war-room/app.js')
 index=read('financial-war-room/index.html')
 style=read('financial-war-room/style.css')
 readme=read('financial-war-room/README.md')
+home=read('assets/js/home-v3.js')
 
 ids={int(x) for x in re.findall(r'(?m)^\s{4}(\d+):\{',guide)}
 expect(ids==set(range(1,13)),f'War Room beginner guide must cover case ids 1..12; got {sorted(ids)}')
+expect(guide.count('facts:[')==12,f'War Room beginner guide must provide Japanese-first fact cards for all 12 cases; got {guide.count("facts:[")}')
 expect('rootExplain' not in guide and 'root:' not in guide,'Beginner guide must not embed root-cause answers/spoilers')
-for marker in ('glossary:[','flow:[','plain:','focus:','map:'):
+for marker in ('glossary:[','flow:[','plain:','focus:','facts:[','map:'):
     expect(marker in guide,f'Beginner guide missing: {marker}')
 
-for marker in ('function preview(sc)','初見ガイド / まだ採点されません','状況は分かった → 挑戦を始める','#preview','まず「どれくらい困っているか」を決める','確認材料を取りに行く','本当に業務が戻ったか確認する','Primary cause / Contributing factor','wrLiveScore'):
+for marker in ('function preview(sc)','初見ガイド / まだ採点されません','状況は分かった → 挑戦を始める','#preview','まず「どれくらい困っているか」を決める','確認材料を取りに行く','本当に業務が戻ったか確認する','Primary cause / Contributing factor','wrLiveScore','facts=Array.isArray(g.facts)','<h3>${esc(x.subtitle)}</h3>','wrPreviewEnglish'):
     expect(marker in app,f'War Room beginner-first app missing: {marker}')
 
 # Home cards must open the non-scored preview first, while challenge start remains explicit.
 expect('href="#preview${String(x.id).padStart(2,\'0\')}"' in app,'War Room scenario cards must route to preview before challenge')
 expect('href="#case${String(sc.id).padStart(2,\'0\')}"' in app,'War Room preview must provide explicit challenge start')
+expect("financial-war-room/#preview" in home,'Global NEXT STEP must route through War Room preview')
+expect("financial-war-room/#case" not in home,'Global NEXT STEP must not bypass beginner preview and jump directly into scoring')
 
 # Preserve existing scoring/sign-off and progress contracts.
 expect("'financial_warroom_'+id+'_result'" in app,'War Room progress/result key changed unexpectedly')
@@ -60,8 +64,8 @@ if errors:
     for e in errors: print(' - '+e)
     sys.exit(1)
 print('War Room beginner QA PASSED')
-print(' - 12 preview guides')
-print(' - preview-before-challenge routing')
+print(' - 12 preview guides + Japanese-first facts')
+print(' - preview-before-challenge routing, including global NEXT STEP')
 print(' - no answer spoilers in guide')
 print(' - tri-role scoring contract preserved')
 print(' - Evidence Diversity DOM compatibility')
