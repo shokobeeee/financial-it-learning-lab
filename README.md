@@ -42,14 +42,17 @@ Linux v16で導入した「分類軸を混ぜない」設計を全教材へ展�
 
 各教材の **🧭 Context** からLayer Guide / Product Profile / conceptual translationを確認できます。
 
+Cloud系はさらに **☁️ Cloud Map** で、用語を「何をする？ / どこまで任せる？ / 各社では何て呼ぶ？ / 銀行Systemのどこ？」の4軸から確認できます。分類・Provider mappingの正本は `assets/js/cloud-concepts.js` です。
+
 ## What “Complete Package” means
 
 20 Labsがあるだけでは完成扱いにしません。
 
 - Start from Zero
 - 20 Labs / 12 Cases
-- 基本 / 選択 / 入力
-- State / Evidence
+- Progressive Learning Modes — 理解段階に合わせて、見る/作る → 選ぶ → 入力/Evidenceへ進む
+- State / Evidence at the Right Time — Evidence UIを初学者へ先回りさせない
+- Layer Guide / Concept → Product → Evidence
 - Financial Context
 - Field Questions
 - Glossary / Cheat Sheet
@@ -94,6 +97,16 @@ Linux → SQL / Database → COBOL → JCL / Batch
 ```
 
 3クラウド教材は順不同。OCIはCloud Fundamentals / War Roomのtranslation profileとして扱い、必要なら将来独立20-Lab packageへ拡張できます。
+
+### Cloud Fundamentalsだけは最初に「教えるUI」を使う
+
+```text
+Lab01–07  見る → 困る → 部品を足す → 名前を知る
+Lab08–15  状況を見る → 選ぶ → 理由を理解する
+Lab16–20  Evidence → 判断 → Verify / Reconcile
+```
+
+AWS / Google Cloud / Azureは、この共通Conceptを理解した後のProvider翻訳・演習として進めます。
 
 ## War Room rule
 
