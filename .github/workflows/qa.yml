@@ -33,8 +33,11 @@ jobs:
       - name: Repository invariants
         run: python3 scripts/qa_repository.py
 
-      - name: War Room beginner UX invariants
+      - name: War Room investigation invariants
         run: python3 scripts/qa_warroom_beginner.py
+
+      - name: Field Incident Gate invariants
+        run: python3 scripts/qa_field_casebook.py
 
       - name: Provider input stays concept-first
         shell: bash
