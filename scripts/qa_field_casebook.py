@@ -74,6 +74,7 @@ for marker in (
 
 preview_segment=app.split('function preview(c)',1)[1].split('function start(c)',1)[0] if 'function preview(c)' in app else ''
 expect('.sources' not in preview_segment and 'SOURCE REVEAL' not in preview_segment,'Preview must not expose source identity before result')
+expect('c.confidence' not in preview_segment and 'c.recommended' not in preview_segment,'Preview must not expose confidence map or recommended Lab hints before result')
 
 for marker in ('.fgCaseGrid{','.fgInvestigationGrid{','.fgEvidenceBoard{','.fgHypothesisBoard{','.fgSources{'):
     expect(marker in style,f'Field Case CSS missing: {marker}')
