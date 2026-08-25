@@ -56,14 +56,16 @@ S.topics=S.topics.map((topic,i)=>{
 
   t[1]=t[1]+' — '+name;
   t[2]=t[2]+' '+P.name+'では代表的に「'+name+'」として現れます。';
-  t[4]=[name,...originalScope.filter(x=>x!==name)];
+  // Keep canonical concept keywords first: cloud-lab-engine uses the leading scope
+  // values as input-mode must tokens. Provider labels are display/context, not answer keys.
+  t[4]=[...originalScope.filter(x=>x!==name),name];
   t[5]=t[5]+'。'+P.name+'では '+name+' をこのConceptの代表実装として確認します。';
   t[10]=t[10]+' '+P.name+'では「'+name+'」。製品間は完全互換ではなく、Concept上の対応です。';
 
   if(row.key==='failure-domain'){
     const fleet=product('ha-fleet');
     t[2]+=' なお '+name+' はFailure Domain、'+fleet+' はCompute台数・自動復旧の仕組みで、同じ分類ではありません。';
-    t[4]=[name,fleet,'failure domain','redundancy'];
+    t[4]=['failure domain','redundancy',name,fleet];
     t[10]+=' Failure DomainとAuto Healing / Fleetを同じ機能として扱わないことが重要です。';
   }
 
