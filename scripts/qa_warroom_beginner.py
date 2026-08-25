@@ -58,6 +58,7 @@ expect("W.st.scores.eng>=85&&W.st.scores.con>=85&&W.st.scores.pm>=85" in resolut
 expect("const over=Math.max(0,W.st.evidence.length-4)" in resolution,'Evidence efficiency penalty must remain')
 expect("W.key=id=>'financial_warroom_'+id+'_result'" in core,'War Room progress/result key changed unexpectedly')
 expect('W.st.sc.impactCorrect' in investigation and 'W.st.sc.commCorrect' in resolution,'Impact/communication scoring hooks must remain')
+expect('W.contribLabel' in resolution,'Resolution must show a human-readable contributing-factor label')
 
 expect('b.dataset.layer' in v16 and 'b.dataset.layerLabel' in v16,'Evidence Diversity Gate must read explicit layer metadata')
 expect('primaryLayer(' not in v16,'Evidence Diversity Gate must not infer layers from button text regex')
@@ -72,7 +73,8 @@ expect('investigation-game.css' in index,'War Room entrypoint must load investig
 expect('app.js' not in index,'Superseded linear app.js must not be wired')
 expect(not (ROOT/'financial-war-room/app.js').exists(),'Superseded linear financial-war-room/app.js should be removed')
 
-for marker in ('.wrInvestigationGrid{','.wrEvidenceBoard{','.wrHypothesisBoard{','.wrAccuseBtn{','.wrResolutionPanel{'):
+# Protect user-visible investigation structure, not one specific wrapper-selector implementation.
+for marker in ('.wrInvestigationGrid{','.wrEvidenceCards{','.wrHypothesisBoard{','.wrAccuseBtn{','.wrResolutionPanel{'):
     expect(marker in style,f'Investigation-game CSS missing: {marker}')
 expect('financial-war-room/#preview' in home,'Home Next Step must enter War Room preview before investigation')
 expect('Investigation Game Model' in readme,'War Room README must document investigation game model')
