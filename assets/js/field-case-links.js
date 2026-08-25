@@ -22,6 +22,10 @@ function caseIds(module,lab){
   const hit=rows.find(x=>lab>=x[0][0]&&lab<=x[0][1]);
   return (hit?.[1]||[]).slice(0,2);
 }
+function loadNavigationScroll(){
+  if(document.querySelector('script[data-fit-nav-scroll]'))return;
+  const s=document.createElement('script');s.src='../assets/js/navigation-scroll.js?v=1';s.dataset.fitNavScroll='1';document.body.appendChild(s);
+}
 function loadCss(){
   if(document.querySelector('link[data-field-links]'))return;
   const l=document.createElement('link');l.rel='stylesheet';l.href='../assets/css/field-case-links.css?v=1';l.dataset.fieldLinks='1';document.head.appendChild(l);
@@ -36,7 +40,7 @@ function render(){
     <div class="field-link-grid">${cases.map(c=>`<a href="../field-casebook/#preview${String(c.id).padStart(2,'0')}"><small>CASE ${String(c.id).padStart(2,'0')} / ${c.difficulty}</small><b>${c.title}</b><span>${c.subtitle}</span></a>`).join('')}</div>`;
 }
 function ensureData(){
-  loadCss();
+  loadNavigationScroll();loadCss();
   if(window.FIELD_CASES&&window.FIELD_CASES.length){render();return}
   if(document.querySelector('script[data-field-cases]'))return;
   const files=['cases.js','cases-1.js','cases-2.js','cases-3.js','cases-4.js','cases-5.js'];
