@@ -33,6 +33,9 @@ jobs:
       - name: Repository invariants
         run: python3 scripts/qa_repository.py
 
+      - name: Navigation scroll invariants
+        run: python3 scripts/qa_navigation_scroll.py
+
       - name: War Room investigation invariants
         run: python3 scripts/qa_warroom_beginner.py
 
