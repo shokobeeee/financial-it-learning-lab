@@ -8,25 +8,24 @@
 
 1. **Start from Zero** — 初学者が「そもそも何をする技術か」から入れる。
 2. **20 Labs** — 基礎 → 実務 → 障害対応/Capstoneまで段階がある。
-3. **Progressive Learning Modes** — 学習段階に合わせて、見る/作る → 選ぶ/判断する → 入力/Evidenceで実践するへ難度を上げる。全Labで同じ3モードを強制しない。
-4. **State / Evidence at the Right Time** — 何が変わったか・何を証拠とするかを学ぶ。ただし初学者の最初のLabへEvidence UIを先回りさせず、概念理解後に段階的に解禁する。
-5. **Layer Guide** — 「同じ軸ではないもの」を分離し、今どのレイヤーを見ているか説明できる。
+3. **Progressive Learning Modes** — 見る/作る → 選ぶ/判断する → 入力/Evidenceへ、理解段階に合わせて難度を上げる。全Labへ同じUIを強制しない。
+4. **State / Evidence at the Right Time** — 何が変わったか・何を証拠とするかを学ぶ。初学者の最初のLabへ高度なEvidence UIを先回りさせない。
+5. **Layer Guide** — 同じ軸ではないものを分離し、いま何のレイヤーを見ているか説明できる。
 6. **Concept → Product → Evidence** — 共通概念・製品実装・運用Evidenceを分ける。製品間対応は `=` ではなく `≒ conceptual mapping` とする。
-7. **Product / Platform Profile** — 必要な領域では、正本Labを複製せずprofile adapterで主要製品差分を学べる。
+7. **Product / Platform Profile** — 正本Labを複製せず、profile adapterで主要製品差分を重ねる。
 8. **Scope Badge / Wrong Layer Coach** — 操作・SQL・JCL・Evidenceの所属レイヤーを表示し、目的レイヤーが違う場合は理由付きで指摘する。
-9. **Evidence Diversity** — 障害演習では同種ログの大量取得ではなく、異なるレイヤーの証拠を集める。
+9. **Evidence Diversity** — 同種ログの大量取得ではなく、異なるレイヤーの証拠を組み合わせる。
 10. **Financial Context** — 件数・金額・残高・正本・締切・顧客影響と接続する。
 11. **Field Questions** — 会議・障害対応で実際に確認すべき質問を持つ。
 12. **Glossary / Cheat Sheet** — 用語を単語ではなく役割で説明する。
 13. **Tri-role View** — Engineer / Consultant / PM・PMOの3視点で修了像を定義する。
 14. **Final Capstone** — 正解当てではなく Evidence → Safe Action → Verification を行う。
-15. **Completion / Next Path** — 進捗、修了状態、次教材・関連教材が分かる。
+15. **War Room Link / Public Incident Transfer** — 各Labから「この知識が効く事故」へ進み、公開事例ベースCaseで知識を転移し、結果から復習Labへ戻れる。
+16. **Completion / Next Path** — 進捗、修了状態、次教材・関連教材が分かる。
 
-### Progressive Learning Modes の考え方
+## Progressive Learning Modes
 
-教材ごとに「難しくなる順番」は変えてよい。重要なのはUIを統一することではなく、認知負荷を学習者の理解段階へ合わせること。
-
-例:
+重要なのはUIの完全統一ではなく、認知負荷を学習者の理解段階へ合わせること。
 
 ```text
 SQL / COBOL / JCL
@@ -66,19 +65,14 @@ Lock / Waiting                         ← Concept
 └ SQL Server sys.dm_tran_locks
 ```
 
-ここで4製品を「同じ」とは扱わない。  
-**同じ目的を見る代表的な実装**として対応付け、権限・仕様・粒度・運用方法の差を残す。
+4製品を「同じ」とは扱わない。同じ目的を見る代表実装として対応付け、権限・仕様・粒度・運用方法の差を残す。
 
 ### Canonical Lab + Profile Adapter
 
-製品ごとに20 Labsをコピーしない。
-
 - Canonical Lab = 共通概念・金融業務・判断ロジックの正本
-- Profile Adapter = 製品名、代表構文、monitor/audit evidence、境界の差分
+- Profile Adapter = 製品名、代表構文、monitor/audit Evidence、境界の差分
 
-これによりOracle、PostgreSQL、SQL Server、OCI等を追加しても教材の正本が分裂しない。
-
-### 現在のProfile対象
+現在のProfile対象:
 
 - Linux: Debian/Ubuntu / RHEL-Rocky-Alma + systemd / tool scope
 - SQL: IBM Db2 / Oracle Database / PostgreSQL / Microsoft SQL Server
@@ -86,95 +80,117 @@ Lock / Waiting                         ← Concept
 - JCL周辺: Generic Scheduler / BMC Control-M / JP1/AJS3 / IBM Z Workload Scheduler
 - Cloud translation: Common / AWS / Google Cloud / Azure / OCI
 
-OCIは現時点ではCloud Fundamentals / Financial War Roomのtranslation profile。独立20-Lab化は、OCI固有の設計・運用を深掘りする必要が生じた時点で判断する。
+OCIは現時点ではCloud Fundamentals / War Roomのtranslation profile。OCI固有の設計・運用を20段階で深掘りする必要が生じた場合だけ独立Packageへ昇格する。
+
+## War Room Link / Public Incident Transfer
+
+教材内の知識を、次の転移ループで実戦へつなぐ。
+
+```text
+LabでConceptを理解
+  ↓
+🚨 War Room Link
+「この知識が効く事故」を症状だけで確認
+  ↓
+Field Incident Gate
+公開報告ベースCaseを自由捜査
+  ↓
+ResultでSource・考え方・復習Labを開示
+  ↓
+弱いLabへ戻る
+  ↓
+Financial War Roomで金融横断判断
+```
+
+### Source hierarchy
+
+1. 公式postmortem・企業発表・規制当局資料をFactの軸にする。
+2. Qiita / note / 新聞・技術メディアは、概念翻訳・社会影響・別視点の補助線として使う。
+3. 一次情報と二次解説が食い違う場合は一次情報を優先する。
+4. 原文を長く転載せず、学習用に匿名化・簡略化・再構成する。
+5. 実事故名・Source・推奨復習LabはResultまで隠し、推理をspoilerしない。
+6. Caseは本番Runbook、法令判断、完全な事故再現ではない。
+
+### 難度とSign-off
+
+- **Field Incident Gate** — 10 Public-Report Reconstructions。Engineer / Consultant / PMが各80点以上。
+- **Financial War Room** — 12 Financial Incidents。Engineer / Consultant / PMが各85点以上。
+
+Field Gateは「外部の事故報告を読める自信」を作る移行関門、Financial War Roomは金融業務・正本・決済・Batch・Hybridを横断する最終関門とする。
 
 ## 共通の修了判断
 
 ### Financial Engineer
 
-- レイヤを分解できる
-- Conceptと製品固有実装を混同しない
-- 証拠を選べる
-- 異なるレイヤーのEvidenceを組み合わせられる
-- 変更前後の差分を説明できる
-- data integrityを壊さない
-- rollback / verificationを考えられる
+- レイヤーを分解し、Conceptと製品固有実装を混同しない
+- 仮説を置き、価値の高いEvidenceで残す/消す
+- 異なるレイヤーのEvidenceを組み合わせる
+- Data integrityを壊さず、rollbackと技術検証を考える
 
 ### Financial Consultant
 
-- 技術を顧客影響・重要業務・riskへ翻訳できる
-- 製品名より先に共通判断軸で比較できる
-- 正本・統制・third party・RTO/RPOを会話に入れられる
-- Primary causeとcontrol gapを分けられる
+- 技術を顧客影響・重要業務・riskへ翻訳する
+- 正本・統制・third party・RTO/RPOを会話に入れる
+- Primary causeとcontrol gapを分ける
+- 公開事例の事実・解説・推論を区別する
 
 ### PM / PMO
 
-- impact / severity / deadlineを固定できる
-- owner / dependency / approvalを整理できる
-- product/team間の責任境界を整理できる
-- safe change / rollback / checkpointを管理できる
-- 復旧を「技術正常」だけで閉じず業務完了まで追える
+- Impact / severity / deadlineを固定する
+- Owner / dependency / approval / rollbackを整理する
+- 復旧を技術Greenだけで閉じず、顧客・件数・金額・後続まで追う
+- 未確定事項と次回更新時刻を含めて共有する
 
 ## 現在のComplete Packages
 
-### Core
+### Core — 80 Labs
 
-- Linux / Infrastructure — 20 Labs
-- SQL / Database — 20 Labs
-- COBOL / Business Systems — 20 Labs
-- JCL / Batch Operations — 20 Labs
+- Linux / Infrastructure — 20
+- SQL / Database — 20
+- COBOL / Business Systems — 20
+- JCL / Batch Operations — 20
 
-### Cloud
+### Cloud — 80 Labs
 
-- Cloud Fundamentals — 20 Labs
-- AWS for Financial IT — 20 Labs
-- Google Cloud for Financial IT — 20 Labs
-- Azure for Financial IT — 20 Labs
+- Cloud Fundamentals — 20
+- AWS for Financial IT — 20
+- Google Cloud for Financial IT — 20
+- Azure for Financial IT — 20
 
-### Final
+### Final Practice
 
-- Financial War Room — 12 Cases / TRI-ROLE SIGN-OFF
+- Field Incident Gate — 10 Cases / TRI-ROLE 80
+- Financial War Room — 12 Cases / TRI-ROLE 85
 
 ## 推奨ルート
 
 ```text
-Linux
-  ↓
-SQL / Database
-  ↓
-COBOL
-  ↓
-JCL / Batch
-  ↓
-Cloud Fundamentals
-  ↓
-AWS → Google Cloud → Azure
-  ↓
-Financial War Room
+Linux → SQL / Database → COBOL → JCL / Batch
+      → Cloud Fundamentals → AWS / Google Cloud / Azure
+      → Field Incident Gate
+      → Financial War Room
 ```
 
-3クラウドは順不同でもよい。重要なのは Cloud Fundamentals の共通概念へ戻して比較できること。Oracle DatabaseやOCI等はContext Profileで差分を重ね、必要なものだけ独立Packageへ昇格する。
+3クラウドは順不同。重要なのはCloud Fundamentalsの共通概念へ戻して比較できること。
 
 ## 完成後の品質管理
 
 教材追加・大幅変更時は最低限以下を機械確認する。
 
 - JavaScript syntax
-- 20 Labs / 12 Cases の件数
-- progress prefix
-- module indexからComplete Package Guideを開ける
-- Context / Layer Guideが対象教材で開ける
-- Profile adapterの主要IDと代表Evidenceが存在する
+- 20 Labs / 10 Field Cases / 12 War Room Casesの件数
+- progress prefix / result key
+- Guide / Context / Layer Guide / War Room Linkのwiring
 - 製品対応を完全互換として表現していない
-- Wrong Layer Coachが学習操作を破壊しない
+- 初心者PreviewがSource・Root cause・推奨Labをspoilerしない
+- 各公開事例Caseに公式/規制当局Sourceがある
+- 全体Source mixにQiita / note / 新聞・技術メディアがある
 - Evidence Diversity GateがCause確定前に機能する
-- Final Capstoneが存在する
-- 総合TOPからリンク切れがない
-- Financial War Roomのsafe recovery / reconciliation / tri-role sign-offが到達可能
+- Safe Recovery / Reconciliation / Communicationが存在する
+- 検証済みgolden pathでField Gate 80×3、War Room 85×3へ到達可能
+- 総合TOP・各教材からリンク切れがない
 
 ### GitHub Quality Flow
-
-品質管理は機械QAだけで完了しない。教材内容・分類・UXの変更は原則として次の順番で扱う。
 
 ```text
 Issue / Learning Problem
@@ -185,7 +201,7 @@ Pull Request
   ↓
 Repository Quality Gate
   ↓
-Learning / Concept / UX / Code Review
+Learning / Concept / UX / Code / Source Review
   ↓
 Review Fixes + Re-review
   ↓
@@ -195,11 +211,9 @@ GitHub Pages Deploy
 ```
 
 - mainへの直接実装を原則避ける
-- `.github/workflows/qa.yml` を常設し、PRでbaseline regressionを確認する
-- 不具合を修正したら、可能な限り同じ不具合を防ぐQA guardを追加する
-- PR templateで初学者影響・Concept/Product/Evidence・Mobile・進捗・Docs同期を確認する
-- 一時QA workflowを作った場合、merge前に削除する
-- Reviewで指摘が出た場合は修正後に再Reviewする
+- 不具合を修正したら同じ不具合を防ぐQA guardを追加する
+- 一時QA workflowはmerge前に削除する
+- SourceのFactと教材側の推論を明確に分ける
 
 詳細は [docs/DEVELOPMENT_WORKFLOW.md](./docs/DEVELOPMENT_WORKFLOW.md) を参照。
 

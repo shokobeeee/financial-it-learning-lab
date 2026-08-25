@@ -11,18 +11,6 @@ const MAP={
   gcp:[[[1,7],[4,5]],[[8,15],[1,6]],[[16,20],[4,6,9,10]]],
   azure:[[[1,7],[4,5]],[[8,15],[1,6]],[[16,20],[4,6,9,10]]]
 };
-const SKILL={
-  1:'変更直後のOS/端末障害を、配布・boot・scopeで切り分ける',
-  2:'正本・COMMIT・failover・Network partitionを一つの事故として追う',
-  3:'Backupの有無ではなく、restore可能性とtransaction logを確認する',
-  4:'Route・DNS・Control Plane・復旧経路の依存を分ける',
-  5:'Validな設定と安全なruntimeを分け、canaryとrollbackを考える',
-  6:'Network障害とretry/backlogによる自己増幅を分ける',
-  7:'Batch resource・Online取引・顧客対応を同時に判断する',
-  8:'record layout・境界値・更改test・安全な再送を結ぶ',
-  9:'切戻し後の再接続stormと段階復旧を考える',
-  10:'timeout取引を失敗と決めつけず、state・重複・金額を照合する'
-};
 function moduleId(){const parts=location.pathname.split('/').filter(Boolean);return MODULES.find(x=>parts.includes(x))||null}
 function labId(module){
   if(module==='linux'){const m=location.pathname.match(/lab(\d{1,2})/i);return m?Number(m[1]):0}
@@ -44,8 +32,8 @@ function render(){
   let panel=document.getElementById('fieldCaseLinkPanel');
   if(!panel){panel=document.createElement('section');panel.id='fieldCaseLinkPanel';panel.className='field-link-panel';const main=document.querySelector('main')||document.body;main.appendChild(panel)}
   panel.innerHTML=`<div class="field-link-head"><div><span>🚨 WAR ROOM LINK</span><h2>${lab?'このLabの知識が効く事故':'この教材を実戦で使う'}</h2></div><a href="../field-casebook/">10 Cases →</a></div>
-    <p class="field-link-note">${lab?`Lab ${String(lab).padStart(2,'0')}の知識を、公開報告ベースの事件で使ってみます。解けなくても、戻るべき教材が分かれば前進です。`:'20 Labsの途中でも覗けます。Case結果から、必要なLabへ戻れる設計です。'}</p>
-    <div class="field-link-grid">${cases.map(c=>`<a href="../field-casebook/#preview${String(c.id).padStart(2,'0')}"><small>CASE ${String(c.id).padStart(2,'0')} / ${c.difficulty}</small><b>${c.title}</b><span>${SKILL[c.id]||c.subtitle}</span></a>`).join('')}</div>`;
+    <p class="field-link-note">${lab?`Lab ${String(lab).padStart(2,'0')}の知識を、公開報告ベースの事件で使ってみます。Caseカードでは症状だけを示し、原因・推奨Evidence・復習Labは答え合わせ後に開示します。`:'20 Labsの途中でも覗けます。Case結果から、必要なLabへ戻れる設計です。'}</p>
+    <div class="field-link-grid">${cases.map(c=>`<a href="../field-casebook/#preview${String(c.id).padStart(2,'0')}"><small>CASE ${String(c.id).padStart(2,'0')} / ${c.difficulty}</small><b>${c.title}</b><span>${c.subtitle}</span></a>`).join('')}</div>`;
 }
 function ensureData(){
   loadCss();
