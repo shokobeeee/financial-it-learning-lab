@@ -166,7 +166,7 @@ def check_cloud_progressive_learning() -> None:
         "function renderGuided(lab)",
         "function renderOperate(lab)",
         "id<=7?'build':id<=15?'guided':'operate'",
-        "Evidenceを取る",
+        "STEP 1 / EVIDENCE",
         "今日の1語",
     ):
         expect(marker in engine, f"Cloud visual engine missing progressive-learning invariant: {marker}")
