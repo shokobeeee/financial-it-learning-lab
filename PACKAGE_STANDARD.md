@@ -154,4 +154,35 @@ Financial War Room
 - 総合TOPからリンク切れがない
 - Financial War Roomのsafe recovery / reconciliation / tri-role sign-offが到達可能
 
+### GitHub Quality Flow
+
+品質管理は機械QAだけで完了しない。教材内容・分類・UXの変更は原則として次の順番で扱う。
+
+```text
+Issue / Learning Problem
+  ↓
+Feature Branch
+  ↓
+Pull Request
+  ↓
+Repository Quality Gate
+  ↓
+Learning / Concept / UX / Code Review
+  ↓
+Review Fixes + Re-review
+  ↓
+Merge to main
+  ↓
+GitHub Pages Deploy
+```
+
+- mainへの直接実装を原則避ける
+- `.github/workflows/qa.yml` を常設し、PRでbaseline regressionを確認する
+- 不具合を修正したら、可能な限り同じ不具合を防ぐQA guardを追加する
+- PR templateで初学者影響・Concept/Product/Evidence・Mobile・進捗・Docs同期を確認する
+- 一時QA workflowを作った場合、merge前に削除する
+- Reviewで指摘が出た場合は修正後に再Reviewする
+
+詳細は [docs/DEVELOPMENT_WORKFLOW.md](./docs/DEVELOPMENT_WORKFLOW.md) を参照。
+
 > 本教材は学習用シミュレーター。製品資格、規制適合判定、本番Runbook、変更手順の代替ではない。
