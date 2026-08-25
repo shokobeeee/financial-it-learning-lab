@@ -45,6 +45,8 @@ def check_required_files() -> None:
         "docs/DEVELOPMENT_WORKFLOW.md",
         "docs/CLOUD_ATLAS.md",
         "assets/js/cloud-concepts.js",
+        "cloud/visual-engine.js",
+        "cloud/visual-learning.css",
         "linux/index.html",
         "sql/index.html",
         "cobol/index.html",
@@ -124,7 +126,7 @@ def check_wiring() -> None:
         "sql/index.html": ["module-package.js", "context-system.js"],
         "cobol/index.html": ["module-package.js", "context-system.js", "integration-context.js"],
         "jcl/index.html": ["module-package.js", "context-system.js", "integration-context.js"],
-        "cloud/index.html": ["cloud-concepts.js", "zero-base.js", "cloud-lab-engine.js", "module-package.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
+        "cloud/index.html": ["cloud-concepts.js", "zero-base.js", "visual-learning.css", "visual-engine.js", "module-package.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
         "aws/index.html": ["cloud-concepts.js", "../cloud/zero-base.js", "cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
         "gcp/index.html": ["cloud-concepts.js", "../cloud/zero-base.js", "cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
         "azure/index.html": ["cloud-concepts.js", "../cloud/zero-base.js", "cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
@@ -134,6 +136,10 @@ def check_wiring() -> None:
         body = text(path)
         for marker in markers:
             expect(marker in body, f"{path}: expected wiring marker missing: {marker}")
+
+    cloud_index = text("cloud/index.html")
+    expect("cloud-lab-engine.js" not in cloud_index, "Cloud Fundamentals must use the progressive visual engine, not the provider/expert lab engine")
+    expect("zero-base-ui.js" not in cloud_index, "Cloud Fundamentals visual engine owns the system-builder UI; old zero-base DOM patch must not also run")
 
     for path in ("aws/index.html", "gcp/index.html", "azure/index.html"):
         body = text(path)
@@ -147,6 +153,34 @@ def check_wiring() -> None:
             expect(positions == sorted(positions), f"{path}: provider load order must be registry → zero-base canonical → adapter → engine")
         except ValueError:
             pass
+
+
+def check_cloud_progressive_learning() -> None:
+    engine = text("cloud/visual-engine.js")
+    css = text("cloud/visual-learning.css")
+    readme = text("cloud/README.md")
+    package = text("PACKAGE_STANDARD.md")
+
+    for marker in (
+        "function renderBuild(lab)",
+        "function renderGuided(lab)",
+        "function renderOperate(lab)",
+        "id<=7?'build':id<=15?'guided':'operate'",
+        "Evidenceを取る",
+        "今日の1語",
+    ):
+        expect(marker in engine, f"Cloud visual engine missing progressive-learning invariant: {marker}")
+
+    expect("modebar" not in engine and "data-mode" not in engine, "Cloud Fundamentals beginner engine must not restore the generic Basic/Select/Input mode bar")
+    expect("vlBeforeAfter" in css and "vlGuidedLayout" in css and "vlOperateFlow" in css, "Cloud visual CSS must support build, guided and operate phases")
+    expect("Lab01–07 — Build / Visual" in readme, "Cloud README must document Build / Visual beginner phase")
+    expect("Lab08–15 — Guided Decision" in readme, "Cloud README must document Guided Decision phase")
+    expect("Lab16–20 — Evidence / Operations" in readme, "Cloud README must document Evidence / Operations phase")
+    expect("Progressive Learning Modes" in package, "Package Standard must allow stage-appropriate learning modes")
+    expect("全Labで同じ3モードを強制しない" in package, "Package Standard must not require expert UI on every beginner Lab")
+
+    # Lab completion must still use the existing storage prefix so Home/Guide progress remains compatible.
+    expect("S.prefix+String(id).padStart(2,'0')+'_complete'" in engine, "Cloud visual engine must preserve current progress key contract")
 
 
 def check_cloud_registry_invariants() -> None:
@@ -262,6 +296,7 @@ def main() -> int:
         check_counts,
         check_progress_contract,
         check_wiring,
+        check_cloud_progressive_learning,
         check_cloud_registry_invariants,
         check_context_invariants,
         check_workflow_hygiene,
@@ -281,6 +316,7 @@ def main() -> int:
     print(" - Lab/Case counts")
     print(" - progress contract")
     print(" - module wiring / provider load order")
+    print(" - Cloud progressive beginner learning")
     print(" - canonical Cloud Concept Registry")
     print(" - Context invariants")
     print(" - workflow hygiene")
