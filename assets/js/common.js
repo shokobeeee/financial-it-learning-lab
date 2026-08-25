@@ -1,4 +1,6 @@
 (function(){
+  function loadNavigationScroll(){if(document.querySelector('script[data-fit-nav-scroll]'))return;const s=document.createElement('script');s.src='assets/js/navigation-scroll.js?v=1';s.dataset.fitNavScroll='1';document.body.appendChild(s)}
+  loadNavigationScroll();
   function count(prefix,total){let n=0;for(let i=1;i<=total;i++){try{if(localStorage.getItem(prefix+String(i).padStart(2,'0')+'_complete')==='true'||localStorage.getItem(prefix+i+'_complete')==='true')n++}catch(e){}}return n}
   const modules=[
     ['linux','linux_lab',20],['cobol','cobol_lab',20],['sql','sql_db_lab',20],['jcl','jcl_batch_lab',20],
