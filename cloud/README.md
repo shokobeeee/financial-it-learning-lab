@@ -4,6 +4,8 @@
 
 クラウド用語を先に覚えるのではなく、**残高照会をする小さな銀行Webサービスをゼロから組み立てながら**、なぜNetwork / Compute / Database / IAM / Backup等が必要なのかを理解する。
 
+Cloud系の分類・Provider mappingの正本は **`assets/js/cloud-concepts.js`**。
+
 ## Zero Base Learning Model
 
 ```text
@@ -27,8 +29,8 @@ VPC / IAM / AZ / KMS 等はStep 0では暗記させない。必要になったLa
 ### 01–07 まず仕組みをつくる
 
 1. Webサービスはどう動く？
-2. クラウドにアプリを置く — Compute
-3. データを置く — Database / 正本
+2. クラウドにアプリを置く — VM / Compute
+3. データを置く — Persistent Data / 正本
 4. 自分たちのネットワークを作る — Virtual Network
 5. 公開する場所と隠す場所を分ける — Subnet
 6. 外へ出る / 外から入る — Route / NAT
@@ -37,7 +39,8 @@ VPC / IAM / AZ / KMS 等はStep 0では暗記させない。必要になったLa
 ### 08–15 安全に・止まりにくくする
 
 8. 誰が通信できるかを絞る — Firewall
-9. 1台壊れても止めない — AZ / HA
+9. 同じ場所の障害で全部止めない — Availability Zone / Failure Domain
+   - Auto Scaling / MIG / VM Scale Sets等の**台数・自動復旧はCompute管理という別の分類軸**。
 10. データの置き場所を使い分ける — Object / Block / File
 11. DB運用の一部をCloudに任せる — Managed DB / Shared Responsibility
 12. 誰が何を操作できるか — IAM
@@ -53,11 +56,23 @@ VPC / IAM / AZ / KMS 等はStep 0では暗記させない。必要になったLa
 19. 金融で使う前に運用を決める — IaC / Change / Audit / FinOps / Third Party
 20. Cloud War Room
 
-各Labでは **「🏗 いま作っている銀行システム」** を表示し、今回増えた部品を図で確認できる。
+各Labでは **「🏗 いま作っている銀行システム」** と **「🧭 今回の位置」** を表示し、今回増えた部品と所属レイヤーを確認する。
+
+## Canonical Lab + Provider Adapter
+
+```text
+Cloud Fundamentals canonical 20 Labs
+  ↓
+Cloud Concept Registry
+  ↓
+AWS / Google Cloud / Azure Adapter
+```
+
+3 Provider教材は別々の20概念を持たない。同じLab番号・同じConcept順を使い、製品名だけを翻訳する。
 
 ## Provider Translation Profiles
 
-**🧭 Context**で共通Conceptをproviderへ翻訳する。
+`☁️ Cloud Map` / `🧭 Context` で共通Conceptをproviderへ翻訳する。
 
 - Common Concept — default
 - AWS
@@ -79,6 +94,7 @@ VPC / IAM / AZ / KMS 等はStep 0では暗記させない。必要になったLa
 - Customer → Internet → Cloud → App → Database → Core の経路を図で説明できる
 - 専門用語を「何の問題を解決する部品か」で説明できる
 - Common Conceptから複数providerへ翻訳し、1:1同一視しない
+- Failure Domain / Compute管理 / Service Model等の分類軸を混ぜない
 - 技術復旧後に顧客導線・件数・金額・正本まで照合する
 - 進捗キー: `cloud_labXX_complete`
 
