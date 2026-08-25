@@ -1,64 +1,84 @@
 (function(){
 'use strict';
-const S=window.CLOUD_SPEC;if(!S||!['aws','gcp','azure'].includes(S.id))return;
-const T=(group,title,subtitle,goal,scope,principle,q,correct,w1,w2,explain)=>[group,title,subtitle,goal,scope,principle,q,correct,w1,w2,explain];
-const CFG={
- aws:{name:'AWS',icon:'🟧',entry:'Route 53 / Elastic Load Balancing',compute:'EC2 / ECS / Lambda',data:'RDS / Aurora / S3',network:'Amazon VPC',subnet:'Subnet',route:'Route Table / IGW / NAT Gateway',firewall:'Security Group / NACL',zone:'Availability Zone / Auto Scaling',storage:'S3 / EBS / EFS',db:'RDS / Aurora',iam:'AWS IAM / IAM Role',secret:'KMS / Secrets Manager / ACM',observe:'CloudWatch / CloudTrail',backup:'AWS Backup / Snapshot / Restore',dr:'Multi-AZ / Multi-Region',hybrid:'Direct Connect / Site-to-Site VPN',govern:'CloudFormation / Organizations / Cost Explorer',extras:[['非同期連携','SQS / SNS / EventBridge','Queue・通知・Event routing。重複、再送、DLQ、idempotencyを業務整合性と一緒に見る。'],['Private接続','VPC Endpoint / PrivateLink','Public経路を減らす接続。IAMや認証認可が不要になるわけではない。'],['実行方式の選択','ECS / EKS / Lambda','Container / Kubernetes / Serverlessを要件・運用成熟度で選ぶ。']]},
- gcp:{name:'Google Cloud',icon:'🔵',entry:'Cloud DNS / Cloud Load Balancing',compute:'Compute Engine / Cloud Run / GKE',data:'Cloud SQL / AlloyDB / Cloud Storage',network:'VPC',subnet:'Subnet',route:'Routes / Cloud NAT',firewall:'VPC Firewall Rules',zone:'Region / Zone / MIG',storage:'Cloud Storage / Persistent Disk / Filestore',db:'Cloud SQL / AlloyDB',iam:'Cloud IAM / Service Account',secret:'Cloud KMS / Secret Manager',observe:'Cloud Monitoring / Logging / Audit Logs',backup:'Backup / Snapshot / Restore',dr:'Multi-zone / Multi-region DR',hybrid:'Cloud Interconnect / Cloud VPN',govern:'Terraform / Organization / Project / Billing',extras:[['非同期連携','Pub/Sub','非同期message。Ack、retry、duplicate、dead-letter、idempotent consumerを見る。'],['Private / Data境界','Private Service Connect / VPC Service Controls','Private service pathとdata exfiltration境界は別の仕組みとして理解する。'],['実行方式の選択','Cloud Run / GKE','Managed containerとKubernetesを運用責任・制御性で比較する。']]},
- azure:{name:'Azure',icon:'🔷',entry:'Azure DNS / Application Gateway / Load Balancer',compute:'Virtual Machines / App Service / Functions / AKS',data:'Azure SQL / Blob Storage',network:'Virtual Network (VNet)',subnet:'Subnet',route:'Route Table / UDR / NAT Gateway',firewall:'NSG / Azure Firewall',zone:'Availability Zone / VM Scale Sets',storage:'Blob / Managed Disks / Azure Files',db:'Azure SQL / Managed Instance',iam:'Microsoft Entra ID / Azure RBAC / Managed Identity',secret:'Key Vault / Managed HSM',observe:'Azure Monitor / Log Analytics / Activity Log',backup:'Azure Backup / Restore',dr:'Site Recovery / Region DR',hybrid:'ExpressRoute / VPN Gateway',govern:'Bicep / Azure Policy / Subscription / Cost Management',extras:[['非同期連携','Service Bus / Event Grid','Queue/messageとevent routingを分け、再送・重複・DLQを見る。'],['Private接続','Private Link / Private Endpoint','PaaSへのprivate path。Private DNSと認証認可も別途確認する。'],['実行方式の選択','App Service / Functions / AKS','PaaS / Serverless / Kubernetesを要件と運用責任で比較する。']]}
+
+const S=window.CLOUD_SPEC;
+const R=window.FIT_CLOUD_CONCEPTS;
+if(!S||!R||!['aws','gcp','azure'].includes(S.id))return;
+
+const P=R.providers[S.id];
+const product=key=>R.product(key,S.id);
+const primary=R.primary();
+
+S.kicker=P.name.toUpperCase()+' FOR FINANCIAL IT 01–20 / CANONICAL CLOUD TRANSLATION';
+S.hero='Cloud Fundamentalsの銀行Webを、<br>'+P.name+'で組み立てる。';
+S.description='新しい20概念を覚える教材ではありません。Cloud Fundamentalsと同じ20 Labsを正本にし、各Labの共通Conceptへ'+P.name+'の代表的な製品名を重ねます。迷ったら同じLab番号のCloud Fundamentalsへ戻ればOKです。';
+S.finish=P.name+'の構成図を見て、Customer → Entry → Network → App → Data → Core のどこを見ているかを共通Conceptへ戻して説明できる。';
+S.groups=R.phases.slice(0,3).map(x=>x.title);
+S.chips=['Cloud Fundamentalsの翻訳',P.name,'Concept → Product','Network','Compute','Data','Identity','Recovery'];
+S.outcomes=primary.map(row=>row.term+' → '+product(row.key));
+S.capstone='最終: '+P.name+' Financial War Room';
+
+S.stage={
+  title:'Cloud Fundamentalsで作った銀行Webを、'+P.name+'では何と呼ぶ？',
+  intro:'Systemの役割は変わりません。Cloud Fundamentalsで理解した同じ箱へ、'+P.name+'の代表的な製品名を貼ります。製品名から覚えるのではなく、共通Concept → Productの順で見ます。',
+  nodes:[
+    ['📱 Customer','残高を見たい','利用者'],
+    ['🚪 Entry',product('load-balancer'),'入口'],
+    ['🌐 Network',product('virtual-network'),'Network'],
+    ['🖥 App',product('compute-vm'),'App'],
+    ['🗄 Data',product('managed-db'),'Data'],
+    ['🏢 Core',product('hybrid-connectivity'),'Core']
+  ],
+  initialConsole:'①から順に押してみよう。新しい構造ではなく、Cloud Fundamentalsの同じSystemへ'+P.name+'名を対応づけます。',
+  console:[
+    '📱 Customer\n利用者の要求と業務目的はProviderが変わっても同じです。まず「何の業務か」から始めます。',
+    '🚪 Entry\n'+product('load-balancer')+'\n\n利用者の要求を受け、正常なBackendへ届ける入口。',
+    '🌐 Network\n'+product('virtual-network')+'\n\nCloud FundamentalsのVirtual Networkという共通Conceptに対する代表的な実装です。',
+    '🖥 App / Compute\n'+product('compute-vm')+'\n\nApplicationを動かすVM系Compute。Container / Serverlessは別の実行方式としてCloud Mapで比較します。',
+    '🗄 Data\n'+product('managed-db')+'\n\nManaged relational DBの代表例。正本・SQL・権限・業務整合性までProvider任せにはなりません。',
+    '🏢 Core / Hybrid\n'+product('hybrid-connectivity')+'\n\n銀行内Network・勘定系等へ接続。Cloud側GreenでもEnd-to-Endで確認します。'
+  ],
+  roles:[
+    ['前提','<b>Cloud Fundamentalsの20 Conceptsが正本</b>。ここでは'+P.name+'名へ翻訳する。'],
+    ['最初に見るもの','製品名より <b>Network / Compute / Data / Identity / Operations / Hybrid</b> のどの役割か。'],
+    ['覚え方','<b>共通Concept → '+P.name+'名 → Evidence</b> の順で覚える。'],
+    ['ゴール',P.name+'の構成図を、製品名なしの共通構造へ戻して説明できる。']
+  ]
 };
-const C=CFG[S.id],G=['まず仕組みをつくる','安全に・止まりにくくする','金融システムとして運用する'];
-S.kicker=C.name.toUpperCase()+' FOR FINANCIAL IT 01–20 / CLOUD FUNDAMENTALS TRANSLATION';
-S.hero='Cloud Fundamentalsの銀行Webを、<br>'+C.name+'で組み立てる。';
-S.description='新しい仕組みを20個覚えるのではありません。Cloud Fundamentalsで理解した同じ銀行Webを、'+C.name+'のサービス名へ翻訳します。迷ったら共通概念へ戻ればOKです。';
-S.finish=C.name+'の構成図を見て、Customer → Entry → Network → App → Data → Core のどこを見ているかを共通概念へ戻して説明できる。';
-S.chips=['Cloud Fundamentalsの翻訳',C.name,'App','Network','Data','Security','Observe','Recovery'];
-S.groups=G;
-S.outcomes=['Webサービスの流れ → '+C.name,'Compute → '+C.compute,'Data → '+C.data,'Virtual Network → '+C.network,'Subnet → '+C.subnet,'Route / NAT → '+C.route,'Entry / LB → '+C.entry,'Firewall → '+C.firewall,'AZ / HA → '+C.zone,'Storage → '+C.storage,'Managed DB → '+C.db,'IAM → '+C.iam,'Secret / Key → '+C.secret,'Observability → '+C.observe,'Backup → '+C.backup,'Region / DR → '+C.dr,'Hybrid → '+C.hybrid,'Common Concept Translation','Change / Governance → '+C.govern,'War Room'];
-S.stage={title:'Cloud Fundamentalsで作った銀行Webを、'+C.name+'では何と呼ぶ？',intro:'仕組みそのものは変わりません。Cloud Fundamentalsで学んだ「Appを動かす」「Networkを作る」「Dataを保存する」「権限を決める」を、'+C.name+'の代表的なサービス名へ置き換えます。',nodes:[['📱 Customer','残高を見たい','利用者'],['🌐 Entry',C.entry,'入口'],['🧱 Network',C.network,'Network'],['🖥 App',C.compute,'App'],['🗄 Data',C.db,'Data'],['🏢 Core',C.hybrid,'Core']],initialConsole:'①から順に押してみよう。新しい構造を覚えるのではなく、Cloud Fundamentalsの同じ箱に'+C.name+'の名前を貼っていきます。',console:['📱 Customer\n利用者の要求はProviderが変わっても同じです。まず「何の業務か」から始めます。','🌐 Entry\n'+C.entry+'\n\n名前解決や入口・振り分けの役割。サービス名より「入口」を先に思い出します。','🧱 Network\n'+C.network+'\n\nCloud FundamentalsのVirtual Networkに相当する代表的な実装です。','🖥 App\n'+C.compute+'\n\nアプリや処理を動かす場所。VM / Container / Serverlessは実行方式の違いです。','🗄 Data\n'+C.db+'\n\n残高や取引などの永続データを扱う代表例。正本・整合性はProvider任せにはなりません。','🏢 Core\n'+C.hybrid+'\n\n銀行内Network・勘定系などへ接続。Cloud側がGreenでもEnd-to-Endで確認します。'],roles:[['前提','<b>Cloud Fundamentalsの仕組みは変わらない</b>。ここでは'+C.name+'名へ翻訳する。'],['最初に見るもの','サービス名より <b>App / Network / Data / Security / Observe / Recovery</b> のどの役割か。'],['覚え方','<b>共通概念 → '+C.name+'名 → Evidence</b> の順で覚える。'],['ゴール',C.name+'の構成図を、製品名なしの共通構造へ戻して説明できる。']]};
-S.topics=[
-T(G[0],'Webサービスの流れを'+C.name+'名で見る','Customer → Entry → App → Data → Response はCloud Fundamentalsと同じ。','Provider名が変わってもWebサービスの基本導線は同じだと説明できる。',[C.entry,C.compute,C.db,'customer response'],'まず共通の業務導線を描き、その上に'+C.name+'サービス名を置く','最初にやるべきことは？','Cloud Fundamentalsの業務導線へ'+C.name+'名を対応づける','サービス一覧を全部暗記する','Provider名だけで構成を判断する','Providerを学ぶときも「何の部品か」を先に固定します。'),
-T(G[0],'クラウドにアプリを置く — '+C.compute,'アプリが動く場所を'+C.name+'で見る。','Compute系サービスを「処理を動かす場所」として説明できる。',[C.compute,'application','runtime','capacity'],'VM / Container / Serverless等を要件と運用責任で選ぶ','Compute系サービスの主な役割は？','アプリや処理を実行する','Databaseの行を自動で正しくする','IAMを不要にする','まず「処理をどこで動かすか」。実行方式はその次です。'),
-T(G[0],'データを置く — '+C.data,'残高や取引データの置き場所を大づかみに見る。','Data系サービスとAppの責務を分け、正本を意識できる。',[C.data,'persistent data','authoritative source','backup'],'どこに保存するかと、どれが正本かを分けて決める','金融データで最初に確認することは？','どこが正本か','VM名の長さ','Regionのロゴ','Providerが変わっても正本・整合性の考え方は変わりません。'),
-T(G[0],'自分たちのネットワーク — '+C.network,'Cloud内の自分たち用Networkを'+C.name+'名で見る。','Virtual Networkという共通概念と'+C.network+'を対応づけられる。',[C.network,C.subnet,'address range','routing'],'address overlapとtrust boundaryを意識してNetworkを設計する','このサービスを理解するとき先に戻る共通概念は？','Virtual Network','Database Transaction','COBOL FILE STATUS','製品名より「自分たちの論理Network」という役割が先です。'),
-T(G[0],'公開する場所と隠す場所 — '+C.subnet,'入口側とApp/DB側を到達性で分ける。','Public / Privateを実際のRouteと通信許可で説明できる。',[C.subnet,'public','private','database'],'Internet公開が必要な入口と内部App/DBを分ける','金融DBの基本配置として妥当なのは？','Internetから直接触れない内部側','誰からでも直接接続できる場所','全Portを公開する場所','名前ではなく実際の到達経路でPublic/Privateを判断します。'),
-T(G[0],'外へ出る／外から入る — '+C.route,'通信の道と向きを'+C.name+'で見る。','Route / NAT / inbound / egressの違いを説明できる。',[C.route,'egress','inbound','route'],'Routeで宛先を決め、内部からの外向き通信と外部からの着信を分ける','NAT系機能の代表的な用途は？','内部側から必要な外向き通信を行う','DB認証を代替する','全着信を許可する','「外へ出られる」と「外から入れる」は別の話です。'),
-T(G[0],'入口を1つにする — '+C.entry,'利用者を正常なAppへ案内する。','DNS / Load Balancer / Health Checkの役割を説明できる。',[C.entry,'backend','health check','timeout'],'名前解決と入口を管理し、正常なBackendへ流す','入口がGreenでも業務障害が起こる理由は？','Health Checkが実業務を十分に確認していない場合がある','入口が必ずDBを書き換えるから','IPが長いから','入口の正常とEnd-to-Endの業務正常は同じではありません。'),
-T(G[1],'誰が通信できるかを絞る — '+C.firewall,'必要な相手・Portだけ通信を許す。','Network通信制御とIdentity認可を混同しない。',[C.firewall,'source','destination','port'],'必要最小限の通信だけ許しblast radiusを小さくする','DB通信で避けたいものは？','広すぎる送信元・Port許可','Appから必要Portだけ許可','管理経路を限定する','FirewallとIAMは別レイヤです。'),
-T(G[1],'1台・1か所が壊れても止めない — '+C.zone,'障害範囲を分けて複数化する。','Zone/AZと冗長化をfailure domainとして説明できる。',[C.zone,'redundancy','failure domain','health'],'重要処理を独立した障害範囲へ分散する','Zone/AZを分ける主目的は？','同じ場所の障害で全部止まるのを避ける','SQLを短くする','権限を減らす','性能の名前ではなく、まず障害範囲を分ける考え方です。'),
-T(G[1],'データの置き場所を使い分ける — '+C.storage,'Object / Block / FileをProvider名へ翻訳する。','Storageをアクセス方法と復旧要件で選べる。',[C.storage,'object','block','file'],'backup/archive・VM disk・shared fileを用途に合わせる','Storageを選ぶ主な軸は？','どう読み書きするかと復旧要件','全部同じStorageにする','価格だけ','同じ「保存」でも用途は違います。'),
-T(G[1],'DB運用の一部を任せる — '+C.db,'Managed DatabaseをProvider名へ翻訳する。','Managed DBでも自組織に残る責任を説明できる。',[C.db,'managed database','schema','data integrity'],'基盤運用の一部をProviderへ任せても、Data/SQL/権限/整合性は管理する','Managed DBでも残る責任は？','データモデル・権限・SQL・業務整合性','何も残らない','Providerの人事管理','任せる範囲と残る責任を分けます。'),
-T(G[1],'誰が何を操作できるか — '+C.iam,'人とAppのIdentity・Roleを'+C.name+'で見る。','最小権限とworkload identityを説明できる。',[C.iam,'role','policy','least privilege'],'人とworkloadを分け、必要最小限の権限だけ与える','Appへ管理者権限を与えない理由は？','侵害・誤操作時の被害範囲を狭める','CPUを速くする','DNSを短くする','IAMの名前より「誰が何をできる？」を先に考えます。'),
-T(G[1],'パスワード・鍵・証明書を守る — '+C.secret,'Secret / Key / CertificateをProvider名へ翻訳する。','秘密情報の保管・access・rotation・expiryを説明できる。',[C.secret,'secret','key','certificate'],'秘密をCodeへ直書きせず、access / rotation / expiryを管理する','証明書運用で突然停止につながるものは？','有効期限と更新経路','CPU世代','Subnet名','暗号化ONだけではなく、鍵と秘密のLifecycleまで運用します。'),
-T(G[1],'壊れたこと・変更されたことを知る — '+C.observe,'実行状態と管理変更のEvidenceを分ける。','Metrics / Logs / Auditを目的で使い分けられる。',[C.observe,'metrics','logs','audit'],'何を証明したいかでruntime evidenceとcontrol-plane auditを使い分ける','「誰が設定変更した？」を見るEvidenceは？','Audit / control-plane log','CPU metricだけ','Storage名','監視と監査は役割が違います。'),
-T(G[1],'データを戻せるようにする — '+C.backup,'Backupを「取る」から「戻す」へ進める。','Restore testとRPO/RTOを業務要件へ結び付けられる。',[C.backup,'restore','RPO','RTO'],'Backupを取得し、必要時間内に戻せることを定期的に試す','Backupがあるだけでは不十分な理由は？','必要時間内に実際に戻せるか確認が必要','File名が長いから','IAMが使えないから','BackupはRestoreできて初めて意味があります。'),
-T(G[2],'場所ごとの大きな障害に備える — '+C.dr,'Region規模の障害とDRを考える。','HAとDRの対象障害・Cost・Data整合性の違いを説明できる。',[C.dr,'region','failover','reconciliation'],'通常冗長化と大規模DRを分け、切替後に業務Dataを再照合する','DR切替後に必要なのは？','技術復旧に加え件数・金額・正本の再照合','DNS切替だけで完了','Errorが消えれば完了','DRは「別Regionを持つこと」ではなく復旧判断とData確認まで含みます。'),
-T(G[2],'銀行の社内システムとつなぐ — '+C.hybrid,'Cloud ↔ On-prem/CoreをEnd-to-Endで追う。','専用線/VPNが全体経路の一部だと説明できる。',[C.hybrid,'routing','DNS','on-prem'],'冗長経路を持ち、Route/DNS/App/DBまでEnd-to-Endで監視する','Cloud側Greenでも業務停止する理由としてあり得るのは？','CoreまでのHybrid経路が壊れている','CloudならOn-premは関係ない','DB名が短い','接続Upだけでは業務正常とは言えません。'),
-T(G[2],C.name+'名を共通概念へ戻す','サービス名を暗記ではなく役割へ戻す。','製品名と共通概念を往復できる。',[C.network,C.compute,C.db,C.iam],'service name → common role → evidence の順で説明する','例えば '+C.network+' を理解するとき一番大事なのは？','共通のVirtual Network概念へ戻す','名前だけ丸暗記する','他Providerと完全に同一製品扱いする','製品間は「=」ではなく概念上の対応です。'),
-T(G[2],'安全に変更・運用する — '+C.govern,'変更・Audit・Cost・管理境界をまとめて運用する。','IaC / Change / Governance / Costを本番運用へ結び付けられる。',[C.govern,'change control','audit trail','rollback'],'version管理された変更、review、rollback、audit、cost ownershipを持つ','本番変更で重要なのは？','誰が何を変え、戻し方と証跡があること','Consoleで直接変更し記録しない','Costだけ見る','「作れる」より「安全に変え、説明し、戻せる」を優先します。'),
-T(G[2],C.name+' Financial War Room','Provider名ではなく複数LayerのEvidenceで切り分ける。','Impact → Evidence → Cause → Safe Recovery → Business Verifyで対応できる。',['impact','evidence','safe recovery','reconcile'],'顧客影響を固定し、複数LayerのEvidenceから原因を絞り、金融Dataまで照合する','復旧完了の判断として最も妥当なのは？','技術状態と顧客導線・件数・金額等の業務整合性を確認する','Error表示が消えたら終了','原因未確認で全部再起動する','Providerのサービス名当てではなく、安全な復旧と業務完了を評価します。')
-];
-S.maps=[
-`📱 Customer\n ↓\n🌐 ${C.entry}\n ↓\n🖥 ${C.compute}\n ↓\n🗄 ${C.db}\n ↓\n✅ Response`,
-`☁️ ${C.name}\n└ 🖥 ${C.compute}  ← NEW`,
-`☁️ ${C.name}\n├ 🖥 App\n└ 🗄 ${C.data}  ← NEW\n   └ authoritative data`,
-`☁️ ${C.name}\n└ 🧱 ${C.network}  ← NEW\n   ├ 🖥 App\n   └ 🗄 DB`,
-`🧱 ${C.network}\n├ 🌐 Public side\n└ 🔒 ${C.subnet} / Private side  ← NEW\n   ├ 🖥 App\n   └ 🗄 DB`,
-`🌐 Internet\n ↓ inbound\n🧱 ${C.network}\n├ ${C.route}  ← NEW\n├ 🖥 App ─ egress → Internet\n└ 🗄 DB`,
-`📱 Customer\n ↓\n🌐 ${C.entry}  ← NEW\n ├→ 🖥 App A\n └→ 🖥 App B\n      ↓\n     🗄 DB`,
-`📱 Customer\n ↓\n🛡 ${C.firewall}  ← NEW\n ↓\n🌐 Entry → 🖥 App → 🗄 DB`,
-`☁️ ${C.name}\n├ Zone A: 🖥 App A\n└ Zone B: 🖥 App B  ← NEW\n   ${C.zone}`,
-`☁️ ${C.name}\n├ 🖥 App\n├ 📦 ${C.storage}  ← NEW\n└ 🗄 DB`,
-`☁️ ${C.name}\n├ 🖥 App\n└ 🗄 ${C.db}  ← NEW\n   Provider: platform ops\n   Customer: schema / SQL / data`,
-`👤 Human ─┐\n          ├→ 🔐 ${C.iam}  ← NEW\n🤖 App ───┘\n             ↓\n        Cloud resources`,
-`🤖 App\n ↓\n🔑 ${C.secret}  ← NEW\n ↓\n🗄 DB / Service\n ↻ rotation / expiry`,
-`📱 Customer → 🖥 App → 🗄 DB\n              │\n              ├ 📊 Metrics\n              ├ 📝 Logs\n              └ 🧾 ${C.observe}  ← NEW`,
-`☁️ ${C.name}\n├ 🖥 App\n├ 🗄 DB\n└ 💾 ${C.backup}  ← NEW\n   ↳ Restore Test\n   ↳ RPO / RTO`,
-`🌏 Primary Region\n └ Banking Web\n      │\n      └── DR / Failover ─→ 🌏 Recovery Region  ← NEW\n          ${C.dr}\n          Reconcile after switch`,
-`📱 Customer\n ↓\n☁️ ${C.name}\n ├ 🖥 App\n └ 🗄 DB\n      ↓\n🔗 ${C.hybrid}  ← NEW\n      ↓\n🏢 On-prem / Core`,
-`共通概念へ戻す  ← NEW\n\nVirtual Network → ${C.network}\nCompute         → ${C.compute}\nManaged DB      → ${C.db}\nIdentity        → ${C.iam}\n\n※「=」ではなく概念上の対応`,
-`🏦 ${C.name} Banking System\n├ 🧰 ${C.govern}  ← NEW\n├ 🧾 Audit / Change\n├ ↩ Rollback\n└ 💰 Cost / Ownership`,
-`🚨 ${C.name} War Room\n\n📱 Customer\n ↓\n🌐 Entry / Network\n ↓\n🖥 App\n ↓\n🗄 Data\n ↓\n🔗 Core\n\nImpact → Evidence → Safe Recovery → Reconcile`
-];
-S.providerExtras=C.extras;
+
+if(!Array.isArray(S.topics)||S.topics.length!==20)return;
+
+S.topics=S.topics.map((topic,i)=>{
+  const row=primary[i];
+  const t=topic.slice();
+  const name=product(row.key);
+  const originalScope=Array.isArray(t[4])?t[4]:[];
+
+  t[1]=t[1]+' — '+name;
+  t[2]=t[2]+' '+P.name+'では代表的に「'+name+'」として現れます。';
+  // Keep canonical concept keywords first: cloud-lab-engine uses the leading scope
+  // values as input-mode must tokens. Provider labels are display/context, not answer keys.
+  t[4]=[...originalScope.filter(x=>x!==name),name];
+  t[5]=t[5]+'。'+P.name+'では '+name+' をこのConceptの代表実装として確認します。';
+  t[10]=t[10]+' '+P.name+'では「'+name+'」。製品間は完全互換ではなく、Concept上の対応です。';
+
+  if(row.key==='failure-domain'){
+    const fleet=product('ha-fleet');
+    t[2]+=' なお '+name+' はFailure Domain、'+fleet+' はCompute台数・自動復旧の仕組みで、同じ分類ではありません。';
+    t[4]=['failure domain','redundancy',name,fleet];
+    t[10]+=' Failure DomainとAuto Healing / Fleetを同じ機能として扱わないことが重要です。';
+  }
+
+  if(row.key==='compute-vm'){
+    t[10]+=' VM系ComputeとContainer / Serverlessは「処理を動かす」という目的は共通でも実行・運用モデルが異なります。';
+  }
+
+  if(row.key==='persistent-data'){
+    t[10]+=' Lab03はまず「永続Dataと正本」のConcept。Managed DBやObject Storageの製品選択は後続Labで分けて扱います。';
+  }
+
+  return t;
+});
+
+S.providerExtras=(P.extras||[]).map(key=>R.get(key)).filter(Boolean);
 })();

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Repository invariants for Financial IT Learning Lab.
 
-Keep this script dependency-free so it can run on every pull request.
-It protects the current baseline; stricter checks should be added as review issue #6 is resolved.
+Dependency-free checks that run on every pull request.
+As repository-wide review #6 is resolved, regression guards are added here.
 """
 from __future__ import annotations
 
@@ -43,6 +43,8 @@ def check_required_files() -> None:
         ".github/workflows/qa.yml",
         ".github/pull_request_template.md",
         "docs/DEVELOPMENT_WORKFLOW.md",
+        "docs/CLOUD_ATLAS.md",
+        "assets/js/cloud-concepts.js",
         "linux/index.html",
         "sql/index.html",
         "cobol/index.html",
@@ -64,6 +66,13 @@ def numeric_lab_ids(module: str) -> set[int]:
     return {int(x) for x in re.findall(r'"id"\s*:\s*(\d+)', body)}
 
 
+def registry_lab_order(registry: str) -> list[str]:
+    match = re.search(r"const\s+labOrder\s*=\s*\[(.*?)\]\s*;", registry, re.S)
+    if not match:
+        return []
+    return re.findall(r"'([^']+)'", match.group(1))
+
+
 def check_counts() -> None:
     expected20 = set(range(1, 21))
     for module in ("sql", "cobol", "jcl"):
@@ -71,9 +80,19 @@ def check_counts() -> None:
         expect(ids == expected20, f"{module}: Lab ids must be exactly 1..20; got {sorted(ids)}")
 
     zero_base = text("cloud/zero-base.js")
-    provider = text("assets/js/cloud-provider-aligned.js")
     expect(len(re.findall(r"(?m)^T\(", zero_base)) == 20, "Cloud Fundamentals canonical zero-base topics must be 20")
-    expect(len(re.findall(r"(?m)^T\(", provider)) == 20, "Cloud provider aligned topics must be 20")
+
+    registry = text("assets/js/cloud-concepts.js")
+    order = registry_lab_order(registry)
+    keys = set(re.findall(r"key:'([^']+)'", registry))
+    expect(len(order) == 20, f"Cloud Concept Registry labOrder must contain 20 entries; got {len(order)}")
+    expect(len(set(order)) == 20, "Cloud Concept Registry labOrder must not contain duplicates")
+    expect(set(order).issubset(keys), f"Cloud Concept Registry labOrder references missing concepts: {sorted(set(order)-keys)}")
+
+    provider = text("assets/js/cloud-provider-aligned.js")
+    expect("R.primary()" in provider, "Cloud provider adapter must consume canonical registry primary concepts")
+    expect("S.topics=S.topics.map" in provider, "Cloud provider adapter must translate canonical topics instead of redefining them")
+    expect(not re.search(r"(?m)^T\(", provider), "Cloud provider adapter must not define its own canonical 20 topics")
 
     scenarios = "\n".join(
         p.read_text(encoding="utf-8") for p in sorted((ROOT / "financial-war-room").glob("scenarios-*.js"))
@@ -105,10 +124,10 @@ def check_wiring() -> None:
         "sql/index.html": ["module-package.js", "context-system.js"],
         "cobol/index.html": ["module-package.js", "context-system.js", "integration-context.js"],
         "jcl/index.html": ["module-package.js", "context-system.js", "integration-context.js"],
-        "cloud/index.html": ["zero-base.js", "cloud-lab-engine.js", "module-package.js", "context-system.js", "cloud-atlas.js"],
-        "aws/index.html": ["cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
-        "gcp/index.html": ["cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
-        "azure/index.html": ["cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
+        "cloud/index.html": ["cloud-concepts.js", "zero-base.js", "cloud-lab-engine.js", "module-package.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
+        "aws/index.html": ["cloud-concepts.js", "../cloud/zero-base.js", "cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
+        "gcp/index.html": ["cloud-concepts.js", "../cloud/zero-base.js", "cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
+        "azure/index.html": ["cloud-concepts.js", "../cloud/zero-base.js", "cloud-provider-aligned.js", "cloud-lab-engine.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
         "financial-war-room/index.html": ["module-package.js", "context-system.js", "integration-context.js", "warroom-v16.js"],
     }
     for path, markers in required_markers.items():
@@ -116,22 +135,67 @@ def check_wiring() -> None:
         for marker in markers:
             expect(marker in body, f"{path}: expected wiring marker missing: {marker}")
 
+    for path in ("aws/index.html", "gcp/index.html", "azure/index.html"):
+        body = text(path)
+        try:
+            positions = [
+                body.index("cloud-concepts.js"),
+                body.index("../cloud/zero-base.js"),
+                body.index("cloud-provider-aligned.js"),
+                body.index("cloud-lab-engine.js"),
+            ]
+            expect(positions == sorted(positions), f"{path}: provider load order must be registry → zero-base canonical → adapter → engine")
+        except ValueError:
+            pass
+
+
+def check_cloud_registry_invariants() -> None:
+    registry = text("assets/js/cloud-concepts.js")
+    adapter = text("assets/js/cloud-provider-aligned.js")
+    atlas = text("assets/js/cloud-atlas.js")
+    guide = text("assets/js/cloud-provider-guide.js")
+    docs = text("docs/CLOUD_ATLAS.md")
+
+    for marker in (
+        "Availability Zone / Failure Domain",
+        "Compute管理 / Orchestration",
+        "key:'failure-domain'",
+        "key:'ha-fleet'",
+        "mappingMode:'examples'",
+    ):
+        expect(marker in registry, f"Cloud Concept Registry missing invariant: {marker}")
+
+    forbidden = (
+        "aws:'Availability Zone / Auto Scaling'",
+        "gcp:'Zone / Managed Instance Group'",
+        "azure:'Availability Zone / VM Scale Sets'",
+    )
+    for path, body in (
+        ("assets/js/cloud-concepts.js", registry),
+        ("assets/js/cloud-provider-aligned.js", adapter),
+        ("assets/js/cloud-atlas.js", atlas),
+    ):
+        for value in forbidden:
+            expect(value not in body, f"{path}: reintroduced mixed failure-domain/fleet classification: {value}")
+
+    expect("FIT_CLOUD_CONCEPTS" in atlas, "Cloud Map must render from canonical registry")
+    expect("const concepts=[" not in atlas and "const rows=[" not in atlas, "Cloud Map must not keep a second concept dictionary")
+    expect("FIT_CLOUD_CONCEPTS" in guide, "Cloud Package Guide must render from canonical registry")
+    expect("R.phases" in guide and "R.primary()" in guide, "Cloud Package Guide must use registry roadmap and glossary")
+    expect("Source of Truth:" in docs and "cloud-concepts.js" in docs, "Cloud Atlas documentation must name canonical registry")
+
+    for readme, old in (
+        ("aws/README.md", "Availability Zone / Auto Scaling"),
+        ("gcp/README.md", "Region / Zone / MIG"),
+        ("azure/README.md", "Availability Zone / VM Scale Sets"),
+    ):
+        expect(old not in text(readme), f"{readme}: old mixed classification remains: {old}")
+
 
 def check_context_invariants() -> None:
     package = text("PACKAGE_STANDARD.md")
     for marker in ("Concept → Product", "Evidence Diversity", "Wrong Layer Coach", "Start from Zero"):
         expect(marker in package, f"PACKAGE_STANDARD missing invariant: {marker}")
-
-    atlas = text("assets/js/cloud-atlas.js")
-    expect("Availability Zone / Failure Domain" in atlas, "Cloud Map must separate Availability Zone as a failure-domain concept")
-    expect("Compute管理 / Orchestration" in atlas, "Cloud Map must retain Compute management/orchestration as a separate axis")
-    expect("mappingMode:'examples'" in atlas, "Cloud Map must mark SaaS provider rows as examples, not equivalents")
-    for forbidden in (
-        "aws:'Availability Zone / Auto Scaling'",
-        "gcp:'Zone / Managed Instance Group'",
-        "azure:'Availability Zone / VM Scale Sets'",
-    ):
-        expect(forbidden not in atlas, f"Cloud Map reintroduced mixed classification: {forbidden}")
 
     context = text("assets/js/context-system.js")
     expect("≒ conceptual mapping" in context, "Context system must state conceptual mapping is not equality")
@@ -198,6 +262,7 @@ def main() -> int:
         check_counts,
         check_progress_contract,
         check_wiring,
+        check_cloud_registry_invariants,
         check_context_invariants,
         check_workflow_hygiene,
         check_entrypoint_links,
@@ -215,8 +280,9 @@ def main() -> int:
     print(" - required files")
     print(" - Lab/Case counts")
     print(" - progress contract")
-    print(" - module wiring")
-    print(" - Context/Cloud Map invariants")
+    print(" - module wiring / provider load order")
+    print(" - canonical Cloud Concept Registry")
+    print(" - Context invariants")
     print(" - workflow hygiene")
     print(" - entrypoint local links")
     return 0
