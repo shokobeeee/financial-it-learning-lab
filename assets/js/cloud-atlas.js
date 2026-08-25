@@ -5,7 +5,7 @@ const path=(location.pathname||'').toLowerCase();
 const moduleId=['cloud','aws','gcp','azure'].find(x=>path.includes('/'+x+'/'))||null;
 if(!moduleId)return;
 
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const LAYERS={
   architecture:{icon:'🧭',name:'全体 / Architecture',short:'全体',desc:'CustomerからCloud、CoreまでをEnd-to-Endで見る層。Region/AZや責任分界など、複数レイヤをまたぐ設計軸もここで扱う。',slot:'architecture'},
@@ -25,6 +25,7 @@ const MODELS={
   iaas:{name:'IaaS寄り',desc:'VM等の基盤を借り、OS・Middleware・Application等を自分たちで多く管理する。'},
   managed:{name:'Managed / PaaS寄り',desc:'基盤運用の一部をCloud側へ任せ、Application・Data・設定等に集中する。'},
   serverless:{name:'Serverless / Fully Managed',desc:'Server管理をさらにCloud側へ寄せ、実行・Event・Request単位で使う。'},
+  computeControl:{name:'Compute管理 / Orchestration',desc:'VM等の台数・配置・置換・自動復旧を管理する仕組み。IaaS/PaaSそのものとは別の分類軸。'},
   control:{name:'Control Plane / 横断',desc:'IAM・Policy・Audit等、複数サービスを横断して管理・統制する。'},
   operations:{name:'Managed Operations',desc:'監視・Backup・Security等、運用機能をサービスとして利用する。'},
   hybrid:{name:'Connectivity / Hybrid',desc:'Cloudと外部Networkを接続するための通信・回線サービス。'},
@@ -41,7 +42,7 @@ const rows=[
  {key:'load-balancer',term:'Load Balancer / Entry',layer:'edge',model:'managed',plain:'利用者からの要求を、複数の正常なApplicationへ振り分ける入口。',why:'1台へ集中させず、故障したAppへ流さないため。Health Checkの質も重要。',bank:'edge',lab:7,products:{aws:'Elastic Load Balancing (ALB / NLB)',gcp:'Cloud Load Balancing',azure:'Application Gateway / Load Balancer',oci:'OCI Load Balancer'},aliases:['load balancer','alb','nlb','elb','application gateway','cloud load balancing']},
  {key:'firewall',term:'Firewall / Security Rule',layer:'network',model:'iaasFoundation',plain:'誰からどのPortへ通信してよいかを絞る仕組み。',why:'Network上で不要な到達性を減らし、侵害・誤設定時のBlast Radiusを小さくする。',bank:'network',lab:8,products:{aws:'Security Group / NACL',gcp:'VPC Firewall Rules',azure:'NSG / Azure Firewall',oci:'NSG / Security Lists'},aliases:['security group','nacl','firewall','nsg','security list']},
  {key:'failure-domain',term:'Availability Zone / Failure Domain',layer:'architecture',model:'concept',plain:'同じ場所の障害で全部止まらないよう、独立した障害範囲を分ける考え方。',why:'「どこまで一緒に壊れるか」を意識して配置するため。Zoneは台数制御機能ではなく、まずFailure Domainとして捉える。',bank:'architecture',lab:9,products:{aws:'Availability Zone',gcp:'Zone',azure:'Availability Zone',oci:'Availability Domain / Fault Domain'},aliases:['az','availability zone','zone','failure domain','availability domain','fault domain']},
- {key:'ha-fleet',term:'冗長化 / Auto Healing / Fleet',layer:'compute',model:'managed',plain:'同じ役割のComputeを複数台で運用し、故障時の置換や台数調整を行う仕組み。',why:'Failure Domainを分けるだけでは十分ではなく、各場所に実際の処理能力を配置・復旧する仕組みが必要。',bank:'compute',lab:9,products:{aws:'EC2 Auto Scaling / Auto Scaling group',gcp:'Managed Instance Group (MIG)',azure:'Virtual Machine Scale Sets',oci:'Instance Pools / Autoscaling'},aliases:['auto scaling','autoscaling','asg','mig','managed instance group','vm scale sets','vmss','instance pools','auto healing']},
+ {key:'ha-fleet',term:'冗長化 / Auto Healing / Fleet',layer:'compute',model:'computeControl',plain:'同じ役割のComputeを複数台で運用し、故障時の置換や台数調整を行う仕組み。',why:'Failure Domainを分けるだけでは十分ではなく、各場所に実際の処理能力を配置・復旧する仕組みが必要。',bank:'compute',lab:9,products:{aws:'EC2 Auto Scaling / Auto Scaling group',gcp:'Managed Instance Group (MIG)',azure:'Virtual Machine Scale Sets',oci:'Instance Pools / Autoscaling'},aliases:['auto scaling','autoscaling','asg','mig','managed instance group','vm scale sets','vmss','instance pools','auto healing']},
  {key:'object-storage',term:'Object Storage',layer:'data',model:'managed',plain:'FileをObjectとして保存するCloud Storage。Backup・Archive・大量データ保管などに向く。',why:'VM Diskとは使い方が違うため、アクセス方法と復旧要件で選ぶ。',bank:'data',lab:10,products:{aws:'Amazon S3',gcp:'Cloud Storage',azure:'Blob Storage',oci:'Object Storage'},aliases:['s3','cloud storage','blob storage','object storage']},
  {key:'block-storage',term:'Block Storage',layer:'data',model:'iaas',plain:'VMからDiskのように使うBlock単位のStorage。',why:'OS DiskやDatabase用Volumeなど、低レベルなDisk用途で使う。',bank:'data',lab:10,products:{aws:'Amazon EBS',gcp:'Persistent Disk',azure:'Managed Disks',oci:'Block Volume'},aliases:['ebs','persistent disk','managed disks','block volume']},
  {key:'file-storage',term:'File Storage',layer:'data',model:'managed',plain:'複数のServerからDirectory/Fileとして共有しやすいStorage。',why:'ObjectやBlockとはアクセス方法が違うため、共有File Systemが必要なときに使う。',bank:'data',lab:10,products:{aws:'Amazon EFS',gcp:'Filestore',azure:'Azure Files',oci:'File Storage'},aliases:['efs','filestore','azure files','file storage']},
