@@ -176,9 +176,9 @@ sudo zypper --non-interactive install nginx
 
 ```text
 もともと何がある？
-→ 何に困る？
-→ 何の機能が必要？
-→ なぜ今回この製品？
+→ 無いと何に困る？
+→ どんな機能が必要？
+→ なぜ今回この製品を選ぶ？
 → どのProfileでどう実装する？
 → 追加前 / 追加後
 → 何をEvidenceとして見る？

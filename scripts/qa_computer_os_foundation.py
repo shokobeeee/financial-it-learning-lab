@@ -56,6 +56,17 @@ for marker in (
 ):
     expect(marker in js,f'foundation check missing: {marker}')
 
+# 用語の説明文を本文の文中へ差し込むと、日本語の一文が読み取れなくなる。
+# 行内は「印の付いた語」のみ、意味は scope 単位の用語メモ / tooltip 側へ置く。
+expect('.fitb-term-plain' not in js and '.fitb-term-plain' not in css,
+       'term definitions must not be re-introduced inline (.fitb-term-plain)')
+expect('b.textContent=original;return b;' in js,
+       'inline term marker must render only the original word')
+expect('function renderGloss(scope,terms)' in js and 'function showTip(btn)' in js,
+       'per-scope gloss strip and hover tooltip must exist')
+expect('.fitb-term{' in css and 'display:inline;' in css.split('.fitb-term{',1)[-1].split('}',1)[0],
+       'inline term marker must stay inline so the sentence can wrap normally')
+
 for marker in (
     "script,style,code,pre,kbd,samp,button,a,input,textarea,select,option",
     '.fitb-drawer,.fitb-launcher,.cosf-foundation',
@@ -66,7 +77,8 @@ for marker in (
 
 for marker in (
     '.fitb-launcher{','.fitb-drawer{','.fitb-term{',
-    'html[data-fitb-level="beginner"] .fitb-term-plain',
+    'html[data-fitb-level="beginner"] .fitb-gloss{display:flex}',
+    '.fitb-gloss{','.fitb-gloss-item{','.fitb-tip{',
     '.cosf-foundation{','.cosf-step-nav{','.cosf-stage{','.cosf-quiz{',
     '@media(max-width:620px)',
 ):
@@ -92,7 +104,7 @@ expect('loadFoundationGlossary' in bridge,'Linux bridge foundation loader missin
 expect('loadFoundationGlossary();loadFinancialProfiles();' in bridge,'Linux load order must place glossary/foundation before profile UX handoff')
 
 for marker in (
-    'linux-kiban-lab-v19-computer-os-foundation',
+    'linux-kiban-lab-v20-glossary-readability',
     '../assets/js/foundation-glossary.js?v=1',
     '../assets/css/foundation-glossary.css?v=1',
 ):

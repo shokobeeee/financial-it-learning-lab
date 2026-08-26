@@ -31,7 +31,7 @@ for marker in (
     "runtime:['Compiler / Runtimeを追加'", "provisioned:['Cloud上にResourceを作成'",
     "external:['別Platformで提供'", "client:['操作する側へToolを追加'",
     'function entryFor(module,lab)', 'function cloudEntry(module,lab)',
-    'function conceptEntry(common,role,origin,why,choice)',
+    'function conceptEntry(common,role,origin,why,choice,problem)',
     'function expandedByDefault(module,lab)', 'cr-primary-details',
     'new MutationObserver(schedule)', 'window.FIT_COMPONENT_RATIONALE=',
 ):
@@ -39,6 +39,15 @@ for marker in (
 
 for module in ('sql','cobol','jcl','cloud','aws','gcp','azure'):
     expect(f'{module}:' in js,f'home/component rationale missing module: {module}')
+
+# 「何に困る？」へ目的文をそのまま流用すると、問いと答えがずれる。
+# CLOUD_META は purpose(why) と problem を別の要素として持ち、Problem 欄には problem を使う。
+expect('const [common,role,origin,why,problem]=m;' in js,
+       'cloudEntry must read a dedicated problem text from CLOUD_META')
+expect('problem:why' not in js,
+       'Problem step must not reuse the purpose sentence (problem:why)')
+for label in ('01 もともと何がある？','02 無いと何に困る？','03 どんな機能が必要？','04 なぜこれを選ぶ？'):
+    expect(label in js,f'component rationale step label missing: {label}')
 
 for marker in (
     'Ubuntuを入れただけではWeb Serverにはなりません',
@@ -60,6 +69,33 @@ for marker in (
 
 for lab in range(1,21):
     expect(f"  {lab}:['" in js,f'Cloud component rationale missing Lab{lab:02}')
+
+# CLOUD_META は [common, role, origin, purpose, problem] の5要素。
+# 5要素目が欠けると Problem 欄が空文字で描画され、画面上は静かに壊れる。
+import re
+for lab in range(1,21):
+    m=re.search(r"^  %d:\[(.*)\],?$"%lab,js,re.M)
+    if not m:
+        errors.append(f'Cloud component rationale Lab{lab:02} row not parseable')
+        continue
+    fields=re.findall(r"'((?:[^'\\]|\\.)*)'",m.group(1))
+    expect(len(fields)==5,
+           f'Lab{lab:02} must define [common, role, origin, purpose, problem]; found {len(fields)} fields')
+    expect(all(f.strip() for f in fields),f'Lab{lab:02} has an empty field')
+
+# linux/ui-financial-profiles.js は component rationale の本文を文字列一致で置換する。
+# 置換元の文が書き換わると Profile 切替の反映が黙って止まるため、両者を突き合わせる。
+profiles=read('linux/ui-financial-profiles.js')
+anchors=re.findall(r"\['((?:[^'\\]|\\.)*)',(?:p\.|'|\+|\s)",profiles[profiles.find('function replaceText('):profiles.find('var w=document.createTreeWalker')])
+expect(len(anchors)>=6,'profile text replacement anchors could not be extracted')
+for anchor in anchors:
+    expect(anchor in js,f'profile replacement anchor no longer present in component rationale: {anchor}')
+# 用語注釈がtext nodeを分割すると、置換元の文が存在していても split() が一致しない。
+# 置換の直前に注釈を外していることまで確認する。
+expect('FIT_FOUNDATION_GLOSSARY.unwrap(panel)' in profiles,
+       'profile text replacement must unwrap glossary markers before matching literals')
+expect(profiles.index('FIT_FOUNDATION_GLOSSARY.unwrap(panel)')<profiles.index('replaceText(panel,p);'),
+       'glossary markers must be unwrapped before replaceText runs')
 
 for marker in (
     'CLIをdownloadすることと、Cloud service本体を作ることは別です',
@@ -92,7 +128,7 @@ expect('loadComponentRationale();' in linux_bridge,'Linux integration bridge mus
 expect('component-rationale' not in field_links,'Field Incident links must not own component-rationale loading')
 
 for marker in (
-    "linux-kiban-lab-v19-computer-os-foundation",
+    "linux-kiban-lab-v20-glossary-readability",
     '../assets/js/component-rationale.js?v=2',
     '../assets/css/component-rationale.css?v=2',
     '../assets/js/foundation-glossary.js?v=1',
