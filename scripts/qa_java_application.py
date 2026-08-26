@@ -47,7 +47,7 @@ def java_warroom_golden_path(lab):
 
 index=read('java/index.html')
 style=read('java/style.css')
-app='\n'.join(read(x) for x in ('java/app-core.js','java/app-warroom.js','java/app-entry.js'))
+app='\n'.join(read(x) for x in ('java/app-core.js','java/app-warroom.js','java/app-entry.js','java/app-polish.js'))
 labs_src='\n'.join(read(f'java/labs-{i}.js') for i in range(1,6))
 readme=read('java/README.md')
 doc=read('docs/ENTERPRISE_JAVA_APPLICATION.md')
@@ -105,13 +105,19 @@ for marker in (
 ):expect(marker in app,f'Java app invariant missing: {marker}')
 
 for marker in (
+    'JOURNEY_ALIASES','function polishJourney()','data-retry-java-war',
+    '↻ Evidenceを見直して再挑戦','guardDuplicateNavigation',
+):expect(marker in app,f'Java review polish missing: {marker}')
+
+for marker in (
     '.j-home-hero{','.j-system-line{','.j-need-grid{','.j-before-after{',
     '.j-evidence-layout{','.j-lens-grid{','.j-modal{','.j-war-layout{',
     '@media(max-width:720px)','@media(prefers-reduced-motion:reduce)',':focus-visible',
 ):expect(marker in style,f'Java CSS invariant missing: {marker}')
 
-for marker in ('labs.js?v=1','labs-5.js?v=1','app-core.js?v=1','app-warroom.js?v=1','app-entry.js?v=1','foundation-glossary.js?v=1','field-case-links.js?v=1','navigation-scroll.js?v=1'):
+for marker in ('labs.js?v=1','labs-5.js?v=1','app-core.js?v=1','app-warroom.js?v=1','app-entry.js?v=1','app-polish.js?v=1','foundation-glossary.js?v=1','field-case-links.js?v=1','navigation-scroll.js?v=1'):
     expect(marker in index,f'java/index.html missing wiring: {marker}')
+expect('data-fit-nav-scroll="1"' in index,'Java entrypoint must mark the canonical navigation-scroll script')
 
 for marker in (
     'Java = Programming Language','JVM = Class Fileを実行するRuntime','Spring Boot = Applicationを構築・運転するFramework',
@@ -154,4 +160,5 @@ print(' - 20 progressive Labs and Java War Room')
 print(' - Java/JVM/JDK/Spring/JDBC/JMS boundaries')
 print(' - Evidence-gated decisions and verified Java War Room 85x3 golden path')
 print(' - responsive Request Journey / Stack Map / Expert Lens UI')
+print(' - semantic journey highlighting, retry UX, and single navigation controller')
 print(' - Root Home, curriculum, sources, progress and incident transfer wiring')
