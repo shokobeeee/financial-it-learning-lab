@@ -13,6 +13,7 @@ const JOURNEY_ALIASES={
 };
 
 let previousHash=location.hash;
+let polishQueued=false;
 
 function currentLab(){
   const match=location.hash.match(/^#lab(\d{1,2})$/i);
@@ -32,8 +33,8 @@ function polishJourney(){
     const canonical=['client','edge','app','runtime','data','queue'][index];
     const active=isActive(canonical,values);
     node.classList.toggle('active',active);
-    const state=node.querySelector('span');
-    if(state)state.textContent=active?'今回の焦点':'Context';
+    const state=node.querySelector('span'),label=active?'今回の焦点':'Context';
+    if(state&&state.textContent!==label)state.textContent=label;
   });
 }
 
@@ -50,17 +51,18 @@ function addWarRoomRetry(){
 
 function guardDuplicateNavigation(){
   const scripts=[...document.querySelectorAll('script[src*="navigation-scroll.js"]')];
-  scripts.forEach((script,index)=>{if(index===0)script.dataset.fitNavScroll='1'});
+  scripts.forEach((script,index)=>{if(index===0&&!script.dataset.fitNavScroll)script.dataset.fitNavScroll='1'});
 }
 
-function polish(){polishJourney();addWarRoomRetry();guardDuplicateNavigation()}
+function polish(){polishQueued=false;polishJourney();addWarRoomRetry();guardDuplicateNavigation()}
+function schedule(){if(polishQueued)return;polishQueued=true;requestAnimationFrame(polish)}
 
-new MutationObserver(()=>requestAnimationFrame(polish)).observe(document.body,{childList:true,subtree:true});
+new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
 window.addEventListener('hashchange',()=>{
   const next=location.hash;
   if(/^#lab20$/i.test(next)&&!/^#lab20$/i.test(previousHash))requestAnimationFrame(addWarRoomRetry);
   previousHash=next;
-  requestAnimationFrame(polish);
+  schedule();
 });
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',polish);else polish();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule);else schedule();
 })();
