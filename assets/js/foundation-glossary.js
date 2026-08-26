@@ -174,7 +174,7 @@ const ALIASES=aliasIndex();
 const ASCII_BEFORE=/[A-Za-z0-9_./-]/,ASCII_AFTER=/[A-Za-z0-9_-]/;
 // カタカナ語は語境界が空白で示されないため、隣がカタカナ・長音・漢字なら複合語の一部とみなす。
 // これが無いと「データセット」が Data、「未インストール」が install として注釈される。
-const JA_ADJACENT=/[\u30A0-\u30FF\u4E00-\u9FFF\u3005]/;
+const JA_ADJACENT=/[\u30A1-\u30FA\u30FC-\u30FF\u4E00-\u9FFF\u3005]/;
 function boundaryOk(text,index,alias){
   const before=text[index-1]||'',after=text[index+alias.alias.length]||'';
   if(!alias.ascii)return !JA_ADJACENT.test(before)&&!JA_ADJACENT.test(after);
