@@ -7,8 +7,8 @@ const LEVEL_KEY='fit_explanation_level_v1';
 const FOUNDATION_COMPLETE_KEY='linux_computer_os_foundation_complete';
 const FOUNDATION_VIEWED_KEY='linux_computer_os_foundation_viewed';
 const LEVELS={
-  beginner:{label:'完全未経験',description:'普通の言葉を専門用語の横に自動表示します。'},
-  standard:{label:'標準',description:'専門用語を押した時だけ説明します。'},
+  beginner:{label:'完全未経験',description:'本文はそのまま読め、意味はカード下の用語メモへまとめます。'},
+  standard:{label:'標準',description:'専門用語に印だけ付け、hoverや押した時に説明します。'},
   compact:{label:'説明最小',description:'本文への用語補助を隠し、用語帳だけ残します。'}
 };
 const CATEGORY_LABELS={computer:'コンピュータ',os:'OS / Linux',network:'ネットワーク',software:'Software / 運用',data:'Database',batch:'COBOL / Batch',cloud:'Cloud'};
@@ -79,6 +79,7 @@ let foundationStep=0;
 let quizMessage='';
 let decorationBusy=false;
 let mutationTimer=0;
+let pendingRoots=[];
 
 function readStorage(key){try{return localStorage.getItem(key)}catch(e){return null}}
 function writeStorage(key,value){try{localStorage.setItem(key,value)}catch(e){}}
@@ -143,7 +144,7 @@ function setLevel(next){
 }
 function excluded(node){
   const p=node&&node.parentElement;if(!p)return true;
-  return !!p.closest('script,style,code,pre,kbd,samp,button,a,input,textarea,select,option,[data-no-glossary],.fitb-drawer,.fitb-launcher,.cosf-foundation,.terminal,.mini-console,.diag-console,.mobile-live-terminal-body');
+  return !!p.closest('script,style,code,pre,kbd,samp,button,a,input,textarea,select,option,[data-no-glossary],.fitb-drawer,.fitb-launcher,.cosf-foundation,.fitb-gloss,.fitb-tip,.terminal,.mini-console,.diag-console,.mobile-live-terminal-body');
 }
 function aliasIndex(){
   const out=[];TERMS.forEach(function(t){(t.aliases||[t.label]).forEach(function(a){out.push({term:t,alias:a,lower:a.toLowerCase(),ascii:/^[A-Za-z0-9_ ./+-]+$/.test(a)})})});
@@ -159,21 +160,112 @@ function findMatch(text,seen){
   ALIASES.forEach(function(a){if(seen.has(a.term.id))return;const i=lower.indexOf(a.lower);if(i<0||!boundaryOk(text,i,a))return;if(!best||i<best.index||(i===best.index&&a.alias.length>best.alias.alias.length))best={index:i,alias:a}});
   return best;
 }
+// 本文へ説明文を割り込ませない。行内は「印の付いた語」のまま、意味はscope単位の用語メモへ集約する。
+const GLOSS_SCOPE_SELECTOR='.cr-card,.cosf-foundation,.card,section,article';
+const MAX_TERMS_PER_SCOPE=6;
+const MAX_TERMS_PER_PASS=40;
+
+// aria-labelはbuttonの読み上げ名を丸ごと置き換えるため、音声でも文中に説明文が割り込む。
+// 名前は語そのままにし、意味はaria-describedbyの補足として渡す。
+function ensureDesc(term){
+  const id='fitb-desc-'+term.id;
+  if(document.getElementById(id))return id;
+  let host=document.getElementById('fitbDescs');
+  if(!host){host=document.createElement('div');host.id='fitbDescs';host.className='fitb-sr';host.dataset.noGlossary='1';document.body.appendChild(host)}
+  const span=document.createElement('span');span.id=id;span.textContent=term.label+'：'+term.plain;host.appendChild(span);
+  return id;
+}
 function termButton(term,original){
-  const b=document.createElement('button');b.type='button';b.className='fitb-term';b.dataset.fitbTerm=term.id;b.dataset.fitbOriginal=original;b.setAttribute('aria-label',term.label+'：'+term.plain);
-  b.innerHTML='<span class="fitb-term-label">'+esc(original)+'</span><span class="fitb-term-plain">'+esc(term.plain)+'</span>';return b;
+  const b=document.createElement('button');b.type='button';b.className='fitb-term';b.dataset.fitbTerm=term.id;b.dataset.fitbOriginal=original;
+  b.setAttribute('aria-describedby',ensureDesc(term));
+  b.textContent=original;return b;
+}
+// 入れ子のcard/sectionそれぞれに用語メモを付けると、注釈の箱が画面に散らばる。
+// 一番外側のcardを1つだけ選び、そこへまとめる。
+function glossScope(node){
+  const p=node.parentElement;if(!p||!p.closest)return null;
+  let el=p.closest(GLOSS_SCOPE_SELECTOR),outer=el;
+  while(el&&el.parentElement){el=el.parentElement.closest(GLOSS_SCOPE_SELECTOR);if(el)outer=el}
+  return outer;
+}
+// 同じ語をcardごとに何度も注釈すると、注釈自体がノイズになる。
+// 脚注と同じく「1ページにつき最初の1回だけ」印を付け、その語のcardへ意味を置く。
+function pageSeenTerms(){
+  const seen=new Set();
+  document.querySelectorAll('.fitb-term').forEach(function(b){if(b.dataset.fitbTerm)seen.add(b.dataset.fitbTerm)});
+  return seen;
+}
+function scopeState(scope){
+  const state={ids:new Set(),terms:[]};
+  if(scope&&scope.querySelectorAll)scope.querySelectorAll('.fitb-term').forEach(function(b){
+    const t=termById(b.dataset.fitbTerm);if(t&&!state.ids.has(t.id)){state.ids.add(t.id);state.terms.push(t)}
+  });
+  return state;
+}
+function renderGloss(scope,terms){
+  if(!scope||!scope.matches||!scope.matches(GLOSS_SCOPE_SELECTOR))return;
+  let el=null;
+  for(let i=0;i<scope.children.length;i++){if(scope.children[i].classList.contains('fitb-gloss')){el=scope.children[i];break}}
+  if(!terms.length){if(el)el.remove();return}
+  const sig=terms.map(function(t){return t.id}).join(',');
+  if(el&&el.dataset.fitbSig===sig)return;
+  if(!el){el=document.createElement('div');el.className='fitb-gloss';el.dataset.noGlossary='1';scope.appendChild(el)}
+  el.dataset.fitbSig=sig;
+  el.innerHTML='<span class="fitb-gloss-label">この画面の用語</span>'+terms.map(function(t){
+    return '<button type="button" class="fitb-gloss-item" data-fitb-term="'+esc(t.id)+'"><b>'+esc(t.label)+'</b><span>'+esc(t.plain)+'</span></button>'
+  }).join('');
 }
 function decorateRoot(root){
   if(level==='compact'||!root||decorationBusy)return;decorationBusy=true;
   try{
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];let n;
-    while((n=walker.nextNode())){if(nodes.length>=120)break;if(!excluded(n)&&n.nodeValue&&n.nodeValue.trim().length>1)nodes.push(n)}
-    const seen=new Set();let count=0;
-    nodes.forEach(function(node){if(count>=24||!node.parentNode)return;const match=findMatch(node.nodeValue,seen);if(!match)return;const start=match.index,end=start+match.alias.alias.length,original=node.nodeValue.slice(start,end),frag=document.createDocumentFragment();frag.appendChild(document.createTextNode(node.nodeValue.slice(0,start)));frag.appendChild(termButton(match.alias.term,original));frag.appendChild(document.createTextNode(node.nodeValue.slice(end)));node.replaceWith(frag);seen.add(match.alias.term.id);count++})
+    while((n=walker.nextNode())){if(nodes.length>=400)break;if(!excluded(n)&&n.nodeValue&&n.nodeValue.trim().length>1)nodes.push(n)}
+    const seen=pageSeenTerms(),scopes=new Map();let count=0;
+    nodes.forEach(function(node){
+      if(count>=MAX_TERMS_PER_PASS||!node.parentNode)return;
+      const scope=glossScope(node);if(!scope)return;
+      let state=scopes.get(scope);if(!state){state=scopeState(scope);scopes.set(scope,state)}
+      if(state.terms.length>=MAX_TERMS_PER_SCOPE)return;
+      const match=findMatch(node.nodeValue,seen);if(!match)return;
+      const start=match.index,end=start+match.alias.alias.length,original=node.nodeValue.slice(start,end),frag=document.createDocumentFragment();
+      frag.appendChild(document.createTextNode(node.nodeValue.slice(0,start)));
+      frag.appendChild(termButton(match.alias.term,original));
+      frag.appendChild(document.createTextNode(node.nodeValue.slice(end)));
+      node.replaceWith(frag);seen.add(match.alias.term.id);state.ids.add(match.alias.term.id);state.terms.push(match.alias.term);count++
+    });
+    scopes.forEach(function(state,scope){renderGloss(scope,state.terms)})
   }finally{decorationBusy=false}
 }
 function decorateAll(){const main=document.querySelector('main');if(main)decorateRoot(main)}
-function unwrapTerms(root){(root||document).querySelectorAll('.fitb-term').forEach(function(b){b.replaceWith(document.createTextNode(b.dataset.fitbOriginal||b.textContent||''))})}
+function unwrapTerms(root){
+  const r=root||document;
+  r.querySelectorAll('.fitb-term').forEach(function(b){b.replaceWith(document.createTextNode(b.dataset.fitbOriginal||b.textContent||''))});
+  r.querySelectorAll('.fitb-gloss').forEach(function(g){g.remove()})
+}
+
+// hover / focus の即時説明。行の高さも折り返しも変えない位置固定のtooltip。
+function ensureTip(){
+  let tip=document.getElementById('fitbTip');if(tip)return tip;
+  tip=document.createElement('div');tip.id='fitbTip';tip.className='fitb-tip';tip.hidden=true;tip.dataset.noGlossary='1';tip.setAttribute('role','tooltip');
+  document.body.appendChild(tip);return tip;
+}
+function showTip(btn){
+  const t=termById(btn.dataset.fitbTerm);if(!t)return;
+  const tip=ensureTip();tip.innerHTML='<b>'+esc(t.label)+'</b><span>'+esc(t.plain)+'</span>';tip.hidden=false;
+  const r=btn.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
+  let left=r.left+r.width/2-w/2;left=Math.max(8,Math.min(left,window.innerWidth-w-8));
+  let top=r.top-h-8;if(top<8)top=r.bottom+8;
+  tip.style.left=left+'px';tip.style.top=top+'px'
+}
+function hideTip(){const tip=document.getElementById('fitbTip');if(tip)tip.hidden=true}
+function bindTip(){
+  document.addEventListener('mouseover',function(e){const b=e.target.closest&&e.target.closest('.fitb-term');if(b)showTip(b)});
+  document.addEventListener('mouseout',function(e){if(e.target.closest&&e.target.closest('.fitb-term'))hideTip()});
+  document.addEventListener('focusin',function(e){const b=e.target.closest&&e.target.closest('.fitb-term');if(b)showTip(b)});
+  document.addEventListener('focusout',hideTip);
+  window.addEventListener('scroll',hideTip,{passive:true});
+  window.addEventListener('resize',hideTip)
+}
 
 function readViewed(){try{return new Set(JSON.parse(readStorage(FOUNDATION_VIEWED_KEY)||'[]'))}catch(e){return new Set()}}
 function saveViewed(set){writeStorage(FOUNDATION_VIEWED_KEY,JSON.stringify(Array.from(set).sort(function(a,b){return a-b})))}
@@ -206,16 +298,28 @@ function bindFoundation(panel){
 }
 function openFoundationAndScroll(){renderFoundation(true);setTimeout(function(){const p=document.getElementById('computerOsFoundationPanel');if(!p)return;const d=p.querySelector('.cosf-details');if(d)d.open=true;p.scrollIntoView({behavior:'smooth',block:'start'})},60)}
 
-function handleTermClick(e){const b=e.target.closest('[data-fitb-term]');if(!b)return;e.preventDefault();openDrawer(b.dataset.fitbTerm)}
+function handleTermClick(e){const b=e.target.closest('[data-fitb-term]');if(!b)return;e.preventDefault();hideTip();openDrawer(b.dataset.fitbTerm)}
 function observe(){
   const observer=new MutationObserver(function(records){
     if(isLinuxHome())renderFoundation(false);
-    if(level==='compact'||decorationBusy)return;clearTimeout(mutationTimer);mutationTimer=setTimeout(function(){records.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1&&!n.closest?.('.fitb-drawer,.cosf-foundation'))decorateRoot(n);else if(n.nodeType===3&&n.parentElement)decorateRoot(n.parentElement)})})},80)
+    if(level==='compact'||decorationBusy)return;
+    // debounceでtimerを張り直すと、先に届いたbatchのaddedNodesが捨てられる。
+    // 遅れて差し込まれるcard（component rationale等）が注釈されない原因になるため、対象を貯めてから処理する。
+    records.forEach(function(r){r.addedNodes.forEach(function(n){
+      if(n.nodeType===1&&!n.closest?.('.fitb-drawer,.cosf-foundation'))pendingRoots.push(n);
+      else if(n.nodeType===3&&n.parentElement)pendingRoots.push(n.parentElement)
+    })});
+    if(!pendingRoots.length)return;
+    clearTimeout(mutationTimer);
+    mutationTimer=setTimeout(function(){
+      const roots=pendingRoots;pendingRoots=[];
+      roots.forEach(function(n){if(n.isConnected)decorateRoot(n)})
+    },80)
   });
   observer.observe(document.body,{childList:true,subtree:true});
 }
 function init(){
-  ensureCss();setRootLevel();createLauncher();ensureDrawer();document.addEventListener('click',handleTermClick);renderFoundation(false);if(level!=='compact')decorateAll();observe();
+  ensureCss();setRootLevel();createLauncher();ensureDrawer();document.addEventListener('click',handleTermClick);bindTip();renderFoundation(false);if(level!=='compact')decorateAll();observe();
   window.addEventListener('hashchange',function(){if(location.hash==='#foundation')openFoundationAndScroll()});if(location.hash==='#foundation')openFoundationAndScroll();
   window.FIT_FOUNDATION_GLOSSARY={terms:TERMS,levels:LEVELS,getLevel:function(){return level},setLevel:setLevel,open:openDrawer,foundationComplete:foundationComplete};
 }
