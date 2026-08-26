@@ -49,11 +49,19 @@ expect('problem:why' not in js,
 for label in ('01 もともと何がある？','02 無いと何に困る？','03 どんな機能が必要？','04 なぜこれを選ぶ？'):
     expect(label in js,f'component rationale step label missing: {label}')
 
-# 「どんな機能が必要？」に役割バッジを流用すると、問いに答えていない文になる。
-for bad in ('capability:`${role}を、Cloud上のResourceとして用意できること。`',
+# 「どんな機能が必要？」へ役割バッジを流用すると、問いに答えていない文になる。
+# 過去に実在したテンプレートを名指しで禁止し、capability が CLOUD_META から
+# 渡されていること（テンプレート生成へ戻っていないこと）まで確認する。
+for bad in ('capability:`${role}をCloud上で実現する。`',
+            'capability:`${role}を、製品名に依存せず説明・判断する。`',
+            'capability:`${role}を管理端末/CI/CD側のToolで実現する。`',
+            'capability:`${common}の役割を${p.name}上で提供する。`',
+            'capability:`${role}を、Cloud上のResourceとして用意できること。`',
             'capability:`${role}を整理し、製品名ではなく役割で説明・判断できること。`',
             'capability:`${common}の役割を、${p.name}上のserviceとして提供できること。`'):
     expect(bad not in js,f'capability must not restate the role badge: {bad}')
+expect(js.count('\n      capability,\n')+js.count('\n    capability,\n')>=4,
+       'every rationale template must pass through the per-Lab capability')
 
 # 「A ≠ B ≠ C」だけでは互いに違うことしか伝わらず、
 # 「nginx ≠ Web Server role」は「nginxはWeb Serverではない」とも読めて役割バッジと矛盾する。

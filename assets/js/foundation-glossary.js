@@ -168,9 +168,17 @@ function aliasIndex(){
   return out.sort(function(a,b){return b.alias.length-a.alias.length});
 }
 const ALIASES=aliasIndex();
+// 短い一般語（Data / Tool / Log 等）は識別子やPathの一部にも一致してしまう。
+// www-data の "data"、backup-tool の "tool"、/data の "data" を弾くため、
+// 直前は区切り記号も含めて識別子文字を許さない。直後は Console/CLI の '/' を残す。
+const ASCII_BEFORE=/[A-Za-z0-9_./-]/,ASCII_AFTER=/[A-Za-z0-9_-]/;
+// カタカナ語は語境界が空白で示されないため、隣がカタカナ・長音・漢字なら複合語の一部とみなす。
+// これが無いと「データセット」が Data、「未インストール」が install として注釈される。
+const JA_ADJACENT=/[\u30A0-\u30FF\u4E00-\u9FFF\u3005]/;
 function boundaryOk(text,index,alias){
-  if(!alias.ascii)return true;const before=text[index-1]||'',after=text[index+alias.alias.length]||'';
-  return !/[A-Za-z0-9_]/.test(before)&&!/[A-Za-z0-9_]/.test(after);
+  const before=text[index-1]||'',after=text[index+alias.alias.length]||'';
+  if(!alias.ascii)return !JA_ADJACENT.test(before)&&!JA_ADJACENT.test(after);
+  return !ASCII_BEFORE.test(before)&&!ASCII_AFTER.test(after);
 }
 function findMatch(text,seen){
   const lower=text.toLowerCase();let best=null;
