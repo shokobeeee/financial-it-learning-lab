@@ -92,9 +92,11 @@ expect('loadComponentRationale();' in linux_bridge,'Linux integration bridge mus
 expect('component-rationale' not in field_links,'Field Incident links must not own component-rationale loading')
 
 for marker in (
-    "linux-kiban-lab-v18-financial-linux-profiles",
+    "linux-kiban-lab-v19-computer-os-foundation",
     '../assets/js/component-rationale.js?v=2',
     '../assets/css/component-rationale.css?v=2',
+    '../assets/js/foundation-glossary.js?v=1',
+    '../assets/css/foundation-glossary.css?v=1',
     './ui-financial-profiles.js?v=1',
     './ui-financial-profiles.css?v=1',
 ):
@@ -113,7 +115,7 @@ for marker in (
     'Linux OS ≠ Distribution固有操作 ≠ Web Server role ≠ nginx',
     'nginxを入れる理由はNetworkへ接続するためではない',
     'Linuxを入れただけでInternet接続が保証されるわけではない',
-    'Component Origin Model',
+    'Need before Tool / Component Origin',
 ):
     expect(marker in linux_readme,f'Linux README missing root explanation: {marker}')
 
