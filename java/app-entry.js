@@ -1,0 +1,1 @@
+(function(){'use strict';const A=window.JAVA_APP;function route(){const m=location.hash.match(/^#lab(\d{1,2})$/i);if(m){const l=A.LABS.find(x=>x.id===Number(m[1]));if(l){A.reset();l.id===20?A.warLab(l):A.normalLab(l);return}}A.home()}window.addEventListener('hashchange',route);if(!location.hash)location.hash='#home';route()})();
