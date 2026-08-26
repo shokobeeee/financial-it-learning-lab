@@ -256,6 +256,17 @@ function expandedByDefault(module,lab){
   if(['aws','gcp','azure'].includes(module))return [1,2,4,11,19].includes(lab);
   return false;
 }
+// BEFORE/AFTERの多くは「A + B + C。」という部品の列挙で、日本語の文ではない。
+// 文のふりをさせず、部品は部品として並べる。
+function stateHtml(cls,kicker,label,text){
+  const t=String(text==null?'':text),cut=t.indexOf('。');
+  const head=cut>=0?t.slice(0,cut):t,note=cut>=0?t.slice(cut+1).trim():'';
+  const items=head.split(' + ').map(function(v){return v.trim()}).filter(Boolean);
+  const body=items.length>1
+    ? '<ul class="cr-parts">'+items.map(function(v){return '<li>'+esc(v)+'</li>'}).join('')+'</ul>'+(note?'<span>'+esc(note)+'</span>':'')
+    : '<span>'+esc(t)+'</span>';
+  return '<div class="cr-state '+cls+'"><small>'+esc(kicker)+'</small><b>'+esc(label)+'</b>'+body+'</div>';
+}
 function rationaleBody(x){
   const o=ORIGINS[x.origin]||ORIGINS.mixed;
   return `<div class="cr-flow">
@@ -264,7 +275,7 @@ function rationaleBody(x){
       <div class="cr-step"><small>03 どんな機能が必要？</small><b>Capability</b><span>${esc(x.capability)}</span></div>
       <div class="cr-step"><small>04 なぜこれを選ぶ？</small><b>${esc(x.component)}</b><span>${esc(x.choice)}</span></div>
     </div>
-    <div class="cr-before-after"><div class="cr-state before"><small>BEFORE</small><b>追加前</b><span>${esc(x.before)}</span></div><div class="cr-arrow">→</div><div class="cr-state after"><small>AFTER</small><b>追加・設定後</b><span>${esc(x.after)}</span></div></div>
+    <div class="cr-before-after">${stateHtml('before','BEFORE','追加前',x.before)}<div class="cr-arrow">→</div>${stateHtml('after','AFTER','追加・設定後',x.after)}</div>
     <div class="cr-observe">${(x.evidence||[]).map(v=>`<span>👀 ${esc(v)}</span>`).join('')}</div>
     <details class="cr-details"><summary>選択肢と「どこから来るか」を見る</summary><div class="cr-details-grid"><div><b>他の選択肢</b><ul>${list(x.alternatives)}</ul></div><div><b>${esc(o[0])}</b><p>${esc(o[1])}</p><div class="cr-sim-note">このサイトはBrowser内Learning Simulatorです。実機へSoftware/Cloud Resourceを自動導入しません。本番では対象環境・version・権限・承認・Runbookを確認します。</div></div></div></details>`;
 }
