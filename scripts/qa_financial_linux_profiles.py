@@ -24,6 +24,7 @@ bridge=read('linux/integration-bridge.js')
 sw=read('linux/sw.js')
 readme=read('linux/README.md')
 doc=read('docs/FINANCIAL_LINUX_PROFILES.md')
+standard=read('PACKAGE_STANDARD.md')
 
 for marker in (
     "rhel:{id:'rhel'", "ubuntu:{id:'ubuntu'", "sles:{id:'sles'", "oracle:{id:'oracle'",
@@ -53,11 +54,13 @@ for marker in (
     "ORDER=['rhel','ubuntu','sles','oracle']", 'FINANCIAL LINUX PROFILE',
     '金融ITのLinuxは、1種類ではない', 'COMMON LINUX', 'PROFILE DIFFERENCE',
     'RHEL系を標準Profile', 'Ubuntu LTS・SLES・Oracle Linux',
-    'Parrot OSはどこ？', 'data-flp-profile', 'data-flp-stage',
+    'Parrot OSはどこ？', 'data-flp-profile', 'data-flp-current', 'data-flp-stage',
     'function installCommand(p)', 'function labFocus(lab,p)',
     'Web Serverという共通役割', 'Distribution Profile',
+    "panel.querySelectorAll('button[data-flp-profile]')", 'e.stopPropagation()',
 ):
     expect(marker in profile_ux,f'Financial Linux profile UX missing: {marker}')
+expect("panel.querySelectorAll('[data-flp-profile]')" not in profile_ux,'Profile click binding must not attach to the whole Step -1 container')
 
 for marker in (
     '.flp-common-diff{','.flp-profile-grid{','.flp-profile-card.current{',
@@ -87,6 +90,14 @@ for marker in (
 ):
     expect(marker in doc,f'Financial Linux profile design doc missing: {marker}')
 
+for marker in (
+    '## Financial Linux Profile Model',
+    'RHEL系を標準にするのは市場シェアの断定ではなく',
+    'Common Linux + RHEL/Rocky/AlmaLinux（標準） / Ubuntu LTS/Debian / SLES / Oracle Linux',
+    'RHEL互換操作とRHELのSupport / Subscription / Certificationを同一視していない',
+):
+    expect(marker in standard,f'Package Standard missing Financial Linux profile requirement: {marker}')
+
 # Every Linux entry page should load the distro layer and the independent integration bridge.
 for path in [Path('linux/index.html'),*sorted(Path('linux').glob('parrot_linux_lab*.html'))]:
     body=read(str(path))
@@ -105,4 +116,5 @@ print(' - Ubuntu, SLES, and Oracle Linux profiles are available')
 print(' - RHEL-compatible support/certification boundary is explicit')
 print(' - Parrot OS remains a security-learning environment, not the production baseline')
 print(' - apt / dnf / zypper simulation paths and profile UI are wired')
-print(' - PWA cache and mobile profile UX are covered')
+print(' - profile-selection events do not bubble into page-wide reloads')
+print(' - package standard, PWA cache, and mobile profile UX are covered')
