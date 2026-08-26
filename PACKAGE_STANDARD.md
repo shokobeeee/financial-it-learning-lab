@@ -54,6 +54,8 @@
 | Cloud上にResourceを作成 | Provider側へprovisionする | EC2、VPC、Managed DB |
 | 別Platformで提供 | 対象Linuxへinstallしない | JES、CICS、Enterprise Scheduler、Managed MQ |
 
+分類の要約は、**OS標準 / 設定 / Package / Runtime / Cloud provision / 外部Platform**。同じ「使い始める」でも、導入・設定・作成・接続の責任境界を混ぜない。
+
 ## 必須の説明境界
 
 - Common LinuxとDistribution固有のPackage・Firewall・Security実装は別
@@ -68,6 +70,31 @@
 - Cloud CLIをdownloadすることと、Cloud Resourceをprovisionすることは別
 
 教材はBrowser内Simulatorであり、実機へSoftwareやCloud Resourceを自動導入しない。本番作業では対象Version、Vendor Support、License、権限、承認、Runbook、最新の公式Documentationを確認する。
+
+## Financial Linux Profile Model
+
+金融ITのLinuxを一つのDistributionで代表させない。
+
+```text
+Common Linux
+Kernel / Process / File / Permission / TCP-IP / Port / systemd / Log
+  ↓
+Distribution Profile
+Package / Firewall / MAC Security / Kernel flavor / Support / Lifecycle / Certification
+```
+
+- **RHEL / Rocky / AlmaLinux** — Enterprise運用を考える教材標準Profile
+- **Ubuntu LTS / Debian** — Cloud / Digital / OpenStack / Kubernetes Profile
+- **SUSE Linux Enterprise Server** — SAP / IBM Z / Mixed Enterprise Profile
+- **Oracle Linux** — Oracle Database / Exadata / OCI Profile
+
+RHEL系を標準にするのは市場シェアの断定ではなく、Enterprise Support・長期運用・Vendor Certificationを意識する教材設計上の基準点である。
+
+Profileの正本表現は、**Common Linux + RHEL/Rocky/AlmaLinux（標準） / Ubuntu LTS/Debian / SLES / Oracle Linux**。
+
+- RHEL互換操作とRHELのSupport / Subscription / Certificationを同一視していない。
+- Rocky / AlmaLinuxはRHEL系操作の学習に使えるが、契約・Vendor Support・製品認証まで同じとは扱わない。
+- Parrot OSはSecurity / Forensics学習環境として残し、金融業務Serverの標準Profileとは分ける。
 
 ## Progressive Learning Modes
 
