@@ -1,8 +1,10 @@
-const CACHE_NAME = 'linux-kiban-lab-v18-financial-linux-profiles';
+const CACHE_NAME = 'linux-kiban-lab-v19-computer-os-foundation';
 const ASSETS = [
   "./integration-bridge.js?v=1",
   "../assets/js/component-rationale.js?v=2",
   "../assets/css/component-rationale.css?v=2",
+  "../assets/js/foundation-glossary.js?v=1",
+  "../assets/css/foundation-glossary.css?v=1",
   "./ui-financial-profiles.js?v=1",
   "./ui-financial-profiles.css?v=1",
   "./ui-compact.css?v=16",
@@ -50,31 +52,23 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match('./index.html'));
-    })
-  );
+  event.respondWith(caches.match(event.request).then(cached => {
+    if (cached) return cached;
+    return fetch(event.request).then(response => {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      return response;
+    }).catch(() => caches.match('./index.html'));
+  }));
 });

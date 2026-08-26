@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const modules=[
-  {id:'linux',prefix:'linux_lab',total:20,title:'Linux / Infrastructure',href:'linux/',note:'まずは基盤の見方から。DNS・Port・Process・Logを順番に追います。'},
+  {id:'linux',prefix:'linux_lab',total:20,title:'Linux / Infrastructure',href:'linux/',note:'コンピュータ・OS・Networkの基本から始め、LinuxのProcess・Port・Logへ進みます。'},
   {id:'sql',prefix:'sql_db_lab',total:20,title:'SQL / Database',href:'sql/',note:'次はデータ。正本・Transaction・Lock・照合を理解します。'},
   {id:'cobol',prefix:'cobol_lab',total:20,title:'COBOL / Business Systems',href:'cobol/',note:'業務データがどんなルールで処理されるかをコードから追います。'},
   {id:'jcl',prefix:'jcl_batch_lab',total:20,title:'JCL / Batch Operations',href:'jcl/',note:'夜間バッチをJOB・STEP・再実行・後続処理まで含めて理解します。'},

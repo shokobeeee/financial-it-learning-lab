@@ -42,6 +42,9 @@ jobs:
       - name: Financial Linux profile invariants
         run: python3 scripts/qa_financial_linux_profiles.py
 
+      - name: Computer / OS Foundation invariants
+        run: python3 scripts/qa_computer_os_foundation.py
+
       - name: War Room investigation invariants
         run: python3 scripts/qa_warroom_beginner.py
 
