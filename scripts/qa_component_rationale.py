@@ -70,6 +70,27 @@ for marker in (
 for lab in range(1,21):
     expect(f"  {lab}:['" in js,f'Cloud component rationale missing Lab{lab:02}')
 
+# CLOUD_META は [common, role, origin, purpose, problem] の5要素。
+# 5要素目が欠けると Problem 欄が空文字で描画され、画面上は静かに壊れる。
+import re
+for lab in range(1,21):
+    m=re.search(r"^  %d:\[(.*)\],?$"%lab,js,re.M)
+    if not m:
+        errors.append(f'Cloud component rationale Lab{lab:02} row not parseable')
+        continue
+    fields=re.findall(r"'((?:[^'\\]|\\.)*)'",m.group(1))
+    expect(len(fields)==5,
+           f'Lab{lab:02} must define [common, role, origin, purpose, problem]; found {len(fields)} fields')
+    expect(all(f.strip() for f in fields),f'Lab{lab:02} has an empty field')
+
+# linux/ui-financial-profiles.js は component rationale の本文を文字列一致で置換する。
+# 置換元の文が書き換わると Profile 切替の反映が黙って止まるため、両者を突き合わせる。
+profiles=read('linux/ui-financial-profiles.js')
+anchors=re.findall(r"\['((?:[^'\\]|\\.)*)',(?:p\.|'|\+|\s)",profiles[profiles.find('function replaceText('):profiles.find('var w=document.createTreeWalker')])
+expect(len(anchors)>=6,'profile text replacement anchors could not be extracted')
+for anchor in anchors:
+    expect(anchor in js,f'profile replacement anchor no longer present in component rationale: {anchor}')
+
 for marker in (
     'CLIをdownloadすることと、Cloud service本体を作ることは別です',
     'CLIは操作用Tool、Resource本体はProvider側です',

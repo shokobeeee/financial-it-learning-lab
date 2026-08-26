@@ -7,7 +7,7 @@
 1教材を **Complete Learning Package** と呼ぶ条件は以下。
 
 1. **Start from Zero** — 初学者が「そもそも何をする技術か」から入れる。
-2. **Need before Tool / Component Origin** — 製品名・install・provisionより先に、「もともと何があるか」「無いと何に困るか」「どんな能力が必要か」「その部品はどこから来るか」を説明する。目的（何のためにあるか）と困りごと（無いと何が起きるか）は別の文として書き分ける。
+2. **Need before Tool / Component Origin** — 製品名・install・provisionより先に、「もともと何があるか」「無いと何に困るか」「どんな機能が必要か」「その部品はどこから来るか」を説明する。目的（何のためにあるか）と困りごと（無いと何が起きるか）は別の文として書き分ける。
 3. **20 Labs** — 基礎 → 実務 → 障害対応/Capstoneまで段階がある。
 4. **Progressive Learning Modes** — 見る/作る → 選ぶ/判断する → 入力/Evidenceへ、理解段階に合わせて難度を上げる。**全Labで同じ3モードを強制しない。**
 5. **State / Evidence at the Right Time** — 何が変わったか・何を証拠とするかを学ぶ。初学者の最初のLabへ高度なEvidence UIを先回りさせない。
@@ -33,7 +33,7 @@ SoftwareやCloud serviceを登場させる時は、製品名やCommandを先に�
   ↓
 無いと何に困る？
   ↓
-どんな能力が必要？
+どんな機能が必要？
   ↓
 選択肢は？
   ↓
