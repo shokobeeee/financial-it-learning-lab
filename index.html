@@ -14,128 +14,29 @@
 </head>
 <body>
 <main class="homeShell">
-  <header class="sitebar">
-    <a class="sitebrand" href="./"><span>Financial IT</span> Learning Lab</a>
-    <div class="siteMeta">160 Labs + 10 Field Cases + 12 War Rooms</div>
-  </header>
-
-  <section class="homeHero">
-    <div class="homeKicker">LEARN THE SYSTEM, THEN TEST IT AGAINST REAL INCIDENTS</div>
-    <h1>金融ITを、<br>順番に身につける。</h1>
-    <p>基盤 → データ → 基幹処理 → クラウド → 公開事例 → 障害対応。迷ったら、上から順に進めればOK。</p>
-  </section>
-
-  <section class="resumeCard" aria-label="次におすすめの学習">
-    <div class="resumeCopy">
-      <div class="resumeLabel">NEXT STEP</div>
-      <h2 data-next-title>次は：Linux / Infrastructure</h2>
-      <p class="resumeNote" data-next-note>まずは基盤の見方から。DNS・Port・Process・Logを順番に追います。</p>
-    </div>
-    <div class="resumeSide">
-      <div class="resumeCount"><strong><span data-home-total>0</span></strong><span>/ 160 Labs</span></div>
-      <div class="homeProgress" aria-label="全体進捗"><div data-home-total-progress></div></div>
-      <div class="progressText"><span data-home-percent>0%</span> LABS COMPLETE</div>
-      <a class="primaryHomeCta" data-next-link href="linux/"><span data-next-link-text>ここから始める</span><span>→</span></a>
-    </div>
-  </section>
-
-  <section class="homeSection">
-    <div class="sectionTitleRow"><h2>学習ルート</h2><span>知識 → 公開事例 → 実戦</span></div>
-    <div class="routeCard">
-      <div class="route">
-        <div class="routeStep" data-route-step="foundation"><span class="routeNum">01</span><b>基盤とデータ</b><small>Linux → SQL</small></div>
-        <div class="routeStep" data-route-step="core"><span class="routeNum">02</span><b>基幹処理</b><small>COBOL → JCL</small></div>
-        <div class="routeStep" data-route-step="cloud"><span class="routeNum">03</span><b>Cloud共通</b><small>構造を理解</small></div>
-        <div class="routeStep" data-route-step="providers"><span class="routeNum">04</span><b>3クラウド</b><small>AWS / GCP / Azure</small></div>
-        <div class="routeStep" data-route-step="field"><span class="routeNum">05</span><b>公開事例</b><small>10 Field Cases</small></div>
-        <div class="routeStep" data-route-step="war"><span class="routeNum">06</span><b>War Room</b><small>12横断事件</small></div>
-        <div class="routeStep" data-route-step="finish"><span class="routeNum">07</span><b>説明できる</b><small>Engineer / Consult / PM</small></div>
-      </div>
-      <p class="routeHint">各Labの下に「🚨 War Room Link」を表示。いま学んだ知識が、どの公開事例ベースCaseで使えるか確認できます。</p>
-    </div>
-  </section>
-
-  <section class="homeSection">
-    <div class="sectionTitleRow"><h2>教材を選ぶ</h2><span>各20 Labs</span></div>
-
-    <div class="moduleSectionLabel">Core Systems</div>
-    <div class="compactGrid">
-      <a class="compactModule" data-module-card="linux" href="linux/">
-        <div class="moduleIcon">🐧</div><div><h3>Linux</h3><p class="moduleOneLine">障害切り分けの土台をつくる</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="linux">未着手</span><div class="compactProgress"><div data-progress="linux"></div></div><div class="moduleScore" data-progress-text="linux">0 / 20</div></div>
-      </a>
-      <a class="compactModule" data-module-card="sql" href="sql/">
-        <div class="moduleIcon">💾</div><div><h3>SQL / Database</h3><p class="moduleOneLine">正本・Transaction・Lock・照合を読む</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="sql">未着手</span><div class="compactProgress"><div data-progress="sql"></div></div><div class="moduleScore" data-progress-text="sql">0 / 20</div></div>
-      </a>
-      <a class="compactModule" data-module-card="cobol" href="cobol/">
-        <div class="moduleIcon">🟩</div><div><h3>COBOL</h3><p class="moduleOneLine">金融の業務ロジックをコードで追う</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="cobol">未着手</span><div class="compactProgress"><div data-progress="cobol"></div></div><div class="moduleScore" data-progress-text="cobol">0 / 20</div></div>
-      </a>
-      <a class="compactModule" data-module-card="jcl" href="jcl/">
-        <div class="moduleIcon">⚙️</div><div><h3>JCL / Batch</h3><p class="moduleOneLine">夜間バッチと安全な再実行を追う</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="jcl">未着手</span><div class="compactProgress"><div data-progress="jcl"></div></div><div class="moduleScore" data-progress-text="jcl">0 / 20</div></div>
-      </a>
-    </div>
-
-    <div class="moduleSectionLabel">Cloud & Hybrid</div>
-    <div class="compactGrid">
-      <a class="compactModule" data-module-card="cloud" href="cloud/">
-        <div class="moduleIcon">☁️</div><div><h3>Cloud Fundamentals</h3><p class="moduleOneLine">製品名の前にクラウドの構造を掴む</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="cloud">未着手</span><div class="compactProgress"><div data-progress="cloud"></div></div><div class="moduleScore" data-progress-text="cloud">0 / 20</div></div>
-      </a>
-      <a class="compactModule" data-module-card="aws" href="aws/">
-        <div class="moduleIcon">🟧</div><div><h3>AWS</h3><p class="moduleOneLine">共通概念をAWSへ翻訳する</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="aws">未着手</span><div class="compactProgress"><div data-progress="aws"></div></div><div class="moduleScore" data-progress-text="aws">0 / 20</div></div>
-      </a>
-      <a class="compactModule" data-module-card="gcp" href="gcp/">
-        <div class="moduleIcon">🔵</div><div><h3>Google Cloud</h3><p class="moduleOneLine">共通概念をGoogle Cloudへ翻訳する</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="gcp">未着手</span><div class="compactProgress"><div data-progress="gcp"></div></div><div class="moduleScore" data-progress-text="gcp">0 / 20</div></div>
-      </a>
-      <a class="compactModule" data-module-card="azure" href="azure/">
-        <div class="moduleIcon">🔷</div><div><h3>Azure</h3><p class="moduleOneLine">共通概念をAzureへ翻訳する</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="azure">未着手</span><div class="compactProgress"><div data-progress="azure"></div></div><div class="moduleScore" data-progress-text="azure">0 / 20</div></div>
-      </a>
-    </div>
-
-    <div class="moduleSectionLabel">Final Practice</div>
-    <div class="compactGrid">
-      <a class="compactModule warModule" data-module-card="field" href="field-casebook/">
-        <div class="moduleIcon">📰</div><div><h3>Field Incident Gate</h3><p class="moduleOneLine">公開報告・Qiita・note・新聞を基にした10事件</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="field">未挑戦</span><div class="compactProgress"><div data-progress="field"></div></div><div class="moduleScore" data-progress-text="field">0 / 10</div></div>
-      </a>
-      <a class="compactModule warModule" data-module-card="war" href="financial-war-room/">
-        <div class="moduleIcon">🚨</div><div><h3>Financial War Room</h3><p class="moduleOneLine">12事件で金融ITを横断して判断する</p></div>
-        <div class="moduleMeta"><span class="moduleState" data-module-state="war">未挑戦</span><div class="compactProgress"><div data-progress="war"></div></div><div class="moduleScore" data-progress-text="war">0 / 12</div></div>
-      </a>
-    </div>
-  </section>
-
-  <details class="moreBox">
-    <summary>この教材の考え方・設計情報を見る</summary>
-    <div class="moreContent">
-      <div>
-        <h3>Concept → Product → Evidence → Public Incident</h3>
-        <p>Linux v16の「分類軸を混ぜない」思想を全教材へ展開し、公開事例ベースCaseで知識を現場判断へ変換します。</p>
-        <div class="contextFlow"><span>Concept</span><span>Product / Platform</span><span>Evidence</span><span>Safe Change</span><span>Business Verify</span></div>
-        <div class="roleMini">
-          <div><b>🧑‍💻 Engineer</b><span>証拠で切り分ける</span></div>
-          <div><b>🧭 Consultant</b><span>業務・リスクへ翻訳</span></div>
-          <div><b>📋 PM / PMO</b><span>判断と復旧を前へ</span></div>
-        </div>
-      </div>
-      <nav class="docLinks" aria-label="設計ドキュメント">
-        <a href="PACKAGE_STANDARD.md">Complete Package Standard →</a>
-        <a href="CURRICULUM.md">Curriculum / Sign-off →</a>
-        <a href="docs/FIELD_CASE_SOURCES.md">Field Case Public Sources →</a>
-        <a href="REFERENCES.md">Official References →</a>
-      </nav>
-    </div>
-  </details>
-
+  <header class="sitebar"><a class="sitebrand" href="./"><span>Financial IT</span> Learning Lab</a><div class="siteMeta">160 Labs + 10 Field Cases + 12 War Rooms</div></header>
+  <section class="homeHero"><div class="homeKicker">LEARN THE SYSTEM, THEN TEST IT AGAINST REAL INCIDENTS</div><h1>金融ITを、<br>順番に身につける。</h1><p>コンピュータとOSの基本から、基盤 → データ → 基幹処理 → クラウド → 公開事例 → 障害対応へ進みます。</p></section>
+  <section class="resumeCard" aria-label="次におすすめの学習"><div class="resumeCopy"><div class="resumeLabel">NEXT STEP</div><h2 data-next-title>次は：Linux / Infrastructure</h2><p class="resumeNote" data-next-note>コンピュータとOSの基本から始め、Linuxの仕組みへ進みます。</p></div><div class="resumeSide"><div class="resumeCount"><strong><span data-home-total>0</span></strong><span>/ 160 Labs</span></div><div class="homeProgress" aria-label="全体進捗"><div data-home-total-progress></div></div><div class="progressText"><span data-home-percent>0%</span> LABS COMPLETE</div><a class="primaryHomeCta" data-next-link href="linux/"><span data-next-link-text>ここから始める</span><span>→</span></a></div></section>
+  <section class="homeSection"><div class="sectionTitleRow"><h2>学習ルート</h2><span>基礎語彙 → 知識 → 公開事例 → 実戦</span></div><div class="routeCard"><div class="route"><div class="routeStep" data-route-step="foundation"><span class="routeNum">01</span><b>OS・基盤・データ</b><small>Foundation → Linux → SQL</small></div><div class="routeStep" data-route-step="core"><span class="routeNum">02</span><b>基幹処理</b><small>COBOL → JCL</small></div><div class="routeStep" data-route-step="cloud"><span class="routeNum">03</span><b>Cloud共通</b><small>構造を理解</small></div><div class="routeStep" data-route-step="providers"><span class="routeNum">04</span><b>3クラウド</b><small>AWS / GCP / Azure</small></div><div class="routeStep" data-route-step="field"><span class="routeNum">05</span><b>公開事例</b><small>10 Field Cases</small></div><div class="routeStep" data-route-step="war"><span class="routeNum">06</span><b>War Room</b><small>12横断事件</small></div><div class="routeStep" data-route-step="finish"><span class="routeNum">07</span><b>説明できる</b><small>Engineer / Consult / PM</small></div></div><p class="routeHint">基本用語は「完全未経験 / 標準 / 説明最小」で切替可能。各Labの下には「🚨 War Room Link」も表示します。</p></div></section>
+  <section class="homeSection"><div class="sectionTitleRow"><h2>教材を選ぶ</h2><span>各20 Labs</span></div><div class="moduleSectionLabel">Core Systems</div><div class="compactGrid">
+    <a class="compactModule" data-module-card="linux" href="linux/"><div class="moduleIcon">🐧</div><div><h3>Linux</h3><p class="moduleOneLine">コンピュータとOSの基本から障害切り分けへ</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="linux">未着手</span><div class="compactProgress"><div data-progress="linux"></div></div><div class="moduleScore" data-progress-text="linux">0 / 20</div></div></a>
+    <a class="compactModule" data-module-card="sql" href="sql/"><div class="moduleIcon">💾</div><div><h3>SQL / Database</h3><p class="moduleOneLine">正本・Transaction・Lock・照合を読む</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="sql">未着手</span><div class="compactProgress"><div data-progress="sql"></div></div><div class="moduleScore" data-progress-text="sql">0 / 20</div></div></a>
+    <a class="compactModule" data-module-card="cobol" href="cobol/"><div class="moduleIcon">🟩</div><div><h3>COBOL</h3><p class="moduleOneLine">金融の業務ロジックをコードで追う</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="cobol">未着手</span><div class="compactProgress"><div data-progress="cobol"></div></div><div class="moduleScore" data-progress-text="cobol">0 / 20</div></div></a>
+    <a class="compactModule" data-module-card="jcl" href="jcl/"><div class="moduleIcon">⚙️</div><div><h3>JCL / Batch</h3><p class="moduleOneLine">夜間バッチと安全な再実行を追う</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="jcl">未着手</span><div class="compactProgress"><div data-progress="jcl"></div></div><div class="moduleScore" data-progress-text="jcl">0 / 20</div></div></a>
+  </div><div class="moduleSectionLabel">Cloud & Hybrid</div><div class="compactGrid">
+    <a class="compactModule" data-module-card="cloud" href="cloud/"><div class="moduleIcon">☁️</div><div><h3>Cloud Fundamentals</h3><p class="moduleOneLine">製品名の前にクラウドの構造を掴む</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="cloud">未着手</span><div class="compactProgress"><div data-progress="cloud"></div></div><div class="moduleScore" data-progress-text="cloud">0 / 20</div></div></a>
+    <a class="compactModule" data-module-card="aws" href="aws/"><div class="moduleIcon">🟧</div><div><h3>AWS</h3><p class="moduleOneLine">共通概念をAWSへ翻訳する</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="aws">未着手</span><div class="compactProgress"><div data-progress="aws"></div></div><div class="moduleScore" data-progress-text="aws">0 / 20</div></div></a>
+    <a class="compactModule" data-module-card="gcp" href="gcp/"><div class="moduleIcon">🔵</div><div><h3>Google Cloud</h3><p class="moduleOneLine">共通概念をGoogle Cloudへ翻訳する</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="gcp">未着手</span><div class="compactProgress"><div data-progress="gcp"></div></div><div class="moduleScore" data-progress-text="gcp">0 / 20</div></div></a>
+    <a class="compactModule" data-module-card="azure" href="azure/"><div class="moduleIcon">🔷</div><div><h3>Azure</h3><p class="moduleOneLine">共通概念をAzureへ翻訳する</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="azure">未着手</span><div class="compactProgress"><div data-progress="azure"></div></div><div class="moduleScore" data-progress-text="azure">0 / 20</div></div></a>
+  </div><div class="moduleSectionLabel">Final Practice</div><div class="compactGrid">
+    <a class="compactModule warModule" data-module-card="field" href="field-casebook/"><div class="moduleIcon">📰</div><div><h3>Field Incident Gate</h3><p class="moduleOneLine">公開報告・Qiita・note・新聞を基にした10事件</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="field">未挑戦</span><div class="compactProgress"><div data-progress="field"></div></div><div class="moduleScore" data-progress-text="field">0 / 10</div></div></a>
+    <a class="compactModule warModule" data-module-card="war" href="financial-war-room/"><div class="moduleIcon">🚨</div><div><h3>Financial War Room</h3><p class="moduleOneLine">12事件で金融ITを横断して判断する</p></div><div class="moduleMeta"><span class="moduleState" data-module-state="war">未挑戦</span><div class="compactProgress"><div data-progress="war"></div></div><div class="moduleScore" data-progress-text="war">0 / 12</div></div></a>
+  </div></section>
+  <details class="moreBox"><summary>この教材の考え方・設計情報を見る</summary><div class="moreContent"><div><h3>Plain language → Concept → Product → Evidence → Public Incident</h3><p>完全未経験者には普通の言葉から、経験者には説明を隠して、同じ教材を段階的に使えるようにします。</p><div class="contextFlow"><span>Plain language</span><span>Concept / Product</span><span>Evidence</span><span>Safe Change</span><span>Business Verify</span></div><div class="roleMini"><div><b>🧑‍💻 Engineer</b><span>証拠で切り分ける</span></div><div><b>🧭 Consultant</b><span>業務・リスクへ翻訳</span></div><div><b>📋 PM / PMO</b><span>判断と復旧を前へ</span></div></div></div><nav class="docLinks" aria-label="設計ドキュメント"><a href="docs/COMPUTER_OS_FOUNDATION.md">Computer / OS Foundation →</a><a href="PACKAGE_STANDARD.md">Complete Package Standard →</a><a href="CURRICULUM.md">Curriculum / Sign-off →</a><a href="docs/FIELD_CASE_SOURCES.md">Field Case Public Sources →</a><a href="REFERENCES.md">Official References →</a></nav></div></details>
   <footer class="homeFooter">Learning simulator. 公開事例Caseは匿名化・再構成です。本番環境では所属組織の規程・権限・変更管理・Runbook・最新の公式情報に従ってください。</footer>
 </main>
 <script src="assets/js/common.js"></script>
 <script src="assets/js/home-v3.js?v=4"></script>
+<script src="assets/js/foundation-glossary.js?v=1"></script>
 </body>
 </html>
