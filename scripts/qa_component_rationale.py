@@ -92,9 +92,11 @@ expect('loadComponentRationale();' in linux_bridge,'Linux integration bridge mus
 expect('component-rationale' not in field_links,'Field Incident links must not own component-rationale loading')
 
 for marker in (
-    "linux-kiban-lab-v17-component-rationale",
+    "linux-kiban-lab-v18-financial-linux-profiles",
     '../assets/js/component-rationale.js?v=2',
     '../assets/css/component-rationale.css?v=2',
+    './ui-financial-profiles.js?v=1',
+    './ui-financial-profiles.css?v=1',
 ):
     expect(marker in linux_sw,f'Linux PWA cache missing: {marker}')
 
@@ -107,9 +109,10 @@ for marker in (
     expect(marker in standard,f'Package Standard missing component-origin rule: {marker}')
 
 for marker in (
-    'Linux OS ≠ Web Server role ≠ nginx',
+    'Financial Linux Profile Model',
+    'Linux OS ≠ Distribution固有操作 ≠ Web Server role ≠ nginx',
     'nginxを入れる理由はNetworkへ接続するためではない',
-    '多くのUbuntu環境ではDHCP等によりNetworkが自動設定されることがある',
+    'Linuxを入れただけでInternet接続が保証されるわけではない',
     'Component Origin Model',
 ):
     expect(marker in linux_readme,f'Linux README missing root explanation: {marker}')
