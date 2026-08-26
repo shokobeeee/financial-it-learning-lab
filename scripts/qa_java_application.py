@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import subprocess
 import sys
+from itertools import combinations
 
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
@@ -16,6 +17,33 @@ def read(path):
 
 def expect(ok,msg):
     if not ok:errors.append(msg)
+
+
+def java_warroom_golden_path(lab):
+    """Reproduce the Lab20 scoring contract and find a passable evidence subset."""
+    evidence=lab.get('evidence',[])
+    safe=next((x for x in lab.get('recoveries',[]) if x.get('correct')),None)
+    correct_checks=[x for x in lab.get('verifications',[]) if x.get('correct')]
+    best=None
+    for size in range(3,len(evidence)+1):
+        for picked in combinations(evidence,size):
+            if sum(int(x.get('cost',0)) for x in picked)>18:
+                continue
+            if len({x.get('layer') for x in picked if x.get('layer')})<3:
+                continue
+            scores={'eng':20,'con':30,'pm':30}
+            for item in picked:
+                for role in scores:scores[role]+=int(item.get('points',{}).get(role,0))
+            scores['eng']+=18;scores['con']+=8;scores['pm']+=5
+            if safe:
+                for role in scores:scores[role]+=int(safe.get('points',{}).get(role,0))
+            for item in correct_checks:
+                for role in scores:scores[role]+=int(item.get('points',{}).get(role,0))
+            scores['con']+=10;scores['pm']+=14
+            scores={k:max(0,min(100,round(v))) for k,v in scores.items()}
+            candidate=(min(scores.values()),sum(scores.values()),-len(picked),scores,[x.get('id') for x in picked])
+            if best is None or candidate[:3]>best[:3]:best=candidate
+    return best
 
 index=read('java/index.html')
 style=read('java/style.css')
@@ -62,6 +90,10 @@ for lab in labs:
         expect(any(x.get('correct') for x in lab.get('recoveries',[])),'Java Lab20: safe recovery missing')
         expect(any(not x.get('correct') for x in lab.get('recoveries',[])),'Java Lab20: unsafe alternatives missing')
         expect(sum(1 for x in lab.get('verifications',[]) if x.get('correct'))>=4,'Java Lab20: business verification set too shallow')
+        golden=java_warroom_golden_path(lab)
+        expect(golden is not None,'Java Lab20: no playable Evidence / Recovery path')
+        if golden is not None:
+            expect(golden[0]>=85,f'Java Lab20: verified golden path cannot reach 85x3; best={golden[3]}, evidence={golden[4]}')
 
 for marker in (
     "PREFIX='java_app_lab'", "WAR_KEY='java_app_warroom_result'",
@@ -103,7 +135,6 @@ for body,name in ((repo_readme,'README'),(curriculum,'CURRICULUM'),(standard,'PA
     expect('180 Labs' in body,f'{name}: 180 Labs total missing')
 expect('Oracle Java SE Support Roadmap' in references and 'Spring Boot Reference Documentation' in references,'REFERENCES: Java official sources missing')
 
-# Key technical boundaries that should survive future edits.
 joined='\n'.join(l.get('boundary','')+' '+l.get('expert','') for l in labs)
 for marker in (
     'JavaはProgramming Language、JVMは実行基盤、Spring BootはApplicationを組み立てるFramework',
@@ -121,6 +152,6 @@ if errors:
 print('Enterprise Java Application QA PASSED')
 print(' - 20 progressive Labs and Java War Room')
 print(' - Java/JVM/JDK/Spring/JDBC/JMS boundaries')
-print(' - Evidence-gated decisions and tri-role 85 sign-off')
+print(' - Evidence-gated decisions and verified Java War Room 85x3 golden path')
 print(' - responsive Request Journey / Stack Map / Expert Lens UI')
 print(' - Root Home, curriculum, sources, progress and incident transfer wiring')
