@@ -48,6 +48,9 @@ jobs:
       - name: Enterprise Java Application invariants
         run: python3 scripts/qa_java_application.py
 
+      - name: Java curriculum route invariants
+        run: python3 scripts/qa_java_route.py
+
       - name: War Room investigation invariants
         run: python3 scripts/qa_warroom_beginner.py
 
