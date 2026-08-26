@@ -1,11 +1,18 @@
 (function(){
 'use strict';
 
+function ensureCss(){
+  if(document.querySelector('link[data-component-rationale]'))return;
+  const l=document.createElement('link');l.rel='stylesheet';l.href='../assets/css/component-rationale.css?v=2';l.dataset.componentRationale='1';document.head.appendChild(l);
+}
+ensureCss();
+
 const MODULE_IDS=['linux','sql','cobol','jcl','cloud','aws','gcp','azure'];
 const ORIGINS={
   builtin:['OS / Platformに含まれる','最初から使える土台。ただし環境設定や起動状態は別に確認する。'],
   configured:['既存機能を設定・有効化','新しい製品を入れるより、すでにある機能の許可・設定・起動を行う。'],
   package:['Packageとして追加','Repository等からSoftwareを導入し、file・設定・service・log等を増やす。'],
+  deployment:['Self-managed Package / Managed Service','自分でDBMS等をinstall・運用する形と、Providerへ基盤運用の一部を任せる形がある。'],
   runtime:['Compiler / Runtimeを追加','Source codeを実行可能な形へ変換・実行するための環境を用意する。'],
   mixed:['OS機能 + 管理Tool','土台の機能はOS側にあり、操作しやすくするToolやdaemonを追加・設定する。'],
   provisioned:['Cloud上にResourceを作成','PCへ本体をdownloadするのではなく、Provider APIでResourceを払い出す。CLI/SDKは操作用Tool。'],
@@ -17,7 +24,7 @@ const HOME={
   sql:{
     title:'SQLを書く前に、なぜDBMSが必要？',
     summary:'CSVや通常fileにもデータは保存できます。ただし、同時利用・安全な更新・検索・Lock・監査をApplicationだけで実装するのは重い。そこでDBMSという管理Softwareを使います。',
-    origin:'mixed',component:'DBMS',role:'Dataを安全に管理するSoftware',
+    origin:'deployment',component:'DBMS',role:'Dataを安全に管理するSoftware',
     baseline:'Fileへ値を書けば保存自体はできる。SQLという言語だけでは、保存・同時更新・復旧は動かない。',
     problem:'多数の利用者が同時に残高を読み書きし、途中失敗や競合があっても整合性を守りたい。',
     capability:'Table・Query・Transaction・Lock・Recovery・Auditをまとめて管理する能力。',
@@ -104,7 +111,7 @@ function e(component,role,origin,baseline,problem,capability,choice,before,after
 const LAB={
   linux:{
     1:e('nginx','HTTP Requestを受けるWeb Server Application','package','Ubuntu/LinuxにはNetwork stack・IP・Route・DNS機能がある。多くの環境ではDHCP等で外へ通信できるが、HTTPを受けるProgramは別。','別PCのBrowserからこのLinuxへWeb Requestを送りたいが、TCP 80で待ち受けるApplicationがいない。','HTTPをlistenし、RequestへResponseを返し、設定・Access Log・Error Logを持つWeb Server。','nginxはLinux必須Softwareではない。Web / Port / Process / Service / Logを一つにつなげて学びやすく、実務でも代表的なので今回選ぶ。','Ubuntu + IP + Default Route + DNS。外へ通信できても、Port 80はLISTENしていない。','nginx package + config + systemd unit + process + TCP 80 listener + access/error log。',['Apache HTTP Server','Application自身のHTTP server','Python http.server（学習用）','Container上のWeb server'],['package状態','systemctl status nginx','ss -lntp / Port 80','curl / Browser response','access.log / error.log'],'nginxはNetwork接続のためではなく、Linuxへ「Web Serverという役割」を追加するために入れます。Linux OS ≠ Web Server role ≠ nginx。'),
-    2:e('Host Firewall','Hostへ届く通信を許可・拒否するControl','mixed','Network stackがあれば通信は成立しうる。Firewallが無いからNetworkにつながらない、という順序ではない。','Serverとして公開した後、すべての相手・Portから無制限に到達できる状態は避けたい。','Kernelのpacket filtering機能と、ufw / firewalld等の管理Toolで通信Ruleを制御する。','教材ではDebian系ufw、RHEL系firewalldをProfileで分ける。',['通信可能だが、Host側の許可Ruleが整理されていない。'],['Firewall Rule + default policy + audit可能な変更。'],['nftables / iptables','ufw','firewalld','Cloud Security Group（別レイヤー）'],['Rule一覧','default policy','packet counter / log','外部からの接続試験'],'FirewallはNetworkそのものではなく、Network通信を制御する部品です。Host FirewallとCloud Security Groupも別レイヤー。'),
+    2:e('Host Firewall','Hostへ届く通信を許可・拒否するControl','mixed','Network stackがあれば通信は成立しうる。Firewallが無いからNetworkにつながらない、という順序ではない。','Serverとして公開した後、すべての相手・Portから無制限に到達できる状態は避けたい。','Kernelのpacket filtering機能と、ufw / firewalld等の管理Toolで通信Ruleを制御する。','教材ではDebian系ufw、RHEL系firewalldをProfileで分ける。','通信可能だが、Host側の許可Ruleが整理されていない。','Firewall Rule + default policy + audit可能な変更。',['nftables / iptables','ufw','firewalld','Cloud Security Group（別レイヤー）'],['Rule一覧','default policy','packet counter / log','外部からの接続試験'],'FirewallはNetworkそのものではなく、Network通信を制御する部品です。Host FirewallとCloud Security Groupも別レイヤー。'),
     3:e('Network設定 / Resolver','IP通信と名前解決を成立させるOS機能','mixed','Linux KernelにはTCP/IP stackがあるが、NIC・IP・Route・DNS設定が正しいとは限らない。','宛先へ届くか、名前をIPへ解決できるかを確認したい。','NIC、IP Address、Default Route、DNS Resolverを構成・確認する。','Ubuntu等ではDHCPにより自動設定されることが多いが、VM/Router/DHCP/DNSが成立していることが前提。','OSを入れただけ。Network機能はあるが、接続先環境は未確認。','IP・Route・Resolver設定が入り、疎通と名前解決を検証できる。',['DHCP','Static IP','NetworkManager','Netplan + systemd-networkd'],['ip addr','ip route','getent / resolvectl','ping / curl'],'「Ubuntuを入れた＝必ずInternet接続済み」ではありません。OSの機能と、環境側の接続設定を分けます。'),
     4:e('OpenSSH Server','Network越しにShellへloginするdaemon','package','IP疎通ができても、Remote Shellを受け付けるProgramが無ければloginできない。','管理者が別端末から安全にLinuxを操作したい。','sshdがTCP 22等で待ち受け、認証後にShell sessionを作る。','OpenSSHは代表的な実装。ClientとServerは役割が別。','Network疎通のみ。Remote loginのlistener・認証入口は無い。','sshd service + host key + auth config + login log。',['Console直接操作','OpenSSH','Bastion / Session Manager系'],['sshd status','LISTEN Port','auth log','session / key fingerprint'],'SSHはNetworkそのものではなく、Network上でRemote loginを提供するApplication protocolです。'),
     9:e('Package Manager','Softwareの取得・導入・更新を管理するTool','builtin','OSだけで必要な全Applicationが入っているわけではない。手作業でfileを置くと依存・更新・削除が追いにくい。','nginx等のSoftwareを、由来・version・依存関係付きで安全に追加したい。','Repository metadataを使い、packageのinstall/update/removeと履歴を管理する。','Debian系はapt/dpkg、RHEL系はdnf/rpm。操作目的は似ても実装は同一ではない。','目的Software・依存file・package記録が無い。','package DBへ記録され、file・依存関係・versionが管理される。',['apt / dpkg','dnf / rpm','vendor installer','container image'],['package list','repository source','installed files','version / update history'],'Package ManagerはApplicationそのものではなく、ApplicationをLinuxへ持ち込む管理レイヤーです。'),
@@ -118,7 +125,7 @@ const LAB={
     19:e('Hardening Control','不要な機能・権限・公開範囲を減らす設定群','mixed','初期状態は汎用性を優先し、組織のrisk許容度に最適化されているとは限らない。','攻撃面を減らし、必要最小限の権限・service・通信へ絞りたい。','設定変更、package更新、audit、scanner等を組み合わせる。','単一の「Hardening Software」を入れれば完了ではない。','汎用初期設定。','承認済みbaseline + exception + evidence + rollback。',['OS baseline','CIS等のbenchmark','scanner','EDR / audit tool'],['enabled services','open ports','permissions','patch level','audit evidence'],'Hardeningは製品導入より、必要性・例外・影響・継続確認を含む運用です。')
   },
   sql:{
-    1:e('DBMS','Table・SQL・Transactionを実行するData管理Software','mixed','SQL文だけでは保存先も実行Engineもない。','顧客・口座・取引を検索し、安全に更新したい。','SQL解析、Data保存、Transaction、Lock、Recoveryを提供する。','教材はBrowser内simulationで、実機DBをinstallしない。Db2文脈を正本に概念を学ぶ。','Application + fileだけ。','DBMS + Database + Table + Log。',['Db2','Oracle','PostgreSQL','SQL Server','Managed DB'],['service/process','connection','catalog/table','transaction log','audit'],'SQLを覚える前に、SQLを実行してDataを守るDBMSが必要です。'),
+    1:e('DBMS','Table・SQL・Transactionを実行するData管理Software','deployment','SQL文だけでは保存先も実行Engineもない。','顧客・口座・取引を検索し、安全に更新したい。','SQL解析、Data保存、Transaction、Lock、Recoveryを提供する。','教材はBrowser内simulationで、実機DBをinstallしない。Db2文脈を正本に概念を学ぶ。','Application + fileだけ。','DBMS + Database + Table + Log。',['Db2','Oracle','PostgreSQL','SQL Server','Managed DB'],['service/process','connection','catalog/table','transaction log','audit'],'SQLを覚える前に、SQLを実行してDataを守るDBMSが必要です。'),
     17:e('DB Driver / Precompiler','COBOL等のApplicationからDBMSへ接続する境界','runtime','COBOLとDBMSは別Softwareで、互いを自動理解しない。','Program内からSQLを実行し、結果・SQLCODE・Transactionを扱いたい。','Driver / Client library / Embedded SQL precompile等で接続境界を作る。','製品・言語・Runtimeにより方法は異なる。','ProgramとDBが別々に存在。','Connection設定 + generated code/library + SQL response。',['Embedded SQL','ODBC/JDBC','Native client','API経由'],['connection config','SQLCODE','client library version','DB session'],'ApplicationとDBMSの間にも接続Software/Runtime境界があります。'),
     19:e('DB Monitor / Catalog View','DBMS内部状態をEvidenceとして見る機能','mixed','Dataが見えるだけでは、Lock・wait・plan・session・auditは分からない。','性能・競合・障害を推測ではなくDBMS Evidenceで確認したい。','製品固有のmonitor view/catalog/logを使う。','Db2/Oracle/PostgreSQL/SQL Serverで代表Evidenceは異なる。','症状とSQL結果だけ。','Session/Lock/Plan/Audit等の内部Evidence。',['Db2 monitor','Oracle dynamic performance view','PostgreSQL statistics view','SQL Server DMV'],['session','lock/wait','execution plan','audit/log'],'Monitor機能はDBMSとは別製品の場合も組込みの場合もあるため、製品Contextを確認します。')
   },
@@ -129,7 +136,7 @@ const LAB={
     18:e('Db2 / CICS','Data管理・Online Transactionを担う外部基盤','external','COBOLだけでも計算はできるが、共有Data・Online要求・Transaction管理は別の能力。','口座DataをDBへ保存し、ATM/窓口のOnline transactionを処理したい。','Db2がData/Transaction、CICSがOnline transaction実行文脈を提供する。','EXEC SQL / EXEC CICSは外部基盤との境界。','COBOL Program単体。','COBOL + Db2/CICS session + response code。',['File処理','Db2','Oracle','CICS/API platform'],['SQLCODE','CICS response','commit boundary','session/log'],'COBOL文の中に見えても、Db2/CICSは別Software・別責務です。')
   },
   jcl:{
-    1:e('JES','JCLを受付・実行・Spool管理するz/OS subsystem','external','JCL Textだけでは実行されない。','JOBを投入し、ProgramとDataを結び付け、結果を残したい。','JESがJobを受付し、z/OS上でStep実行と出力管理を行う。','教材ではJCL/JESの関係をsimulationする。UbuntuへJCLをinstallする話ではない。','JCL Textのみ。','JOB ID + Step execution + Spool。',['JES2/JES3文脈','Open system batch','Enterprise Scheduler'],['JOB ID','JES message','Spool','RC/ABEND'],'JCLは定義、JESは実行基盤。役割を分けます。'),
+    1:e('JES','JCLを受付・実行・Spool管理するz/OS subsystem','external','JCL Textだけでは実行されない。','JOBを投入し、ProgramとDataを結び付け、結果を残したい。','JESがJobを受付し、z/OS上でStep実行と出力管理を行う。','教材ではJCL/JESの関係をsimulationする。UbuntuへJCLをinstallする話ではない。','JCL Textのみ。','JOB ID + Step execution + Spool。',['JES / JCL','Open system batch','Enterprise Scheduler'],['JOB ID','JES message','Spool','RC/ABEND'],'JCLは定義、JESは実行基盤。役割を分けます。'),
     6:e('JES Spool','Job message・SYSOUT・結果を保持する出力管理','external','Programが終了しても、何が起きたかを人が確認できなければ運用できない。','JOB/STEPのmessage・output・RCを後から追いたい。','JESがSpoolへ出力を保持・検索可能にする。','Spoolは単なるApplication Logと同じではない。','画面に出ない実行結果。','JOB単位のSYSOUT/message/RC。',['JES Spool','File log','Central log platform'],['JESMSGLG','JESJCL','JESYSMSG','SYSOUT'],'SpoolはJCLへ追加installするToolではなく、JESが提供する運用機能です。'),
     14:e('Sort / Utility Program','汎用処理を再利用するSystem Utility','external','毎回COBOLでsort/copyを作ることもできるが、定型処理を重複実装したくない。','大量DataのSort/Copy/Transformを標準化したい。','DFSORT等のUtility ProgramをJCLのEXECから呼び出す。','JCL自身がDataをsortするのではない。JCLはUtilityを起動する。','JCL定義だけ。','Utility Program + SYSIN control + input/output Dataset。',['DFSORT','ICETOOL','COBOL Program','Open system sort'],['Utility RC','SYSOUT','input/output count','control statement'],'JCLは「何を動かすか」を指定し、実処理はProgram/Utilityが行います。'),
     16:e('Enterprise Scheduler','Job依存・営業日・締切を全体管理する外側の層','external','JCLは1 JobのStepを表せても、企業全体のJob network・営業日・待合せは別問題。','数百/数千Jobの依存・calendar・alert・rerunを管理したい。','Control-M / JP1 / IBM Z Workload Scheduler等がJES/JCLの外側をorchestrateする。','製品名は違っても、Scheduler層とJCL層を混ぜない。','個別JCLはあるが、全体依存が人手。','Job network + calendar + dependency + alert。',['Control-M','JP1/AJS3','IBM Z Workload Scheduler','Cloud scheduler'],['predecessor/successor','calendar','release/rerun state','deadline'],'Schedulerを入れる理由はJCL構文を実行するためではなく、業務全体の順序と時刻を管理するためです。')
@@ -159,25 +166,61 @@ const CLOUD_META={
   20:['War Room','複数部品をEvidenceで横断判断する演習','builtin','新しいSoftwareを入れるLabではなく、既存部品を統合して判断する。']
 };
 
+function conceptEntry(common,role,origin,why,choice){
+  if(origin==='builtin'){
+    return{
+      title:`なぜ ${common} を学ぶ？`,summary:why,component:common,role,origin,
+      baseline:'既存のSystem部品はあるが、役割・経路・判断方法が整理されていない。',
+      problem:why,
+      capability:`${role}を、製品名に依存せず説明・判断する。`,
+      choice,
+      before:'部品名や症状がばらばらに見える。',
+      after:`${common}という共通Conceptで構造化し、関連Evidenceへ進める。`,
+      alternatives:['製品名だけ暗記する','共通Conceptへ戻して比較する','System図で位置を確認する'],
+      evidence:['System map','役割・責任境界','関連Evidence','Business verification'],
+      boundary:'このLabは新しいResourceをdownload/provisionするLabではなく、既存部品を構造化して判断するLabです。'
+    };
+  }
+  if(origin==='client'){
+    return{
+      title:`なぜ ${common} が必要？`,summary:why,component:common,role,origin,
+      baseline:'Cloud Resourceはあるが、Console手作業へ依存し、差分・Review・Rollbackが追いにくい。',
+      problem:why,
+      capability:`${role}を管理端末/CI/CD側のToolで実現する。`,
+      choice,
+      before:'手作業変更。Resource本体はProvider側、変更定義は散在。',
+      after:'Code/Template + Review + execution plan + Provider Resource + Audit。',
+      alternatives:['Web Console','Provider CLI/SDK','Terraform/Bicep/CloudFormation等','Policy/Governance service'],
+      evidence:['Code diff','plan/result','Audit log','Resource state','Rollback/previous version'],
+      boundary:'IaC/CLI Toolを管理端末へinstallすることと、Cloud Resource本体をProvider側へprovisionすることは別です。'
+    };
+  }
+  return{
+    title:`なぜ ${common} が必要？`,summary:why,component:common,role,origin,
+    baseline:'Cloud契約・Accountだけでは、この役割を担うResourceはまだ存在しない。',
+    problem:why,
+    capability:`${role}をCloud上で実現する。`,
+    choice,
+    before:'必要な役割がSystem図に無い、または人手・自前運用へ依存。',
+    after:`${common}という役割がSystemへ追加され、状態・権限・Log・Costを管理できる。`,
+    alternatives:['自社設備で実装','Cloud IaaSで構成','Managed serviceを利用','複数Providerの代表実装'],
+    evidence:['Resource/設定の存在','配置・接続関係','IAM/責任分界','Metrics/Logs','削除/rollback方法'],
+    boundary:'Cloud service本体はPCへdownloadするのではなく、Provider側へprovisionします。Console/CLIは操作手段です。'
+  };
+}
+
 function cloudEntry(module,lab){
   const m=CLOUD_META[lab];if(!m)return null;
   const [common,role,origin,why]=m;
-  if(module==='cloud'){
-    return{
-      title:`なぜ ${common} が必要？`,summary:why,component:common,role,origin,
-      baseline:'Cloud契約・Accountだけでは、この役割を担うResourceはまだ存在しない。',
-      problem:why,
-      capability:`${role}をCloud上で実現する。`,
-      choice:'まず製品名を出さずCommon Conceptとして理解し、その後AWS/GCP/Azure/OCIへ翻訳する。',
-      before:'必要な役割がSystem図に無い、または人手・自前運用へ依存。',
-      after:`${common}という役割がSystemへ追加され、状態・権限・Log・Costを管理できる。`,
-      alternatives:['自社設備で実装','Cloud IaaSで構成','Managed serviceを利用','複数Providerの代表実装'],
-      evidence:['Resource/設定の存在','配置・接続関係','IAM/責任分界','Metrics/Logs','削除/rollback方法'],
-      boundary:'Cloud service本体はPCへdownloadするのではなく、Provider側へprovisionします。Console/CLIは操作手段です。'
-    };
-  }
+  if(module==='cloud')return conceptEntry(common,role,origin,why,'まず製品名を出さずCommon Conceptとして理解し、その後AWS/GCP/Azure/OCIへ翻訳する。');
   const p=PROVIDERS[module];if(!p)return null;
   const service=p.services[lab]||common;
+  if(origin==='builtin'){
+    return conceptEntry(service,role,origin,why,`${p.name}名を見た後も、共通Conceptへ戻して他Providerと比較する。`);
+  }
+  if(origin==='client'){
+    return conceptEntry(service,role,origin,why,`${service}等を管理側のTool/Control Planeとして使い、${p.name} Resourceの変更をCode・Review・Auditへ載せる。`);
+  }
   return{
     title:`なぜ ${service} が必要？`,summary:`Cloud Fundamentalsの「${common}」を${p.name}で実現する代表serviceです。`,component:service,role,origin,
     baseline:`${p.account}はあるが、この役割のResourceはまだprovisionされていない。`,
@@ -205,13 +248,17 @@ function entryFor(module,lab){
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function list(items){return (items||[]).map(x=>`<li>${esc(x)}</li>`).join('')}
 function originBadge(origin){const o=ORIGINS[origin]||ORIGINS.mixed;return `<span class="cr-badge"><strong>由来</strong> ${esc(o[0])}</span>`}
-
-function genericHtml(module,lab,x){
+function expandedByDefault(module,lab){
+  if(!lab)return true;
+  if(module==='linux')return [1,2,3,4,9].includes(lab);
+  if(['sql','cobol','jcl'].includes(module))return lab===1;
+  if(module==='cloud')return lab<=7;
+  if(['aws','gcp','azure'].includes(module))return [1,2,4,11,19].includes(lab);
+  return false;
+}
+function rationaleBody(x){
   const o=ORIGINS[x.origin]||ORIGINS.mixed;
-  return `<section class="cr-card" id="componentRationalePanel" data-cr-key="${esc(module+':'+lab)}">
-    <div class="cr-head"><div><div class="cr-kicker">NEED BEFORE TOOL / COMPONENT ORIGIN</div><h2>${esc(x.title)}</h2><p class="cr-summary">${esc(x.summary)}</p></div><div class="cr-badges">${originBadge(x.origin)}<span class="cr-badge"><strong>役割</strong> ${esc(x.role)}</span></div></div>
-    <div class="cr-boundary">${esc(x.boundary)}</div>
-    <div class="cr-flow">
+  return `<div class="cr-flow">
       <div class="cr-step"><small>01 もともと何がある？</small><b>Before the component</b><span>${esc(x.baseline)}</span></div>
       <div class="cr-step"><small>02 何に困る？</small><b>Problem</b><span>${esc(x.problem)}</span></div>
       <div class="cr-step"><small>03 何の機能が必要？</small><b>Capability</b><span>${esc(x.capability)}</span></div>
@@ -219,7 +266,15 @@ function genericHtml(module,lab,x){
     </div>
     <div class="cr-before-after"><div class="cr-state before"><small>BEFORE</small><b>追加前</b><span>${esc(x.before)}</span></div><div class="cr-arrow">→</div><div class="cr-state after"><small>AFTER</small><b>追加・設定後</b><span>${esc(x.after)}</span></div></div>
     <div class="cr-observe">${(x.evidence||[]).map(v=>`<span>👀 ${esc(v)}</span>`).join('')}</div>
-    <details class="cr-details"><summary>選択肢と「どこから来るか」を見る</summary><div class="cr-details-grid"><div><b>他の選択肢</b><ul>${list(x.alternatives)}</ul></div><div><b>${esc(o[0])}</b><p>${esc(o[1])}</p><div class="cr-sim-note">このサイトはBrowser内Learning Simulatorです。実機へSoftware/Cloud Resourceを自動導入しません。本番では対象環境・version・権限・承認・Runbookを確認します。</div></div></div></details>
+    <details class="cr-details"><summary>選択肢と「どこから来るか」を見る</summary><div class="cr-details-grid"><div><b>他の選択肢</b><ul>${list(x.alternatives)}</ul></div><div><b>${esc(o[0])}</b><p>${esc(o[1])}</p><div class="cr-sim-note">このサイトはBrowser内Learning Simulatorです。実機へSoftware/Cloud Resourceを自動導入しません。本番では対象環境・version・権限・承認・Runbookを確認します。</div></div></div></details>`;
+}
+
+function genericHtml(module,lab,x){
+  const expanded=expandedByDefault(module,lab),body=rationaleBody(x);
+  return `<section class="cr-card ${expanded?'':'cr-card-compact'}" id="componentRationalePanel" data-cr-key="${esc(module+':'+lab)}">
+    <div class="cr-head"><div><div class="cr-kicker">NEED BEFORE TOOL / COMPONENT ORIGIN</div><h2>${esc(x.title)}</h2><p class="cr-summary">${esc(x.summary)}</p></div><div class="cr-badges">${originBadge(x.origin)}<span class="cr-badge"><strong>役割</strong> ${esc(x.role)}</span></div></div>
+    <div class="cr-boundary">${esc(x.boundary)}</div>
+    ${expanded?body:`<details class="cr-details cr-primary-details"><summary>必要になった理由を4ステップで見る</summary>${body}</details>`}
   </section>`;
 }
 
@@ -236,7 +291,7 @@ function linuxHomeHtml(){
     <div class="cr-boundary">Ubuntuを入れただけではWeb Serverにはなりません。一方、nginxが無くても、NIC・DHCP・Route・DNS等が成立すればNetwork通信はできます。</div>
     <div class="cr-linux-question"><div class="yes"><b>✅ OSにある土台</b><span>Kernel、Process、File、TCP/IP stack、Networkを設定・確認する機能。</span></div><div class="no"><b>❌ 自動では増えない役割</b><span>Web Server、Database、業務Application。必要になった時にSoftwareやServiceを追加します。</span></div></div>
     <div class="cr-linux-controls">${LINUX_STAGES.map((s,i)=>`<button data-cr-linux-step="${i}" class="${i===0?'active':''}">${i+1}. ${['OSを入れる','Network確認','Browserで試す','nginxを足す'][i]}</button>`).join('')}</div>
-    <div class="cr-linux-stage"><div class="cr-system-map" id="crLinuxMap">${esc(LINUX_STAGES[0].map)}</div><div class="cr-console" id="crLinuxConsole">${esc(LINUX_STAGES[0].console)}</div></div>
+    <div class="cr-linux-stage"><div class="cr-system-map" id="crLinuxMap" aria-live="polite">${esc(LINUX_STAGES[0].map)}</div><div class="cr-console" id="crLinuxConsole" aria-live="polite">${esc(LINUX_STAGES[0].console)}</div></div>
     <div class="cr-keyline"><div><b>Linux / Ubuntu</b><span>OSという土台</span></div><div><b>Web Server</b><span>System上の役割</span></div><div><b>nginx</b><span>その役割を実現するApplicationの1つ</span></div></div>
     <details class="cr-details"><summary>Softwareは全部「downloadして入れるもの」？</summary><div class="cr-origin-legend"><div><b>OSに含まれる</b><span>Kernel / Process / TCP-IP stack等</span></div><div><b>設定して使う</b><span>Network / Firewall / Scheduler等</span></div><div><b>Packageを追加</b><span>nginx / Ansible / Container Runtime等</span></div><div><b>別Platformで提供</b><span>JES / CICS / Enterprise Scheduler等</span></div><div><b>Cloudにprovision</b><span>EC2 / VPC / Managed DB等</span></div><div><b>操作端末へTool</b><span>CLI / SDK / IaC / Control Tool等</span></div></div></details>
   </section>`;
