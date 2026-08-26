@@ -62,16 +62,41 @@ SoftwareやCloud serviceを登場させる時は、製品名やCommandを先に�
 
 ### 必須の説明境界
 
-- `Linux / Ubuntu` = OSという土台
+- `Common Linux` = Kernel・Process・File・TCP/IP等の共通Concept
+- `RHEL / Ubuntu LTS / SLES / Oracle Linux` = Distribution Profile
 - `Web Server` = System上の役割
 - `nginx` = Web Server役割を実現するApplicationの1つ
 - Networkに接続できることと、HTTPへ応答できることは別
+- Linux共通ConceptとPackage・Firewall・Security等のDistribution固有実装は別
 - SQLは言語、DBMSはSQLを実行してDataを管理するSoftware
 - COBOL SourceとCompiler / Runtimeは別
 - JCLはJob定義、JESは実行基盤
 - Cloud CLIをdownloadすることと、Cloud Resourceをprovisionすることは別
 
 教材はBrowser内Simulatorであり、実機へSoftwareやCloud Resourceを自動導入しない。本番作業では対象環境・version・権限・承認・Runbookを確認する。
+
+## Financial Linux Profile Model
+
+金融ITのLinuxを一つのDistributionで代表させない。
+
+```text
+Common Linux
+Kernel / Process / File / Permission / TCP-IP / Port / systemd / Log
+  ↓
+Distribution Profile
+Package / Firewall / MAC Security / Kernel flavor / Support / Lifecycle / Certification
+```
+
+- **RHEL / Rocky / AlmaLinux** — Enterprise運用を考える教材標準Profile
+- **Ubuntu LTS / Debian** — Cloud / Digital / OpenStack / Kubernetes Profile
+- **SUSE Linux Enterprise Server** — SAP / IBM Z / Mixed Enterprise Profile
+- **Oracle Linux** — Oracle Database / Exadata / OCI Profile
+
+RHEL系を標準にするのは市場シェアの断定ではなく、Enterprise Support・長期運用・Vendor Certificationを意識する教材設計上の基準点である。
+
+Rocky / AlmaLinuxはRHEL系操作の学習に使えるが、RHEL Subscription・Vendor Support・製品Certificationまで同一とは扱わない。Parrot OSはSecurity / Forensics学習環境として残し、金融業務Serverの標準Profileとは分ける。
+
+詳細は [`docs/FINANCIAL_LINUX_PROFILES.md`](./docs/FINANCIAL_LINUX_PROFILES.md) を参照。
 
 ## Progressive Learning Modes
 
@@ -89,18 +114,18 @@ Lab16–20  Evidence → 判断 → Verify / Reconcile
 
 「高度なUIがあるほど良い教材」とはしない。問題を解けるところまで教材が教えてから問う。
 
-## v16 Context Model
+## v18 Context Model
 
-Linux v16の設計思想を全教材の共通教育OSとして採用する。
+Linuxで育てた「分類軸を混ぜない」設計思想を全教材の共通教育OSとして採用する。
 
 ```text
 Need / Problem
   ↓
 Capability
   ↓
-Concept
+Common Concept
   ↓
-Product / Platform Implementation
+Distribution / Product / Platform Profile
   ↓
 Component Origin
   ↓
@@ -130,7 +155,7 @@ Lock / Waiting                         ← Concept
 
 現在のProfile対象:
 
-- Linux: Debian/Ubuntu / RHEL-Rocky-Alma + systemd / tool scope
+- Linux: Common Linux + RHEL/Rocky/AlmaLinux（標準） / Ubuntu LTS/Debian / SLES / Oracle Linux
 - SQL: IBM Db2 / Oracle Database / PostgreSQL / Microsoft SQL Server
 - COBOL: IBM Enterprise COBOL / GnuCOBOL / Oracle Pro*COBOL context
 - JCL周辺: Generic Scheduler / BMC Control-M / JP1/AJS3 / IBM Z Workload Scheduler
@@ -161,11 +186,12 @@ Financial War Roomで金融横断判断
 ### Source hierarchy
 
 1. 公式postmortem・企業発表・規制当局資料をFactの軸にする。
-2. Qiita / note / 新聞・技術メディアは、概念翻訳・社会影響・別視点の補助線として使う。
-3. 一次情報と二次解説が食い違う場合は一次情報を優先する。
-4. 原文を長く転載せず、学習用に匿名化・簡略化・再構成する。
-5. 実事故名・Source・推奨復習LabはResultまで隠し、推理をspoilerしない。
-6. Caseは本番Runbook、法令判断、完全な事故再現ではない。
+2. Zenn / Qiita / 企業Engineering Blog等は、概念・実装・復旧・設計判断の補助線として使う。
+3. note / 新聞・技術メディア等は、社会影響や別視点を補う。
+4. 一次情報と二次解説が食い違う場合は一次情報を優先する。
+5. 原文を長く転載せず、学習用に匿名化・簡略化・再構成する。
+6. 実事故名・Source・推奨復習LabはResultまで隠し、推理をspoilerしない。
+7. Caseは本番Runbook、法令判断、完全な事故再現ではない。
 
 ### 難度とSign-off
 
@@ -179,6 +205,7 @@ Field Gateは「外部の事故報告を読める自信」を作る移行関門�
 ### Financial Engineer
 
 - レイヤーを分解し、Conceptと製品固有実装を混同しない
+- Common LinuxとDistribution固有のPackage・Firewall・Security実装を分ける
 - その部品がOS標準・Package・Runtime・Cloud Resource・外部Platformのどれか説明する
 - 仮説を置き、価値の高いEvidenceで残す/消す
 - 異なるレイヤーのEvidenceを組み合わせる
@@ -188,6 +215,7 @@ Field Gateは「外部の事故報告を読める自信」を作る移行関門�
 
 - 技術を顧客影響・重要業務・riskへ翻訳する
 - 「なぜその製品が必要か」を業務能力・運用責任・代替案で説明する
+- Distribution選定をSupport・Lifecycle・Certification・Workload要件へ翻訳する
 - 正本・統制・third party・RTO/RPOを会話に入れる
 - Primary causeとcontrol gapを分ける
 - 公開事例の事実・解説・推論を区別する
@@ -196,6 +224,7 @@ Field Gateは「外部の事故報告を読める自信」を作る移行関門�
 
 - Impact / severity / deadlineを固定する
 - 新規導入・設定変更・Cloud provision・外部Platform連携を同じ作業として扱わない
+- Distribution / Version / Support契約 / EOL / Support Matrixを確認する
 - Owner / dependency / approval / rollbackを整理する
 - 復旧を技術Greenだけで閉じず、顧客・件数・金額・後続まで追う
 - 未確定事項と次回更新時刻を含めて共有する
@@ -242,10 +271,14 @@ Linux → SQL / Database → COBOL → JCL / Batch
 - Guide / Context / Layer Guide / War Room Linkのwiring
 - Software / Service登場前にNeed → Capability → Component Originが説明されている
 - OS標準 / 設定 / Package / Runtime / Cloud provision / 外部Platformを混同していない
+- Common LinuxとDistribution固有実装を混同していない
+- RHEL標準Profileを市場シェアの断定として表現していない
+- Ubuntu LTS / SLES / Oracle Linuxの比較Profileが維持されている
+- RHEL互換操作とRHELのSupport / Subscription / Certificationを同一視していない
 - 製品対応を完全互換として表現していない
 - 初心者PreviewがSource・Root cause・推奨Labをspoilerしない
 - 各公開事例Caseに公式/規制当局Sourceがある
-- 全体Source mixにQiita / note / 新聞・技術メディアがある
+- 全体Source mixにZenn / Qiita / note / 新聞・技術メディアがある
 - Evidence Diversity GateがCause確定前に機能する
 - Safe Recovery / Reconciliation / Communicationが存在する
 - 検証済みgolden pathでField Gate 80×3、War Room 85×3へ到達可能
