@@ -31,7 +31,7 @@ for marker in (
     "runtime:['Compiler / Runtimeを追加'", "provisioned:['Cloud上にResourceを作成'",
     "external:['別Platformで提供'", "client:['操作する側へToolを追加'",
     'function entryFor(module,lab)', 'function cloudEntry(module,lab)',
-    'function conceptEntry(common,role,origin,why,choice)',
+    'function conceptEntry(common,role,origin,why,choice,problem)',
     'function expandedByDefault(module,lab)', 'cr-primary-details',
     'new MutationObserver(schedule)', 'window.FIT_COMPONENT_RATIONALE=',
 ):
@@ -39,6 +39,15 @@ for marker in (
 
 for module in ('sql','cobol','jcl','cloud','aws','gcp','azure'):
     expect(f'{module}:' in js,f'home/component rationale missing module: {module}')
+
+# 「何に困る？」へ目的文をそのまま流用すると、問いと答えがずれる。
+# CLOUD_META は purpose(why) と problem を別の要素として持ち、Problem 欄には problem を使う。
+expect('const [common,role,origin,why,problem]=m;' in js,
+       'cloudEntry must read a dedicated problem text from CLOUD_META')
+expect('problem:why' not in js,
+       'Problem step must not reuse the purpose sentence (problem:why)')
+for label in ('01 もともと何がある？','02 無いと何に困る？','03 どんな機能が必要？','04 なぜこれを選ぶ？'):
+    expect(label in js,f'component rationale step label missing: {label}')
 
 for marker in (
     'Ubuntuを入れただけではWeb Serverにはなりません',
