@@ -39,6 +39,9 @@ jobs:
       - name: Need-before-tool component rationale invariants
         run: python3 scripts/qa_component_rationale.py
 
+      - name: Financial Linux profile invariants
+        run: python3 scripts/qa_financial_linux_profiles.py
+
       - name: War Room investigation invariants
         run: python3 scripts/qa_warroom_beginner.py
 
