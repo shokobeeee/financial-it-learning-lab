@@ -122,6 +122,23 @@ for anchor in anchors:
 # 置換の直前に注釈を外していることまで確認する。
 expect('FIT_FOUNDATION_GLOSSARY.unwrap(panel)' in profiles,
        'profile text replacement must unwrap glossary markers before matching literals')
+# BEFORE/AFTERを部品chipへ分けると、文字列一致の対象text nodeも分割される。
+# chip単位の置換が無いと、Profileを切り替えてもBEFOREだけUbuntuのまま残る。
+expect(".cr-parts li" in profiles and "li.textContent.trim()==='Ubuntu'" in profiles,
+       'profile replacement must also cover the split BEFORE/AFTER part chips')
+
+# 部品chipは ' + ' で区切る。service名の中に ' + ' があると名前が途中で割れる。
+import re as _re
+for _m in _re.finditer(r"services:\{([^}]*)\}",js):
+    for _v in _re.findall(r"'((?:[^'\\]|\\.)*)'",_m.group(1)):
+        expect(' + ' not in _v,f'provider service name must not contain the part separator: {_v}')
+
+# Zone/AZは利用者が作るResourceではない。由来まで分けないとバッジと本文が矛盾する。
+expect("placement:['Providerが用意した区分から選ぶ'" in js,
+       'a placement origin must exist for Provider-defined zones/regions')
+expect("  9:['Failure Domain','一緒に壊れる範囲を分けて配置する仕組み','placement'," in js,
+       'Lab09 must use the placement origin, not provisioned')
+expect('const placed=' not in js,'the lab===9 special case must not come back')
 expect(profiles.index('FIT_FOUNDATION_GLOSSARY.unwrap(panel)')<profiles.index('replaceText(panel,p);'),
        'glossary markers must be unwrapped before replaceText runs')
 

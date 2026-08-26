@@ -60,6 +60,11 @@ for marker in (
 # 行内は「印の付いた語」のみ、意味は scope 単位の用語メモ / tooltip 側へ置く。
 expect('.fitb-term-plain' not in js and '.fitb-term-plain' not in css,
        'term definitions must not be re-introduced inline (.fitb-term-plain)')
+# 「リソース」はLinux文脈ではCPU/Memory/Diskを指す。Cloud Resourceの別名にすると誤注釈になる。
+expect("aliases:['Cloud Resource','クラウドリソース','Resource']" in js,
+       'Cloud Resource must not claim the katakana リソース')
+expect("{id:'system-resource'" in js,
+       'the OS-level resource meaning needs its own glossary term')
 expect('b.textContent=original;return b;' in js,
        'inline term marker must render only the original word')
 expect('function renderGloss(scope,terms)' in js and 'function showTip(btn)' in js,

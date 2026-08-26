@@ -48,6 +48,11 @@ function replaceText(root,p){
     ['Debian系はapt/dpkg、RHEL系はdnf/rpm。操作目的は似ても実装は同一ではない。','選択中は '+p.pkg+'。Ubuntu / RHEL / SLES / Oracle Linuxで操作目的が近くても、Repository・Option・Support境界は同一ではない。']
   ];
   var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n;while((n=w.nextNode())){var text=n.nodeValue;replacements.forEach(function(r){text=text.split(r[0]).join(r[1])});n.nodeValue=text}
+  // BEFORE/AFTERは部品ごとのchipへ分かれており、1つのtext nodeには部品名しか入らない。
+  // 上の文字列一致では届かないため、Distribution名だけのchipを個別に置き換える。
+  if(root.querySelectorAll)root.querySelectorAll('.cr-parts li').forEach(function(li){
+    if(li.textContent.trim()==='Ubuntu')li.textContent=p.short
+  });
 }
 function renderLab(panel,p,lab){
   if(panel.dataset.flpProfile===p.id)return;panel.dataset.flpProfile=p.id;

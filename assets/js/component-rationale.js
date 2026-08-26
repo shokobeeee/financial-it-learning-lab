@@ -17,7 +17,8 @@ const ORIGINS={
   mixed:['OS機能 + 管理Tool','土台の機能はOS側にあり、操作しやすくするToolやdaemonを追加・設定する。'],
   provisioned:['Cloud上にResourceを作成','PCへ本体をdownloadするのではなく、Provider APIでResourceを払い出す。CLI/SDKは操作用Tool。'],
   external:['別Platformで提供','いま見ているOSへinstallするのではなく、Mainframe・Scheduler・Managed service等の別基盤が提供する。'],
-  client:['操作する側へToolを追加','対象Serverではなく、管理端末・Control nodeへCLI/Agent/自動化Toolを置く。']
+  client:['操作する側へToolを追加','対象Serverではなく、管理端末・Control nodeへCLI/Agent/自動化Toolを置く。'],
+  placement:['Providerが用意した区分から選ぶ','新しくResourceを作るのではなく、既にある区分のどこへ置くかを決める。']
 };
 
 const HOME={
@@ -81,8 +82,8 @@ const HOME={
 };
 
 const PROVIDERS={
-  aws:{name:'AWS',account:'AWS Account',services:{2:'Amazon EC2',3:'Amazon EBS / S3 / RDS等',4:'Amazon VPC',5:'Subnet',6:'Route Table / IGW / NAT Gateway',7:'Elastic Load Balancing',8:'Security Group / NACL',9:'Availability Zone',10:'S3 / EBS / EFS',11:'Amazon RDS / Aurora',12:'AWS IAM / IAM Role',13:'Secrets Manager / KMS / ACM',14:'CloudWatch / CloudTrail',15:'AWS Backup / Snapshot',16:'別RegionへのReplication + Route 53 Failover',17:'Direct Connect / Site-to-Site VPN',18:'Provider mapping',19:'CloudFormation / Organizations',20:'AWS War Room'}},
-  gcp:{name:'Google Cloud',account:'Project',services:{2:'Compute Engine',3:'Persistent Disk / Cloud Storage / Cloud SQL等',4:'VPC',5:'Subnet',6:'Routes / Cloud NAT',7:'Cloud Load Balancing',8:'VPC Firewall',9:'Zone',10:'Cloud Storage / Persistent Disk / Filestore',11:'Cloud SQL / AlloyDB',12:'IAM / Service Account',13:'Secret Manager / Cloud KMS / Certificate Manager',14:'Cloud Monitoring / Cloud Logging / Audit Logs',15:'Backup and DR / Snapshot',16:'別RegionへのReplication + Cloud DNS Failover',17:'Cloud Interconnect / Cloud VPN',18:'Provider mapping',19:'Terraform / Organization Policy',20:'Google Cloud War Room'}},
+  aws:{name:'AWS',account:'AWS Account',services:{2:'Amazon EC2',3:'Amazon EBS / S3 / RDS等',4:'Amazon VPC',5:'Subnet',6:'Route Table / IGW / NAT Gateway',7:'Elastic Load Balancing',8:'Security Group / NACL',9:'Availability Zone',10:'S3 / EBS / EFS',11:'Amazon RDS / Aurora',12:'AWS IAM / IAM Role',13:'Secrets Manager / KMS / ACM',14:'CloudWatch / CloudTrail',15:'AWS Backup / Snapshot',16:'別RegionへのReplication / Route 53 Failover',17:'Direct Connect / Site-to-Site VPN',18:'Provider mapping',19:'CloudFormation / Organizations',20:'AWS War Room'}},
+  gcp:{name:'Google Cloud',account:'Project',services:{2:'Compute Engine',3:'Persistent Disk / Cloud Storage / Cloud SQL等',4:'VPC',5:'Subnet',6:'Routes / Cloud NAT',7:'Cloud Load Balancing',8:'VPC Firewall',9:'Zone',10:'Cloud Storage / Persistent Disk / Filestore',11:'Cloud SQL / AlloyDB',12:'IAM / Service Account',13:'Secret Manager / Cloud KMS / Certificate Manager',14:'Cloud Monitoring / Cloud Logging / Audit Logs',15:'Backup and DR / Snapshot',16:'別RegionへのReplication / Cloud DNS Failover',17:'Cloud Interconnect / Cloud VPN',18:'Provider mapping',19:'Terraform / Organization Policy',20:'Google Cloud War Room'}},
   azure:{name:'Azure',account:'Subscription / Resource Group',services:{2:'Azure Virtual Machines',3:'Managed Disks / Blob / Azure SQL等',4:'Virtual Network',5:'Subnet',6:'Route Table / NAT Gateway',7:'Azure Load Balancer / Application Gateway',8:'Network Security Group',9:'Availability Zone',10:'Blob Storage / Managed Disks / Azure Files',11:'Azure SQL / Managed Instance',12:'Microsoft Entra ID / Azure RBAC / Managed Identity',13:'Key Vault / Managed Certificate',14:'Azure Monitor / Activity Log',15:'Azure Backup / Snapshot',16:'Azure Site Recovery / geo冗長Replication',17:'ExpressRoute / VPN Gateway',18:'Provider mapping',19:'Bicep / ARM / Azure Policy',20:'Azure War Room'}}
 };
 
@@ -152,7 +153,7 @@ const CLOUD_META={
   6:['Route / NAT','通信の向きと経路を決める部品','provisioned','外へ出る通信と、外から入る通信を別々の経路として設計するためです。','経路を決めないと、内部Serverから外部へSoftware更新を取りに行けない。かといって外向きの経路と外からの入口を取り違えると、公開するつもりのないServerが外から届く場所に出てしまう。','内部から外部への経路を用意し、外部から内部への到達可否は別に決められること。',['経路表の内容','外向き通信の出口','外から到達できる入口の有無','通信できた/できない実測']],
   7:['Load Balancer','一つの入口から複数のAppへ振り分ける部品','provisioned','利用者にServerを選ばせず、健全な宛先だけへRequestを届けるためです。','入口が1台のServerに固定されていると、その1台が止まった時点でServiceも止まり、増設もできない。','1つの宛先で受けたRequestを応答できるApp群へ振り分け、落ちた宛先を自動で外せること。',['正常と判定された宛先の数','宛先ごとの振り分け実績','health checkの失敗履歴','切り離しにかかった時間']],
   8:['Firewall Control','誰からどのPortへ通信できるかを決めるControl','provisioned','Networkを作った後に、許可する通信だけを明示的に決めるためです。','Networkを作っただけでは許可条件が決まらず、必要な通信と不要な通信を区別できない。','送信元・宛先・Portの組み合わせで、通してよい通信だけを許可できること。',['許可Ruleの一覧','拒否されたPacketの記録','使われていないRule','外部からの接続試験']],
-  9:['Failure Domain','一緒に壊れる範囲を分けて配置する仕組み','provisioned','1か所の障害で全Appが同時に止まらないよう、配置を分けるためです。Providerの区分は、小さい順に Zone（電源や建物の単位）＜ Region（地理的に離れた単位）で、Zoneを分ければ建物レベル、Regionを分ければ地域レベルの障害に備えられます。','同じ電源・同じ建物（＝同じZone）へ全Appを置くと、その1か所が壊れただけでService全体が止まる。Zoneを分けても片側に1台ずつでは、片系停止時に残る処理能力は半分になる。','一緒に停止する範囲を把握し、同じApp群を別々のZoneへ分けたうえで、片側が止まっても業務が回る台数を各Zoneへ置けること。',['Zoneごとの稼働台数','片側停止時に残る処理能力','Subnet/DB/LBのZone配置','Zone障害を想定した切替試験']],
+  9:['Failure Domain','一緒に壊れる範囲を分けて配置する仕組み','placement','1か所の障害で全Appが同時に止まらないよう、配置を分けるためです。Providerの区分は、小さい順に Zone（電源や建物の単位）＜ Region（地理的に離れた単位）で、Zoneを分ければ建物レベル、Regionを分ければ地域レベルの障害に備えられます。','同じ電源・同じ建物（＝同じZone）へ全Appを置くと、その1か所が壊れただけでService全体が止まる。Zoneを分けても片側に1台ずつでは、片系停止時に残る処理能力は半分になる。','一緒に停止する範囲を把握し、同じApp群を別々のZoneへ分けたうえで、片側が止まっても業務が回る台数を各Zoneへ置けること。',['Zoneごとの稼働台数','片側停止時に残る処理能力','Subnet/DB/LBのZone配置','Zone障害を想定した切替試験']],
   10:['Storage Service','Object/Block/Fileを用途で使い分ける保存部品','provisioned','用途ごとに読み書き方法・共有範囲・耐久性の違うStorageを選ぶためです。','保存先を1種類に決め打ちすると、共有できない・費用が合わない・性能が足りない、のどれかが起きる。','Object・Block・Fileという読み書きの型を選び、用途に合う耐久性と共有範囲を指定できること。',['Object/Block/Fileのどれか','耐久性と冗長化の設定','同時に読み書きできる範囲','保存容量と費用の推移']],
   11:['Managed Database','DB基盤の運用をProviderと分担するData管理service','provisioned','Patch・HA・Backupといった基盤運用の一部をProviderへ任せ、Data設計とSQLに集中するためです。','自前でDB Serverを運用すると、Patch・冗長化・Backupまで自分たちの運用範囲として抱えることになる。','DBのPatch・冗長化・Backupを任せたうえで、Schema・SQL・権限は自分で設計できること。',['フェイルオーバーの履歴と接続断時間','メンテナンス時間帯の設定','自動更新の対象と範囲','Backup保持期間とPITRの範囲']],
   12:['IAM','誰が何を操作できるかを定義するControl Plane','provisioned','人とApplicationへ、必要な操作だけを許可するためです。','全員と全Applicationが同じ強い権限を持つと、誤操作や漏えいの影響が全Resourceへ広がる。','人とApplicationごとに、どのResourceへどの操作を許すかを定義し、あとから取り消せること。',['誰にどの権限が付いているか','使われていない権限','権限を付与した申請と承認の記録','操作の実行履歴']],
@@ -179,6 +180,20 @@ function conceptEntry(common,role,origin,why,choice,problem,capability,evidence)
       alternatives:['製品名だけ暗記する','共通Conceptへ戻して比較する','System図で位置を確認する'],
       evidence,
       boundary:'このLabは新しいResourceをdownload/provisionするLabではなく、既存部品を構造化して判断するLabです。'
+    };
+  }
+  if(origin==='placement'){
+    return{
+      title:`なぜ ${common} が必要？`,summary:why,component:common,role,origin,
+      baseline:'Resourceは作れる。ただし、それをどこへ置くかは指定しなければ寄ってしまう。',
+      problem,
+      capability,
+      choice,
+      before:'置き場所を意識せずResourceを作っており、どこまでが一緒に止まるか説明できない。',
+      after:`${common}を分けて配置し、片側が止まったときに残る処理能力を数えられる。`,
+      alternatives:['1か所へまとめる','複数のZoneへ分ける','複数のRegionへ分ける','Managed serviceの冗長化に任せる'],
+      evidence,
+      boundary:`${common}はProviderが用意した区分で、利用者が作るものではありません。Resourceをどの区分へ置くかを選びます。`
     };
   }
   if(origin==='client'){
@@ -215,10 +230,11 @@ function cloudEntry(module,lab){
   if(module==='cloud')return conceptEntry(common,role,origin,why,'まず製品名を出さずCommon Conceptとして理解し、そのあとAWS/GCP/Azure/OCIの名前へ翻訳する。',problem,capability,evidence);
   const p=PROVIDERS[module];if(!p)return null;
   const service=p.services[lab]||common;
-  // Zone/Regionは利用者が作るResourceではなく、Providerが用意した配置先の区分。
-  const placed=lab===9;
   if(origin==='builtin'){
     return conceptEntry(service,role,origin,why,`${p.name}の名前を覚えた後も、共通Conceptへ戻して他Providerと比較できるようにする。`,problem,capability,evidence);
+  }
+  if(origin==='placement'){
+    return conceptEntry(service,role,origin,why,`${p.name}では${service}という名前の区分になる。Resourceをどの${service}へ置くかで、一緒に止まる範囲が決まる。`,problem,capability,evidence);
   }
   if(origin==='client'){
     return conceptEntry(service,role,origin,why,`${service}等を管理側のToolとして使い、${p.name}の構成変更をCode・Review・Auditへ載せる。`,problem,capability,evidence);
@@ -236,14 +252,10 @@ function cloudEntry(module,lab){
       ?`${p.name}では共通Conceptと同じ名前を使う。名前が同じでも、他Providerの同種serviceと中身が完全に同じとは限らない。`
       :`${service}を代表例として使う。他Providerの同種serviceと完全に同じではない。`,
     before:'Console/CLIは使えても、この役割を担うResource本体はまだ無い。',
-    after:placed
-      ?`配置先の${service} + Resourceの所属 + 冗長化の範囲 + Log/Cost。`
-      :`${service}のResource + Resource ID + 配置先のRegion/Zone/Network + 操作権限 + Log/Cost。`,
+    after:`${service}のResource + Resource ID + 配置先のRegion/Zone/Network + 操作権限 + Log/Cost。`,
     alternatives:['Consoleでprovision','CLI/SDKでprovision','IaCでprovision','別service/別Provider'],
     evidence,
-    boundary:placed
-      ?`${service}はProviderが用意した区分で、利用者が作るものではありません。Resourceをどの${service}へ置くかを選びます。`
-      :`${p.name} CLIをinstallすることと、${service}を作ることは別です。CLIは操作用Tool、Resource本体はProvider側です。`
+    boundary:`${p.name} CLIをinstallすることと、${service}を作ることは別です。CLIは操作用Tool、Resource本体はProvider側です。`
   };
 }
 
