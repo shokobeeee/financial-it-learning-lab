@@ -17,16 +17,22 @@ def expect(ok,msg):
 
 js=read('assets/js/component-rationale.js')
 css=read('assets/css/component-rationale.css')
-bridge=read('assets/js/field-case-links.js')
+field_links=read('assets/js/field-case-links.js')
+linux_bridge=read('linux/integration-bridge.js')
+linux_sw=read('linux/sw.js')
 standard=read('PACKAGE_STANDARD.md')
 linux_readme=read('linux/README.md')
 
 for marker in (
+    'function ensureCss()', "component-rationale.css?v=2",
     "const ORIGINS=", "builtin:['OS / Platformに含まれる'",
     "configured:['既存機能を設定・有効化'", "package:['Packageとして追加'",
+    "deployment:['Self-managed Package / Managed Service'",
     "runtime:['Compiler / Runtimeを追加'", "provisioned:['Cloud上にResourceを作成'",
     "external:['別Platformで提供'", "client:['操作する側へToolを追加'",
     'function entryFor(module,lab)', 'function cloudEntry(module,lab)',
+    'function conceptEntry(common,role,origin,why,choice)',
+    'function expandedByDefault(module,lab)', 'cr-primary-details',
     'new MutationObserver(schedule)', 'window.FIT_COMPONENT_RATIONALE=',
 ):
     expect(marker in js,f'component rationale JS missing: {marker}')
@@ -46,7 +52,7 @@ for marker in (
     expect(marker in js,f'Linux need-before-tool rationale missing: {marker}')
 
 for marker in (
-    "sql:{\n    1:e('DBMS'", "17:e('DB Driver / Precompiler'",
+    "sql:{\n    1:e('DBMS'", "'deployment'", "17:e('DB Driver / Precompiler'",
     "cobol:{\n    1:e('COBOL Compiler / Runtime'", "18:e('Db2 / CICS'",
     "jcl:{\n    1:e('JES'", "16:e('Enterprise Scheduler'",
 ):
@@ -58,25 +64,39 @@ for lab in range(1,21):
 for marker in (
     'CLIをdownloadすることと、Cloud service本体を作ることは別です',
     'CLIは操作用Tool、Resource本体はProvider側です',
+    'このLabは新しいResourceをdownload/provisionするLabではなく',
+    'IaC/CLI Toolを管理端末へinstallすることと、Cloud Resource本体をProvider側へprovisionすることは別です',
     "aws:{name:'AWS'", "gcp:{name:'Google Cloud'", "azure:{name:'Azure'",
 ):
     expect(marker in js,f'Cloud provision/download boundary missing: {marker}')
 
 for marker in (
-    'data-cr-linux-step', 'crLinuxMap', 'crLinuxConsole',
+    'data-cr-linux-step', 'crLinuxMap', 'crLinuxConsole', 'aria-live="polite"',
     'このサイトはBrowser内Learning Simulatorです。実機へSoftware/Cloud Resourceを自動導入しません。',
 ):
     expect(marker in js,f'beginner interaction/simulation guard missing: {marker}')
 
 for marker in (
     '.cr-card{','.cr-flow{','.cr-before-after{','.cr-linux-controls{',
-    '.cr-origin-legend{','@media(max-width:620px)',
+    '.cr-origin-legend{','.cr-card-compact{','.cr-primary-details{',
+    '@media(max-width:620px)',
 ):
     expect(marker in css,f'component rationale CSS missing: {marker}')
 
-expect("component-rationale.css?v=1" in bridge,'module bridge must load component-rationale.css')
-expect("component-rationale.js?v=1" in bridge,'module bridge must load component-rationale.js')
-expect('loadComponentRationale();' in bridge,'module bridge must initialize component rationale')
+for module in ('sql','cobol','jcl','cloud','aws','gcp','azure'):
+    entry=read(f'{module}/index.html')
+    expect('component-rationale.js?v=2' in entry,f'{module}: component rationale must be wired directly')
+
+expect('component-rationale.js?v=2' in linux_bridge,'Linux integration bridge must load component rationale directly')
+expect('loadComponentRationale();' in linux_bridge,'Linux integration bridge must initialize component rationale')
+expect('component-rationale' not in field_links,'Field Incident links must not own component-rationale loading')
+
+for marker in (
+    "linux-kiban-lab-v17-component-rationale",
+    '../assets/js/component-rationale.js?v=2',
+    '../assets/css/component-rationale.css?v=2',
+):
+    expect(marker in linux_sw,f'Linux PWA cache missing: {marker}')
 
 for marker in (
     'Need before Tool / Component Origin',
@@ -103,5 +123,7 @@ print('Component rationale QA PASSED')
 print(' - Linux OS / Network / server role / nginx are separated')
 print(' - Need -> capability -> component -> origin -> Evidence is explicit')
 print(' - Core and Cloud modules distinguish install/config/runtime/provision/external')
-print(' - Browser simulator boundary is explicit')
-print(' - shared module wiring and responsive UI are present')
+print(' - Cloud knowledge/control-tool Labs are not mislabeled as provisioned resources')
+print(' - progressive disclosure limits cognitive load')
+print(' - Browser simulator and PWA cache boundaries are explicit')
+print(' - component rationale is independently wired across all modules')
