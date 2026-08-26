@@ -1,6 +1,10 @@
-const CACHE_NAME = 'linux-kiban-lab-v16-layer-guide';
+const CACHE_NAME = 'linux-kiban-lab-v18-financial-linux-profiles';
 const ASSETS = [
   "./integration-bridge.js?v=1",
+  "../assets/js/component-rationale.js?v=2",
+  "../assets/css/component-rationale.css?v=2",
+  "./ui-financial-profiles.js?v=1",
+  "./ui-financial-profiles.css?v=1",
   "./ui-compact.css?v=16",
   "./ui-live-terminal.css?v=16",
   "./ui-learning.css?v=16",
