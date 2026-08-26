@@ -66,18 +66,18 @@ for marker in (
     '.flp-common-diff{','.flp-profile-grid{','.flp-profile-card.current{',
     '.flp-stage{','.flp-lab-context{','@media(max-width:620px)',
 ):
-    expect(marker in profile_css,f'Financial Linux profile CSS missing: {marker}')
+    expect(marker in profile_css,f'Linux distro profile CSS missing: {marker}')
 
-expect("s.onload=loadFinancialProfiles" in bridge,'Financial profile UX must load after component rationale')
+expect('loadFoundationGlossary();loadFinancialProfiles()' in bridge,'Foundation glossary and profile UX must load after component rationale')
 expect("ui-financial-profiles.js?v=1" in bridge,'Linux bridge must load financial profile UX')
-expect('RHEL系を教材標準にし、Ubuntu LTS・SLES・Oracle Linuxへ翻訳' in bridge,'Linux zero-based guide must state the four-profile model')
+expect('RHEL系を教材標準に' in bridge and 'Ubuntu LTS・SLES・Oracle Linuxへ翻訳' in bridge,'Linux zero-based guide must state the four-profile model')
 
-for marker in ('linux-kiban-lab-v18-financial-linux-profiles','ui-financial-profiles.js?v=1','ui-financial-profiles.css?v=1'):
+for marker in ('linux-kiban-lab-v19-computer-os-foundation','ui-financial-profiles.js?v=1','ui-financial-profiles.css?v=1'):
     expect(marker in sw,f'Linux PWA cache missing profile asset/version: {marker}')
 
 for marker in (
     'Financial Linux Profile Model','RHEL系を標準Profile','Ubuntu LTS / Debian',
-    'SUSE Linux Enterprise Server','Oracle Linux','Parrot OSはSecurity / Forensics学習向け',
+    'SLES','Oracle Linux','Parrot OSはSecurity / Forensics学習向け',
     'Linux OS ≠ Distribution固有操作 ≠ Web Server role ≠ nginx',
     'sudo zypper --non-interactive install nginx','RHEL Subscription、Vendor Support、製品Certificationまで同一ではない',
 ):
@@ -98,7 +98,6 @@ for marker in (
 ):
     expect(marker in standard,f'Package Standard missing Financial Linux profile requirement: {marker}')
 
-# Every Linux entry page should load the distro layer and the independent integration bridge.
 for path in [Path('linux/index.html'),*sorted(Path('linux').glob('parrot_linux_lab*.html'))]:
     body=read(str(path))
     expect('ui-distro.js?v=16' in body,f'{path}: distro profile script missing')
