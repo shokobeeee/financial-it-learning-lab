@@ -223,7 +223,8 @@ function decorateRoot(root){
     const seen=pageSeenTerms(),scopes=new Map();let count=0;
     nodes.forEach(function(node){
       if(count>=MAX_TERMS_PER_PASS||!node.parentNode)return;
-      const scope=glossScope(node);if(!scope)return;
+      // card内に無いtext nodeも印は付ける。用語メモはcardを持つscopeだけに出す。
+      const scope=glossScope(node)||root;
       let state=scopes.get(scope);if(!state){state=scopeState(scope);scopes.set(scope,state)}
       if(state.terms.length>=MAX_TERMS_PER_SCOPE)return;
       const match=findMatch(node.nodeValue,seen);if(!match)return;
@@ -239,7 +240,15 @@ function decorateRoot(root){
 function decorateAll(){const main=document.querySelector('main');if(main)decorateRoot(main)}
 function unwrapTerms(root){
   const r=root||document;
-  r.querySelectorAll('.fitb-term').forEach(function(b){b.replaceWith(document.createTextNode(b.dataset.fitbOriginal||b.textContent||''))});
+  const marks=r.querySelectorAll('.fitb-term');
+  const parents=new Set();
+  marks.forEach(function(b){
+    if(b.parentNode)parents.add(b.parentNode);
+    b.replaceWith(document.createTextNode(b.dataset.fitbOriginal||b.textContent||''))
+  });
+  // replaceWithだけでは text node が3つに割れたまま残る。
+  // 文字列一致で本文を書き換える側（Profile差分等）のために、隣接text nodeを結合して元の1文へ戻す。
+  parents.forEach(function(el){if(el.normalize)el.normalize()});
   r.querySelectorAll('.fitb-gloss').forEach(function(g){g.remove()})
 }
 
@@ -321,7 +330,7 @@ function observe(){
 function init(){
   ensureCss();setRootLevel();createLauncher();ensureDrawer();document.addEventListener('click',handleTermClick);bindTip();renderFoundation(false);if(level!=='compact')decorateAll();observe();
   window.addEventListener('hashchange',function(){if(location.hash==='#foundation')openFoundationAndScroll()});if(location.hash==='#foundation')openFoundationAndScroll();
-  window.FIT_FOUNDATION_GLOSSARY={terms:TERMS,levels:LEVELS,getLevel:function(){return level},setLevel:setLevel,open:openDrawer,foundationComplete:foundationComplete};
+  window.FIT_FOUNDATION_GLOSSARY={terms:TERMS,levels:LEVELS,getLevel:function(){return level},setLevel:setLevel,open:openDrawer,unwrap:unwrapTerms,foundationComplete:foundationComplete};
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

@@ -90,6 +90,12 @@ anchors=re.findall(r"\['((?:[^'\\]|\\.)*)',(?:p\.|'|\+|\s)",profiles[profiles.fi
 expect(len(anchors)>=6,'profile text replacement anchors could not be extracted')
 for anchor in anchors:
     expect(anchor in js,f'profile replacement anchor no longer present in component rationale: {anchor}')
+# 用語注釈がtext nodeを分割すると、置換元の文が存在していても split() が一致しない。
+# 置換の直前に注釈を外していることまで確認する。
+expect('FIT_FOUNDATION_GLOSSARY.unwrap(panel)' in profiles,
+       'profile text replacement must unwrap glossary markers before matching literals')
+expect(profiles.index('FIT_FOUNDATION_GLOSSARY.unwrap(panel)')<profiles.index('replaceText(panel,p);'),
+       'glossary markers must be unwrapped before replaceText runs')
 
 for marker in (
     'CLIをdownloadすることと、Cloud service本体を作ることは別です',
@@ -122,7 +128,7 @@ expect('loadComponentRationale();' in linux_bridge,'Linux integration bridge mus
 expect('component-rationale' not in field_links,'Field Incident links must not own component-rationale loading')
 
 for marker in (
-    "linux-kiban-lab-v19-computer-os-foundation",
+    "linux-kiban-lab-v20-glossary-readability",
     '../assets/js/component-rationale.js?v=2',
     '../assets/css/component-rationale.css?v=2',
     '../assets/js/foundation-glossary.js?v=1',

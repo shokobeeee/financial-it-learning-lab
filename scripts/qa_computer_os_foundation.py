@@ -64,7 +64,7 @@ expect('b.textContent=original;return b;' in js,
        'inline term marker must render only the original word')
 expect('function renderGloss(scope,terms)' in js and 'function showTip(btn)' in js,
        'per-scope gloss strip and hover tooltip must exist')
-expect('display:inline;' in css.split('.fitb-term{',1)[1].split('}',1)[0],
+expect('.fitb-term{' in css and 'display:inline;' in css.split('.fitb-term{',1)[-1].split('}',1)[0],
        'inline term marker must stay inline so the sentence can wrap normally')
 
 for marker in (
@@ -104,7 +104,7 @@ expect('loadFoundationGlossary' in bridge,'Linux bridge foundation loader missin
 expect('loadFoundationGlossary();loadFinancialProfiles();' in bridge,'Linux load order must place glossary/foundation before profile UX handoff')
 
 for marker in (
-    'linux-kiban-lab-v19-computer-os-foundation',
+    'linux-kiban-lab-v20-glossary-readability',
     '../assets/js/foundation-glossary.js?v=1',
     '../assets/css/foundation-glossary.css?v=1',
 ):
