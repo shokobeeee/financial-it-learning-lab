@@ -49,12 +49,26 @@ function addWarRoomRetry(){
   result.appendChild(button);
 }
 
+function polishNextPath(){
+  if(/^#lab20$/i.test(location.hash)){
+    const next=document.querySelector('.j-complete-banner .j-primary[href="../field-casebook/"]');
+    if(next){next.href='../cobol/';next.textContent='次は COBOL / Business Systems →'}
+  }
+  if(/^#home$/i.test(location.hash)||!location.hash){
+    const card=document.querySelector('.j-progress-card');
+    if(card&&/Java Package修了/.test(card.textContent)){
+      const note=card.querySelector('.j-muted');
+      if(note&&note.textContent!=='次は COBOL / Business Systemsへ進みます。')note.textContent='次は COBOL / Business Systemsへ進みます。';
+    }
+  }
+}
+
 function guardDuplicateNavigation(){
   const scripts=[...document.querySelectorAll('script[src*="navigation-scroll.js"]')];
   scripts.forEach((script,index)=>{if(index===0&&!script.dataset.fitNavScroll)script.dataset.fitNavScroll='1'});
 }
 
-function polish(){polishQueued=false;polishJourney();addWarRoomRetry();guardDuplicateNavigation()}
+function polish(){polishQueued=false;polishJourney();addWarRoomRetry();polishNextPath();guardDuplicateNavigation()}
 function schedule(){if(polishQueued)return;polishQueued=true;requestAnimationFrame(polish)}
 
 new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
