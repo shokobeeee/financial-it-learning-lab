@@ -34,8 +34,17 @@
 
 ### Final Practice
 
-- Field Incident Gate — 10 Cases / Engineer・Consultant・PM 各80点以上
-- Financial War Room — 12 Cases / Engineer・Consultant・PM 各85点以上
+#### Field Incident Gate — 10 Cases
+
+- Financial Engineer: **80 / 100 以上**
+- Financial Consultant: **80 / 100 以上**
+- PM / PMO: **80 / 100 以上**
+
+#### Financial War Room — 12 Cases
+
+- Financial Engineer: **85 / 100 以上**
+- Financial Consultant: **85 / 100 以上**
+- PM / PMO: **85 / 100 以上**
 
 合計: **180 Labs + 10 Field Cases + 12 War Room Cases**
 
