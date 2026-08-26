@@ -72,7 +72,7 @@ expect('loadFoundationGlossary();loadFinancialProfiles()' in bridge,'Foundation 
 expect("ui-financial-profiles.js?v=1" in bridge,'Linux bridge must load financial profile UX')
 expect('RHEL系を教材標準に' in bridge and 'Ubuntu LTS・SLES・Oracle Linuxへ翻訳' in bridge,'Linux zero-based guide must state the four-profile model')
 
-for marker in ('linux-kiban-lab-v20-glossary-readability','ui-financial-profiles.js?v=1','ui-financial-profiles.css?v=1'):
+for marker in ('linux-kiban-lab-v21-evidence-and-boundaries','ui-financial-profiles.js?v=1','ui-financial-profiles.css?v=1'):
     expect(marker in sw,f'Linux PWA cache missing profile asset/version: {marker}')
 
 for marker in (

@@ -104,7 +104,7 @@ expect('loadFoundationGlossary' in bridge,'Linux bridge foundation loader missin
 expect('loadFoundationGlossary();loadFinancialProfiles();' in bridge,'Linux load order must place glossary/foundation before profile UX handoff')
 
 for marker in (
-    'linux-kiban-lab-v20-glossary-readability',
+    'linux-kiban-lab-v21-evidence-and-boundaries',
     '../assets/js/foundation-glossary.js?v=1',
     '../assets/css/foundation-glossary.css?v=1',
 ):

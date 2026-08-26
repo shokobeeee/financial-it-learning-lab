@@ -156,7 +156,7 @@ expect('loadComponentRationale();' in linux_bridge,'Linux integration bridge mus
 expect('component-rationale' not in field_links,'Field Incident links must not own component-rationale loading')
 
 for marker in (
-    "linux-kiban-lab-v20-glossary-readability",
+    "linux-kiban-lab-v21-evidence-and-boundaries",
     '../assets/js/component-rationale.js?v=2',
     '../assets/css/component-rationale.css?v=2',
     '../assets/js/foundation-glossary.js?v=1',
