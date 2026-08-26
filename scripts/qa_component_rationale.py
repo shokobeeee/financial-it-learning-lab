@@ -31,7 +31,7 @@ for marker in (
     "runtime:['Compiler / Runtimeを追加'", "provisioned:['Cloud上にResourceを作成'",
     "external:['別Platformで提供'", "client:['操作する側へToolを追加'",
     'function entryFor(module,lab)', 'function cloudEntry(module,lab)',
-    'function conceptEntry(common,role,origin,why,choice,problem,capability)',
+    'function conceptEntry(common,role,origin,why,choice,problem,capability,evidence)',
     'function expandedByDefault(module,lab)', 'cr-primary-details',
     'new MutationObserver(schedule)', 'window.FIT_COMPONENT_RATIONALE=',
 ):
@@ -42,7 +42,7 @@ for module in ('sql','cobol','jcl','cloud','aws','gcp','azure'):
 
 # 「何に困る？」へ目的文をそのまま流用すると、問いと答えがずれる。
 # CLOUD_META は purpose(why) と problem を別の要素として持ち、Problem 欄には problem を使う。
-expect('const [common,role,origin,why,problem,capability]=m;' in js,
+expect('const [common,role,origin,why,problem,capability,evidence]=m;' in js,
        'cloudEntry must read a dedicated problem text from CLOUD_META')
 expect('problem:why' not in js,
        'Problem step must not reuse the purpose sentence (problem:why)')
@@ -55,11 +55,20 @@ for bad in ('capability:`${role}を、Cloud上のResourceとして用意でき�
             'capability:`${common}の役割を、${p.name}上のserviceとして提供できること。`'):
     expect(bad not in js,f'capability must not restate the role badge: {bad}')
 
+# 「A ≠ B ≠ C」だけでは互いに違うことしか伝わらず、
+# 「nginx ≠ Web Server role」は「nginxはWeb Serverではない」とも読めて役割バッジと矛盾する。
+# 境界欄は、差異ではなく三者の関係（土台／役割の名／担う製品）を書く。
+expect('Linux OS ≠ Web Server role ≠ nginx' not in js,
+       'boundary must state the relationship between OS / role / product, not just inequality')
+expect('土台であるLinuxというOS、そこへ足すWeb Serverという役割の名、その役割を実際に担う製品であるnginx' in js,
+       'linux Lab01 boundary must name the three layers explicitly')
+expect('COBOL ≠ Mainframe ≠ JCL ≠ Db2 ≠ CICS' not in js,
+       'cobol boundary must assign each name to a layer instead of chaining ≠')
+
 for marker in (
     'Ubuntuを入れただけではWeb Serverにはなりません',
     'nginxが無くても、NIC・DHCP・Route・DNS等が成立すればNetwork通信はできます',
     'nginxはLinux必須ではなく、Web Serverという役割を追加するApplicationです',
-    'Linux OS ≠ Web Server role ≠ nginx',
     "1:e('nginx'", "2:e('Host Firewall'", "3:e('Network設定 / Resolver'",
     "4:e('OpenSSH Server'", "9:e('Package Manager'", "14:e('Container Runtime'",
     "17:e('Ansible'", "18:e('Hypervisor / Cloud Compute'",
@@ -76,18 +85,31 @@ for marker in (
 for lab in range(1,21):
     expect(f"  {lab}:['" in js,f'Cloud component rationale missing Lab{lab:02}')
 
-# CLOUD_META は [common, role, origin, purpose, problem, capability] の6要素。
-# 要素が欠けると Problem / Capability 欄が空文字で描画され、画面上は静かに壊れる。
+# CLOUD_META は [common, role, origin, purpose, problem, capability, evidence[]] の7要素。
+# 要素が欠けると Problem / Capability / Evidence 欄が空で描画され、画面上は静かに壊れる。
 import re
+cloud_evidence=[]
 for lab in range(1,21):
     m=re.search(r"^  %d:\[(.*)\],?$"%lab,js,re.M)
     if not m:
         errors.append(f'Cloud component rationale Lab{lab:02} row not parseable')
         continue
-    fields=re.findall(r"'((?:[^'\\]|\\.)*)'",m.group(1))
-    expect(len(fields)==6,
-           f'Lab{lab:02} must define [common, role, origin, purpose, problem, capability]; found {len(fields)} fields')
-    expect(all(f.strip() for f in fields),f'Lab{lab:02} has an empty field')
+    row=m.group(1)
+    ev=re.search(r",(\[[^\]]*\])$",row)
+    expect(bool(ev),f'Lab{lab:02} must end with its own evidence array')
+    if not ev: continue
+    scalars=re.findall(r"'((?:[^'\\]|\\.)*)'",row[:ev.start()])
+    expect(len(scalars)==6,
+           f'Lab{lab:02} must define [common, role, origin, purpose, problem, capability]; found {len(scalars)}')
+    expect(all(f.strip() for f in scalars),f'Lab{lab:02} has an empty field')
+    items=re.findall(r"'((?:[^'\\]|\\.)*)'",ev.group(1))
+    expect(len(items)>=3 and all(i.strip() for i in items),
+           f'Lab{lab:02} needs at least 3 non-empty evidence items')
+    cloud_evidence.append(tuple(items))
+
+# Cloudだけ全Labが同じEvidenceだと、「Evidenceで判断する」という教材の核が空洞になる。
+expect(len(set(cloud_evidence))==len(cloud_evidence),
+       'each Cloud Lab must have its own evidence, not one shared template')
 
 # linux/ui-financial-profiles.js は component rationale の本文を文字列一致で置換する。
 # 置換元の文が書き換わると Profile 切替の反映が黙って止まるため、両者を突き合わせる。

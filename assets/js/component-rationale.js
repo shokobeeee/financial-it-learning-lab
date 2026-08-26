@@ -47,7 +47,7 @@ const HOME={
     after:'Compiler output + Runtime + File/DB/CICS接続。',
     alternatives:['IBM Enterprise COBOL','GnuCOBOL','Oracle Pro*COBOL context'],
     evidence:['Compiler message','Load module / executable','RETURN-CODE','FILE STATUS','SQLCODE / CICS response'],
-    boundary:'COBOL ≠ Mainframe ≠ JCL ≠ Db2 ≠ CICS。言語・実行環境・外部基盤を分けます。'
+    boundary:'COBOLは業務処理を書く言語、Mainframe（z/OS）はそれが動く実行環境、JCLはその環境へ実行を頼む定義、Db2はDataを預ける外部基盤、CICSはOnline要求を受ける外部基盤。5つとも別の層のものです。'
   },
   jcl:{
     title:'JCLを書けば、どのPCでもBatchが動く？',
@@ -81,9 +81,9 @@ const HOME={
 };
 
 const PROVIDERS={
-  aws:{name:'AWS',account:'AWS Account',services:{2:'Amazon EC2',3:'Amazon EBS / S3 / RDS等',4:'Amazon VPC',5:'Subnet',6:'Route Table / IGW / NAT Gateway',7:'Elastic Load Balancing',8:'Security Group / NACL',9:'Availability Zone',10:'S3 / EBS / EFS',11:'Amazon RDS / Aurora',12:'AWS IAM / IAM Role',13:'Secrets Manager / KMS / ACM',14:'CloudWatch / CloudTrail',15:'AWS Backup / Snapshot',16:'Multi-Region構成',17:'Direct Connect / Site-to-Site VPN',18:'Provider mapping',19:'CloudFormation / Organizations',20:'AWS War Room'}},
-  gcp:{name:'Google Cloud',account:'Project',services:{2:'Compute Engine',3:'Persistent Disk / Cloud Storage / Cloud SQL等',4:'VPC',5:'Subnet',6:'Routes / Cloud NAT',7:'Cloud Load Balancing',8:'VPC Firewall',9:'Zone',10:'Cloud Storage / Persistent Disk / Filestore',11:'Cloud SQL / AlloyDB',12:'IAM / Service Account',13:'Secret Manager / Cloud KMS / Certificate Manager',14:'Cloud Monitoring / Cloud Logging / Audit Logs',15:'Backup and DR / Snapshot',16:'Multi-Region構成',17:'Cloud Interconnect / Cloud VPN',18:'Provider mapping',19:'Terraform / Organization Policy',20:'Google Cloud War Room'}},
-  azure:{name:'Azure',account:'Subscription / Resource Group',services:{2:'Azure Virtual Machines',3:'Managed Disks / Blob / Azure SQL等',4:'Virtual Network',5:'Subnet',6:'Route Table / NAT Gateway',7:'Azure Load Balancer / Application Gateway',8:'Network Security Group',9:'Availability Zone',10:'Blob Storage / Managed Disks / Azure Files',11:'Azure SQL / Managed Instance',12:'Microsoft Entra ID / Azure RBAC / Managed Identity',13:'Key Vault / Managed Certificate',14:'Azure Monitor / Activity Log',15:'Azure Backup / Snapshot',16:'Paired Region / DR構成',17:'ExpressRoute / VPN Gateway',18:'Provider mapping',19:'Bicep / ARM / Azure Policy',20:'Azure War Room'}}
+  aws:{name:'AWS',account:'AWS Account',services:{2:'Amazon EC2',3:'Amazon EBS / S3 / RDS等',4:'Amazon VPC',5:'Subnet',6:'Route Table / IGW / NAT Gateway',7:'Elastic Load Balancing',8:'Security Group / NACL',9:'Availability Zone',10:'S3 / EBS / EFS',11:'Amazon RDS / Aurora',12:'AWS IAM / IAM Role',13:'Secrets Manager / KMS / ACM',14:'CloudWatch / CloudTrail',15:'AWS Backup / Snapshot',16:'別RegionへのReplication + Route 53 Failover',17:'Direct Connect / Site-to-Site VPN',18:'Provider mapping',19:'CloudFormation / Organizations',20:'AWS War Room'}},
+  gcp:{name:'Google Cloud',account:'Project',services:{2:'Compute Engine',3:'Persistent Disk / Cloud Storage / Cloud SQL等',4:'VPC',5:'Subnet',6:'Routes / Cloud NAT',7:'Cloud Load Balancing',8:'VPC Firewall',9:'Zone',10:'Cloud Storage / Persistent Disk / Filestore',11:'Cloud SQL / AlloyDB',12:'IAM / Service Account',13:'Secret Manager / Cloud KMS / Certificate Manager',14:'Cloud Monitoring / Cloud Logging / Audit Logs',15:'Backup and DR / Snapshot',16:'別RegionへのReplication + Cloud DNS Failover',17:'Cloud Interconnect / Cloud VPN',18:'Provider mapping',19:'Terraform / Organization Policy',20:'Google Cloud War Room'}},
+  azure:{name:'Azure',account:'Subscription / Resource Group',services:{2:'Azure Virtual Machines',3:'Managed Disks / Blob / Azure SQL等',4:'Virtual Network',5:'Subnet',6:'Route Table / NAT Gateway',7:'Azure Load Balancer / Application Gateway',8:'Network Security Group',9:'Availability Zone',10:'Blob Storage / Managed Disks / Azure Files',11:'Azure SQL / Managed Instance',12:'Microsoft Entra ID / Azure RBAC / Managed Identity',13:'Key Vault / Managed Certificate',14:'Azure Monitor / Activity Log',15:'Azure Backup / Snapshot',16:'Azure Site Recovery / geo冗長Replication',17:'ExpressRoute / VPN Gateway',18:'Provider mapping',19:'Bicep / ARM / Azure Policy',20:'Azure War Room'}}
 };
 
 for(const id of ['aws','gcp','azure']){
@@ -110,7 +110,7 @@ function e(component,role,origin,baseline,problem,capability,choice,before,after
 
 const LAB={
   linux:{
-    1:e('nginx','HTTP Requestを受けるWeb Server Application','package','Ubuntu/LinuxにはNetwork stack・IP・Route・DNSの機能がある。多くの環境ではDHCP等で外へ通信できるが、HTTPを受け取るProgramはまだ無い。','別PCのBrowserからこのLinuxへアクセスしても、TCP 80で待ち受けるApplicationがいないため接続できない。','HTTPをlistenしてResponseを返し、設定・Access Log・Error Logを残せること。','nginxはLinux必須Softwareではない。Web / Port / Process / Service / Logを一つにつなげて学びやすく、実務でも代表的なので今回選ぶ。','Ubuntu + IP + Default Route + DNS。外へ通信できても、Port 80はLISTENしていない。','nginx package + config + systemd unit + process + TCP 80 listener + access/error log。',['Apache HTTP Server','Application自身のHTTP server','Python http.server（学習用）','Container上のWeb server'],['package状態','systemctl status nginx','ss -lntp / Port 80','curl / Browser response','access.log / error.log'],'nginxはNetwork接続のためではなく、Linuxへ「Web Serverという役割」を追加するために入れます。Linux OS ≠ Web Server role ≠ nginx。'),
+    1:e('nginx','HTTP Requestを受けるWeb Server Application','package','Ubuntu/LinuxにはNetwork stack・IP・Route・DNSの機能がある。多くの環境ではDHCP等で外へ通信できるが、HTTPを受け取るProgramはまだ無い。','別PCのBrowserからこのLinuxへアクセスしても、TCP 80で待ち受けるApplicationがいないため接続できない。','HTTPをlistenしてResponseを返し、設定・Access Log・Error Logを残せること。','nginxはLinux必須Softwareではない。Web / Port / Process / Service / Logを一つにつなげて学びやすく、実務でも代表的なので今回選ぶ。','Ubuntu + IP + Default Route + DNS。外へ通信できても、Port 80はLISTENしていない。','nginx package + config + systemd unit + process + TCP 80 listener + access/error log。',['Apache HTTP Server','Application自身のHTTP server','Python http.server（学習用）','Container上のWeb server'],['package状態','systemctl status nginx','ss -lntp / Port 80','curl / Browser response','access.log / error.log'],'nginxは、LinuxをNetworkへつなぐために入れるものではありません。すでにつながっているLinuxへ「Webからの依頼に答える」という役割を1つ足すために入れます。土台であるLinuxというOS、そこへ足すWeb Serverという役割の名、その役割を実際に担う製品であるnginx。この3つは別の層の話です。'),
     2:e('Host Firewall','Hostへ届く通信を許可・拒否するControl','mixed','Network設定が整っていれば通信は成立しうる。Firewallが無いからNetworkにつながらない、という順序ではない。','Serverを公開すると、許可したい相手だけでなく、すべての相手・Portから無制限に到達できてしまう。','Kernelのpacket filtering機能と、ufw / firewalld等の管理Toolで通信Ruleを制御できること。','教材ではDebian系ufw、RHEL系firewalldをProfileで分ける。','通信可能だが、Host側の許可Ruleが整理されていない。','Firewall Rule + default policy + audit可能な変更。',['nftables / iptables','ufw','firewalld','Cloud Security Group（別レイヤー）'],['Rule一覧','default policy','packet counter / log','外部からの接続試験'],'FirewallはNetworkそのものではなく、Network通信を制御する部品です。Host FirewallとCloud Security Groupも別レイヤー。'),
     3:e('Network設定 / Resolver','IP通信と名前解決を成立させるOS機能','mixed','Linux KernelにはTCP/IP stackがある。ただしNIC・IP・Route・DNSの設定が正しいとは限らない。','IP・Route・DNSのどれかが欠けていると、宛先へ届かない、または名前をIPへ解決できない。','NIC・IP Address・Default Route・DNS Resolverを構成し、疎通と名前解決を確認できること。','Ubuntu等ではDHCPにより自動設定されることが多いが、VM/Router/DHCP/DNSが成立していることが前提。','OSを入れただけ。Network機能はあるが、接続先環境は未確認。','IP・Route・Resolver設定が入り、疎通と名前解決を検証できる。',['DHCP','Static IP','NetworkManager','Netplan + systemd-networkd'],['ip addr','ip route','getent / resolvectl','ping / curl'],'「Ubuntuを入れた＝必ずInternet接続済み」ではありません。OSの機能と、環境側の接続設定を分けます。'),
     4:e('OpenSSH Server','Network越しにShellへloginするdaemon','package','IP疎通はできている。ただしRemote Shellを受け付けるProgramはまだ動いていない。','管理者が別端末からLinuxを操作しようとしても、Remote loginを受け付けるdaemonが無ければ入れない。','TCP 22等で待ち受け、認証したうえでShell sessionを作れること。','OpenSSHは代表的な実装。ClientとServerは役割が別。','Network疎通のみ。Remote loginのlistener・認証入口は無い。','sshd service + host key + auth config + login log。',['Console直接操作','OpenSSH','Bastion / Session Manager系'],['sshd status','LISTEN Port','auth log','session / key fingerprint'],'SSHはNetworkそのものではなく、Network上でRemote loginを提供するApplication protocolです。'),
@@ -144,29 +144,29 @@ const LAB={
 };
 
 const CLOUD_META={
-  1:['System Flow','利用者の要求がどの部品を通るかという全体像','builtin','部品を1つずつ足す前に、Customer→App→Dataという処理の流れを先に決めるためです。','流れが決まっていないと、どの部品がなぜ必要なのかを説明できず、部品選びが場当たりになる。','利用者の要求が、どの部品を、どの順で通るのかを1本の線として書き出せること。'],
-  2:['Compute','Applicationを実行する場所','provisioned','Programを動かすCPU・Memory・OS環境を、Provider側に用意するためです。','実行する場所が無ければ、Application codeがあっても処理は1件も動かない。','Programを載せるCPU・Memory・OSを必要な性能で確保し、起動・停止・増減できること。'],
-  3:['Persistent Data','消えてはいけないDataを保持する置き場所','provisioned','Applicationが停止・再起動しても、残高や取引履歴を残すためです。','Memory上のDataはProcessやVMが止まると消え、残高や取引履歴を復元できない。','書き込んだDataを、Applicationが止まっても保持し、あとから同じ内容で読み出せること。'],
-  4:['Virtual Network','Cloud内の論理的な通信範囲','provisioned','App・DBを自分たちの通信範囲として分離し、経路と許可を管理するためです。','通信範囲が定義されていないと、どこまでが自社の範囲で、誰と通信してよいかを制御できない。','自分たちのResourceだけが属する通信範囲を作り、出入りできる相手を決められること。'],
-  5:['Subnet','公開範囲と内部範囲を分ける区画','provisioned','外部へ公開する入口と、隠しておきたいDBを別々の区画へ置き分けるためです。','入口とDBが同じ区画にあると、公開したい部品と隠したい部品を同じ条件で扱うことになる。','公開する区画と内部だけの区画を分け、どちらにResourceを置くか選べること。'],
-  6:['Route / NAT','通信の向きと経路を決める部品','provisioned','外へ出る通信と、外から入る通信を別々の経路として設計するためです。','経路を決めないと、内部Serverから外部へSoftware更新を取りに行けない。かといって外向きの経路と外からの入口を取り違えると、公開するつもりのないServerが外から届く場所に出てしまう。','内部から外部への経路を用意し、外部から内部への到達可否は別に決められること。'],
-  7:['Load Balancer','一つの入口から複数のAppへ振り分ける部品','provisioned','利用者にServerを選ばせず、健全な宛先だけへRequestを届けるためです。','入口が1台のServerに固定されていると、その1台が止まった時点でServiceも止まり、増設もできない。','1つの宛先で受けたRequestを応答できるApp群へ振り分け、落ちた宛先を自動で外せること。'],
-  8:['Firewall Control','誰からどのPortへ通信できるかを決めるControl','provisioned','Networkを作った後に、許可する通信だけを明示的に決めるためです。','Networkを作っただけでは許可条件が決まらず、必要な通信と不要な通信を区別できない。','送信元・宛先・Portの組み合わせで、通してよい通信だけを許可できること。'],
-  9:['Failure Domain','一緒に壊れる範囲を分けて配置する仕組み','provisioned','1か所の障害で全Appが同時に止まらないよう、配置を分けるためです。','同じ電源・同じ建物・同じZoneへ全Appを置くと、その1か所が壊れただけでService全体が止まる。','一緒に停止する範囲を把握し、同じApp群を別々の範囲へ分けて配置できること。'],
-  10:['Storage Service','Object/Block/Fileを用途で使い分ける保存部品','provisioned','用途ごとに読み書き方法・共有範囲・耐久性の違うStorageを選ぶためです。','保存先を1種類に決め打ちすると、共有できない・費用が合わない・性能が足りない、のどれかが起きる。','Object・Block・Fileという読み書きの型を選び、用途に合う耐久性と共有範囲を指定できること。'],
-  11:['Managed Database','DB基盤の運用をProviderと分担するData管理service','provisioned','Patch・HA・Backupといった基盤運用の一部をProviderへ任せ、Data設計とSQLに集中するためです。','自前でDB Serverを運用すると、Patch・冗長化・Backupまで自分たちの運用範囲として抱えることになる。','DBのPatch・冗長化・Backupを任せたうえで、Schema・SQL・権限は自分で設計できること。'],
-  12:['IAM','誰が何を操作できるかを定義するControl Plane','provisioned','人とApplicationへ、必要な操作だけを許可するためです。','全員と全Applicationが同じ強い権限を持つと、誤操作や漏えいの影響が全Resourceへ広がる。','人とApplicationごとに、どのResourceへどの操作を許すかを定義し、あとから取り消せること。'],
-  13:['Secret / Key / Certificate','秘密情報を保管・利用・更新するservice','provisioned','PasswordやKeyをCodeから切り離し、更新と利用履歴を管理するためです。','CodeへPasswordやKeyを直書きすると、共有・更新・失効のたびにCodeそのものを直すことになる。','PasswordやKeyをCodeの外へ保管し、利用の可否・更新・失効を管理できること。'],
-  14:['Observability','Metrics/Logs/Trace/Auditを集めるservice','provisioned','障害時に何が起きたかを、推測ではなくEvidenceで確認するためです。','記録が残っていないと、障害の原因も影響範囲も、担当者の記憶と推測でしか語れない。','Metrics・Log・Traceを継続して集め、障害の前後を時刻順に突き合わせられること。'],
-  15:['Backup / Restore','必要な時点のDataへ戻す仕組み','provisioned','誤削除や破損が起きても、必要な時点のDataへ戻せるようにするためです。','本番Dataが1本しか無い状態では、誤削除・破損・暗号化が起きた時点で戻す手段が残らない。','正本とは別の場所へ世代を残し、指定した時点の状態へ実際に戻せること。'],
-  16:['DR Resource','Region規模の障害時に業務を切り替える構成','provisioned','1つのRegionが使えなくなっても、業務を継続できるようにするためです。','通常の冗長化はRegion内が前提で、Region全体が停止する障害では切り替え先が残らない。','別のRegionへ復旧先を用意し、目標時間内に業務を切り替えられること。'],
-  17:['Hybrid Connectivity','Cloudと社内/Core systemをつなぐ経路','provisioned','Cloud上のAppと社内のCore systemを、1つの業務の流れとしてつなぐためです。','Cloud内だけが正常でも、社内のCore systemへ届かなければ業務は完結しない。','Cloudと社内Networkの間に、必要な帯域と経路で通信できる専用の道を作れること。'],
-  18:['Provider Mapping','製品名と共通Conceptの対応関係','builtin','製品名が変わっても、同じ役割の部品として理解し直せるようにするためです。','製品名だけを覚えると、Providerが変わった途端に同じ役割の部品だと気づけない。','製品名を見たときに、それが担う役割へ戻して、他Providerの同じ役割と並べられること。'],
-  19:['IaC / Governance Tool','変更をCode・Review・Auditへ載せる仕組み','client','構成変更を、差分・承認・履歴が残る形で行うためです。','Consoleの手作業だけでは、誰がいつ何を変えたのかを追えず、元へ戻すことも難しい。','構成をCodeとして書き、差分の確認・承認・適用・巻き戻しを記録付きで行えること。'],
-  20:['War Room','複数部品のEvidenceを突き合わせて切り分ける手順','builtin','個々の部品ではなく、System全体をEvidenceで切り分ける練習をするためです。','部品ごとの知識があっても、障害時にどの部品からどの順で確認するかが決まらない。','複数のEvidenceを突き合わせ、どこまで壊れているか・何から確認するかを順に決められること。']
+  1:['System Flow','利用者の要求がどの部品を通るかという全体像','builtin','部品を1つずつ足す前に、Customer→App→Dataという処理の流れを先に決めるためです。','流れが決まっていないと、どの部品がなぜ必要なのかを説明できず、部品選びが場当たりになる。','利用者の要求が、どの部品を、どの順で通るのかを1本の線として書き出せること。',['Customer→App→Dataの経路図','部品ごとの担当と責任範囲','入口と出口の件数','業務が完了したかの確認']],
+  2:['Compute','Applicationを実行する場所','provisioned','Programを動かすCPU・Memory・OS環境を、Provider側に用意するためです。','実行する場所が無ければ、Application codeがあっても処理は1件も動かない。','Programを載せるCPU・Memory・OSを必要な性能で確保し、起動・停止・増減できること。',['Instanceの起動状態と台数','CPU/Memory使用率','配置先のZone','起動・停止・作り直しの履歴']],
+  3:['Persistent Data','消えてはいけないDataを保持する置き場所','provisioned','Applicationが停止・再起動しても、残高や取引履歴を残すためです。','Memory上のDataはProcessやVMが止まると消え、残高や取引履歴を復元できない。','書き込んだDataを、Applicationが止まっても保持し、あとから同じ内容で読み出せること。',['書き込みが確定したか','どこが正本のDataか','容量と伸び方','再起動後に同じ値が読めるか']],
+  4:['Virtual Network','Cloud内の論理的な通信範囲','provisioned','App・DBを自分たちの通信範囲として分離し、経路と許可を管理するためです。','通信範囲が定義されていないと、どこまでが自社の範囲で、誰と通信してよいかを制御できない。','自分たちのResourceだけが属する通信範囲を作り、出入りできる相手を決められること。',['Networkの範囲とアドレス帯','所属しているResource一覧','対向との接続状態','範囲をまたぐ通信の可否']],
+  5:['Subnet','公開範囲と内部範囲を分ける区画','provisioned','外部へ公開する入口と、隠しておきたいDBを別々の区画へ置き分けるためです。','入口とDBが同じ区画にあると、公開したい部品と隠したい部品を同じ条件で扱うことになる。','公開する区画と内部だけの区画を分け、どちらにResourceを置くか選べること。',['区画ごとの公開/非公開','各Resourceがどの区画にいるか','外部から到達できるIPの有無','区画とZoneの対応']],
+  6:['Route / NAT','通信の向きと経路を決める部品','provisioned','外へ出る通信と、外から入る通信を別々の経路として設計するためです。','経路を決めないと、内部Serverから外部へSoftware更新を取りに行けない。かといって外向きの経路と外からの入口を取り違えると、公開するつもりのないServerが外から届く場所に出てしまう。','内部から外部への経路を用意し、外部から内部への到達可否は別に決められること。',['経路表の内容','外向き通信の出口','外から到達できる入口の有無','通信できた/できない実測']],
+  7:['Load Balancer','一つの入口から複数のAppへ振り分ける部品','provisioned','利用者にServerを選ばせず、健全な宛先だけへRequestを届けるためです。','入口が1台のServerに固定されていると、その1台が止まった時点でServiceも止まり、増設もできない。','1つの宛先で受けたRequestを応答できるApp群へ振り分け、落ちた宛先を自動で外せること。',['正常と判定された宛先の数','宛先ごとの振り分け実績','health checkの失敗履歴','切り離しにかかった時間']],
+  8:['Firewall Control','誰からどのPortへ通信できるかを決めるControl','provisioned','Networkを作った後に、許可する通信だけを明示的に決めるためです。','Networkを作っただけでは許可条件が決まらず、必要な通信と不要な通信を区別できない。','送信元・宛先・Portの組み合わせで、通してよい通信だけを許可できること。',['許可Ruleの一覧','拒否されたPacketの記録','使われていないRule','外部からの接続試験']],
+  9:['Failure Domain','一緒に壊れる範囲を分けて配置する仕組み','provisioned','1か所の障害で全Appが同時に止まらないよう、配置を分けるためです。Providerの区分は、小さい順に Zone（電源や建物の単位）＜ Region（地理的に離れた単位）で、Zoneを分ければ建物レベル、Regionを分ければ地域レベルの障害に備えられます。','同じ電源・同じ建物（＝同じZone）へ全Appを置くと、その1か所が壊れただけでService全体が止まる。Zoneを分けても片側に1台ずつでは、片系停止時に残る処理能力は半分になる。','一緒に停止する範囲を把握し、同じApp群を別々のZoneへ分けたうえで、片側が止まっても業務が回る台数を各Zoneへ置けること。',['Zoneごとの稼働台数','片側停止時に残る処理能力','Subnet/DB/LBのZone配置','Zone障害を想定した切替試験']],
+  10:['Storage Service','Object/Block/Fileを用途で使い分ける保存部品','provisioned','用途ごとに読み書き方法・共有範囲・耐久性の違うStorageを選ぶためです。','保存先を1種類に決め打ちすると、共有できない・費用が合わない・性能が足りない、のどれかが起きる。','Object・Block・Fileという読み書きの型を選び、用途に合う耐久性と共有範囲を指定できること。',['Object/Block/Fileのどれか','耐久性と冗長化の設定','同時に読み書きできる範囲','保存容量と費用の推移']],
+  11:['Managed Database','DB基盤の運用をProviderと分担するData管理service','provisioned','Patch・HA・Backupといった基盤運用の一部をProviderへ任せ、Data設計とSQLに集中するためです。','自前でDB Serverを運用すると、Patch・冗長化・Backupまで自分たちの運用範囲として抱えることになる。','DBのPatch・冗長化・Backupを任せたうえで、Schema・SQL・権限は自分で設計できること。',['フェイルオーバーの履歴と接続断時間','メンテナンス時間帯の設定','自動更新の対象と範囲','Backup保持期間とPITRの範囲']],
+  12:['IAM','誰が何を操作できるかを定義するControl Plane','provisioned','人とApplicationへ、必要な操作だけを許可するためです。','全員と全Applicationが同じ強い権限を持つと、誤操作や漏えいの影響が全Resourceへ広がる。','人とApplicationごとに、どのResourceへどの操作を許すかを定義し、あとから取り消せること。',['誰にどの権限が付いているか','使われていない権限','権限を付与した申請と承認の記録','操作の実行履歴']],
+  13:['Secret / Key / Certificate','秘密情報を保管・利用・更新するservice','provisioned','PasswordやKeyをCodeから切り離し、更新と利用履歴を管理するためです。','CodeへPasswordやKeyを直書きすると、共有・更新・失効のたびにCodeそのものを直すことになる。','PasswordやKeyをCodeの外へ保管し、利用の可否・更新・失効を管理できること。',['Secretの保管場所と参照方法','Keyの有効期限と更新履歴','Certificateの期限','Codeへの直書きが無いこと']],
+  14:['Observability','Metrics/Logs/Trace/Auditを集めるservice','provisioned','障害時に何が起きたかを、推測ではなくEvidenceで確認するためです。','記録が残っていないと、障害の原因も影響範囲も、担当者の記憶と推測でしか語れない。','Metrics・Log・Traceを継続して集め、障害の前後を時刻順に突き合わせられること。',['Metricsが欠測なく届いているか','障害前後のLogが時刻順に追えるか','監査証跡の保存期間','Alertの発報と対応の記録']],
+  15:['Backup / Restore','必要な時点のDataへ戻す仕組み','provisioned','誤削除や破損が起きても、必要な時点のDataへ戻せるようにするためです。','本番Dataが1本しか無い状態では、誤削除・破損・暗号化が起きた時点で戻す手段が残らない。','正本とは別の場所へ世代を残し、指定した時点の状態へ実際に戻せること。',['Backupの取得日時と世代','保存先が本番と別に分かれているか','リストア試験の実施記録','目標時間内に戻せたかの実測']],
+  16:['Multi-Region DR','Region規模の障害時に別Regionへ業務を切り替える構成','provisioned','1つのRegionが使えなくなっても、業務を継続できるようにするためです。Lab09のZone分けが建物レベルの備えなのに対し、こちらは地域レベルの備えです。','Zoneを分ける冗長化はRegion内が前提で、Region全体が停止する障害では切り替え先が残らない。','別Regionへ復旧先を用意し、RTO（何時間で復旧するか）とRPO（どこまでのDataを守るか）を決めたうえで、実際に切り替えられること。',['RTO/RPOの目標値','複製の遅れ（同期か非同期か）','切替手順と判断権限','切替訓練の実施記録']],
+  17:['Hybrid Connectivity','Cloudと社内/Core systemをつなぐ経路','provisioned','Cloud上のAppと社内のCore systemを、1つの業務の流れとしてつなぐためです。','Cloud内だけが正常でも、社内のCore systemへ届かなければ業務は完結しない。','Cloudと社内Networkの間に、必要な帯域と経路で通信できる専用の道を作れること。',['BGP peerの状態','広報・受信している経路','2回線の物理経路が分かれているか','遅延・帯域の実測と切替試験']],
+  18:['Provider Mapping','製品名と共通Conceptの対応関係','builtin','製品名が変わっても、同じ役割の部品として理解し直せるようにするためです。','製品名だけを覚えると、Providerが変わった途端に同じ役割の部品だと気づけない。','製品名を見たときに、それが担う役割へ戻して、他Providerの同じ役割と並べられること。',['共通Conceptと製品名の対応表','役割が同じでも違う点','Provider間で移せない前提','用語の言い換え履歴']],
+  19:['IaC / Governance Tool','変更をCode・Review・Auditへ載せる仕組み','client','構成変更を、差分・承認・履歴が残る形で行うためです。','Consoleの手作業だけでは、誰がいつ何を変えたのかを追えず、元へ戻すことも難しい。','構成をCodeとして書き、差分の確認・承認・適用・巻き戻しを記録付きで行えること。',['Codeの差分','適用前のplanと適用結果','誰がいつ承認したか','巻き戻せる直前の版']],
+  20:['War Room','複数部品のEvidenceを突き合わせて切り分ける手順','builtin','個々の部品ではなく、System全体をEvidenceで切り分ける練習をするためです。','部品ごとの知識があっても、障害時にどの部品からどの順で確認するかが決まらない。','複数のEvidenceを突き合わせ、どこまで壊れているか・何から確認するかを順に決められること。',['どの部品まで壊れているか','Evidenceの取得時刻の並び','業務影響の件数と金額','復旧したと判断した根拠']]
 };
 
-function conceptEntry(common,role,origin,why,choice,problem,capability){
+function conceptEntry(common,role,origin,why,choice,problem,capability,evidence){
   if(origin==='builtin'){
     return{
       title:`なぜ ${common} を学ぶ？`,summary:why,component:common,role,origin,
@@ -177,7 +177,7 @@ function conceptEntry(common,role,origin,why,choice,problem,capability){
       before:'部品名と症状がばらばらに見え、どこから確認すればよいか決められない。',
       after:`${common}という共通Conceptで全体を整理でき、関連するEvidenceへ進める。`,
       alternatives:['製品名だけ暗記する','共通Conceptへ戻して比較する','System図で位置を確認する'],
-      evidence:['System map','役割・責任境界','関連Evidence','Business verification'],
+      evidence,
       boundary:'このLabは新しいResourceをdownload/provisionするLabではなく、既存部品を構造化して判断するLabです。'
     };
   }
@@ -191,7 +191,7 @@ function conceptEntry(common,role,origin,why,choice,problem,capability){
       before:'変更は手作業。Resource本体はProvider側にあり、変更の定義と記録は各担当者へ散らばっている。',
       after:'Code/Template + Review + execution plan + Provider Resource + Audit。',
       alternatives:['Web Console','Provider CLI/SDK','Terraform/Bicep/CloudFormation等','Policy/Governance service'],
-      evidence:['Code diff','plan/result','Audit log','Resource state','Rollback/previous version'],
+      evidence,
       boundary:'IaC/CLI Toolを管理端末へinstallすることと、Cloud Resource本体をProvider側へprovisionすることは別です。'
     };
   }
@@ -204,24 +204,24 @@ function conceptEntry(common,role,origin,why,choice,problem,capability){
     before:'この役割を担う部品がSystem図に無い。必要になっても、その場の手作業でしのぐことになる。',
     after:`${common}という役割がSystemへ加わり、状態・権限・Log・Costを管理できる。`,
     alternatives:['自社設備で実装','Cloud IaaSで構成','Managed serviceを利用','複数Providerの代表実装'],
-    evidence:['Resource/設定の存在','配置・接続関係','IAM/責任分界','Metrics/Logs','削除/rollback方法'],
+    evidence,
     boundary:'Cloud service本体はPCへdownloadするのではなく、Provider側へprovisionします。Console/CLIはそのための操作手段です。'
   };
 }
 
 function cloudEntry(module,lab){
   const m=CLOUD_META[lab];if(!m)return null;
-  const [common,role,origin,why,problem,capability]=m;
-  if(module==='cloud')return conceptEntry(common,role,origin,why,'まず製品名を出さずCommon Conceptとして理解し、そのあとAWS/GCP/Azure/OCIの名前へ翻訳する。',problem,capability);
+  const [common,role,origin,why,problem,capability,evidence]=m;
+  if(module==='cloud')return conceptEntry(common,role,origin,why,'まず製品名を出さずCommon Conceptとして理解し、そのあとAWS/GCP/Azure/OCIの名前へ翻訳する。',problem,capability,evidence);
   const p=PROVIDERS[module];if(!p)return null;
   const service=p.services[lab]||common;
   // Zone/Regionは利用者が作るResourceではなく、Providerが用意した配置先の区分。
   const placed=lab===9;
   if(origin==='builtin'){
-    return conceptEntry(service,role,origin,why,`${p.name}の名前を覚えた後も、共通Conceptへ戻して他Providerと比較できるようにする。`,problem,capability);
+    return conceptEntry(service,role,origin,why,`${p.name}の名前を覚えた後も、共通Conceptへ戻して他Providerと比較できるようにする。`,problem,capability,evidence);
   }
   if(origin==='client'){
-    return conceptEntry(service,role,origin,why,`${service}等を管理側のToolとして使い、${p.name}の構成変更をCode・Review・Auditへ載せる。`,problem,capability);
+    return conceptEntry(service,role,origin,why,`${service}等を管理側のToolとして使い、${p.name}の構成変更をCode・Review・Auditへ載せる。`,problem,capability,evidence);
   }
   return{
     title:`なぜ ${service} が必要？`,
@@ -240,7 +240,7 @@ function cloudEntry(module,lab){
       ?`配置先の${service} + Resourceの所属 + 冗長化の範囲 + Log/Cost。`
       :`${service}のResource + Resource ID + 配置先のRegion/Zone/Network + 操作権限 + Log/Cost。`,
     alternatives:['Consoleでprovision','CLI/SDKでprovision','IaCでprovision','別service/別Provider'],
-    evidence:['Resource state/ID','Network/Region配置','IAM/Policy','Metrics/Logs','Audit/Billing'],
+    evidence,
     boundary:placed
       ?`${service}はProviderが用意した区分で、利用者が作るものではありません。Resourceをどの${service}へ置くかを選びます。`
       :`${p.name} CLIをinstallすることと、${service}を作ることは別です。CLIは操作用Tool、Resource本体はProvider側です。`
