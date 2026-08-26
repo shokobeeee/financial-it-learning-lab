@@ -1,4 +1,4 @@
-const CACHE_NAME = 'linux-kiban-lab-v20-glossary-readability';
+const CACHE_NAME = 'linux-kiban-lab-v21-evidence-and-boundaries';
 const ASSETS = [
   "./integration-bridge.js?v=1",
   "../assets/js/component-rationale.js?v=2",
