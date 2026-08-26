@@ -50,7 +50,7 @@ for marker in (
     expect(marker in distro_css,f'Linux distro profile CSS missing: {marker}')
 
 for marker in (
-    "ORDER=['rhel','ubuntu','sles','oracle']", 'Financial Linux Profile',
+    "ORDER=['rhel','ubuntu','sles','oracle']", 'FINANCIAL LINUX PROFILE',
     '金融ITのLinuxは、1種類ではない', 'COMMON LINUX', 'PROFILE DIFFERENCE',
     'RHEL系を標準Profile', 'Ubuntu LTS・SLES・Oracle Linux',
     'Parrot OSはどこ？', 'data-flp-profile', 'data-flp-stage',
