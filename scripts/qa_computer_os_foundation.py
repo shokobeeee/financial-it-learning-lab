@@ -56,11 +56,8 @@ for marker in (
 ):
     expect(marker in js,f'foundation check missing: {marker}')
 
-# 用語の説明文を本文の文中へ差し込むと、日本語の一文が読み取れなくなる。
-# 行内は「印の付いた語」のみ、意味は scope 単位の用語メモ / tooltip 側へ置く。
 expect('.fitb-term-plain' not in js and '.fitb-term-plain' not in css,
        'term definitions must not be re-introduced inline (.fitb-term-plain)')
-# 「リソース」はLinux文脈ではCPU/Memory/Diskを指す。Cloud Resourceの別名にすると誤注釈になる。
 expect("aliases:['Cloud Resource','クラウドリソース','Resource']" in js,
        'Cloud Resource must not claim the katakana リソース')
 expect("{id:'system-resource'" in js,
@@ -92,6 +89,7 @@ for marker in (
 entrypoints={
     'index.html':'assets/js/foundation-glossary.js?v=1',
     'sql/index.html':'../assets/js/foundation-glossary.js?v=1',
+    'java/index.html':'../assets/js/foundation-glossary.js?v=1',
     'cobol/index.html':'../assets/js/foundation-glossary.js?v=1',
     'jcl/index.html':'../assets/js/foundation-glossary.js?v=1',
     'cloud/index.html':'../assets/js/foundation-glossary.js?v=1',
@@ -149,5 +147,5 @@ print(' - 8-step zero-assumption Computer / OS / Network foundation')
 print(' - Kernel / Process / File / TCP-IP / Default Route plain-language entries')
 print(' - Beginner / Standard / Compact explanation levels')
 print(' - inline decoration excludes code, commands, controls, and learning UI')
-print(' - shared glossary is wired across learning, incidents, and War Room')
+print(' - shared glossary is wired across learning, application, incidents, and War Room')
 print(' - Linux PWA, docs, root route, and completion contracts are covered')

@@ -44,11 +44,19 @@ def check_required_files() -> None:
         ".github/pull_request_template.md",
         "docs/DEVELOPMENT_WORKFLOW.md",
         "docs/CLOUD_ATLAS.md",
+        "docs/ENTERPRISE_JAVA_APPLICATION.md",
         "assets/js/cloud-concepts.js",
         "cloud/visual-engine.js",
         "cloud/visual-learning.css",
         "linux/index.html",
         "sql/index.html",
+        "java/index.html",
+        "java/style.css",
+        "java/app-core.js",
+        "java/app-warroom.js",
+        "java/app-entry.js",
+        "java/labs.js",
+        "java/README.md",
         "cobol/index.html",
         "jcl/index.html",
         "cloud/index.html",
@@ -77,7 +85,7 @@ def registry_lab_order(registry: str) -> list[str]:
 
 def check_counts() -> None:
     expected20 = set(range(1, 21))
-    for module in ("sql", "cobol", "jcl"):
+    for module in ("sql", "java", "cobol", "jcl"):
         ids = numeric_lab_ids(module)
         expect(ids == expected20, f"{module}: Lab ids must be exactly 1..20; got {sorted(ids)}")
 
@@ -108,6 +116,7 @@ def check_progress_contract() -> None:
     expected = {
         "linux": "linux_lab",
         "sql": "sql_db_lab",
+        "java": "java_app_lab",
         "cobol": "cobol_lab",
         "jcl": "jcl_batch_lab",
         "cloud": "cloud_lab",
@@ -117,6 +126,7 @@ def check_progress_contract() -> None:
     }
     for module, prefix in expected.items():
         expect(prefix in home, f"home progress contract missing prefix for {module}: {prefix}")
+    expect("TOTAL_LABS=180" in home, "home progress denominator must be 180 Labs")
     expect("financial_warroom_" in home, "home progress contract missing Financial War Room results")
 
 
@@ -124,6 +134,7 @@ def check_wiring() -> None:
     required_markers = {
         "linux/index.html": ["integration-bridge.js"],
         "sql/index.html": ["module-package.js", "context-system.js"],
+        "java/index.html": ["labs.js", "labs-5.js", "app-core.js", "app-warroom.js", "app-entry.js", "foundation-glossary.js", "field-case-links.js", "navigation-scroll.js"],
         "cobol/index.html": ["module-package.js", "context-system.js", "integration-context.js"],
         "jcl/index.html": ["module-package.js", "context-system.js", "integration-context.js"],
         "cloud/index.html": ["cloud-concepts.js", "zero-base.js", "visual-learning.css", "visual-engine.js", "module-package.js", "cloud-provider-guide.js", "context-system.js", "cloud-atlas.js"],
@@ -177,9 +188,8 @@ def check_cloud_progressive_learning() -> None:
     expect("Lab08–15 — Guided Decision" in readme, "Cloud README must document Guided Decision phase")
     expect("Lab16–20 — Evidence / Operations" in readme, "Cloud README must document Evidence / Operations phase")
     expect("Progressive Learning Modes" in package, "Package Standard must allow stage-appropriate learning modes")
-    expect("全Labで同じ3モードを強制しない" in package, "Package Standard must not require expert UI on every beginner Lab")
+    expect("全Labへ同じUIを強制しない" in package or "全Labで同じ3モードを強制しない" in package, "Package Standard must not require expert UI on every beginner Lab")
 
-    # Lab completion must still use the existing storage prefix so Home/Guide progress remains compatible.
     expect("S.prefix+String(id).padStart(2,'0')+'_complete'" in engine, "Cloud visual engine must preserve current progress key contract")
 
 
@@ -263,6 +273,7 @@ def check_entrypoint_links() -> None:
         "index.html",
         "linux/index.html",
         "sql/index.html",
+        "java/index.html",
         "cobol/index.html",
         "jcl/index.html",
         "cloud/index.html",

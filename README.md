@@ -1,17 +1,21 @@
 # Financial IT Learning Lab
 
-金融ITを「読む」のではなく、**触って理解し、公開事例で試し、技術・業務・PMの3視点で説明できる**ことを目指すインタラクティブ学習ラボです。
+金融ITを「読む」だけで終わらせず、**触って理解し、公開事例で試し、技術・業務・PMの3視点で説明できる**状態を目指すインタラクティブ学習ラボです。
 
 ## Complete Learning Packages
 
-### Core — 4 Packages / 80 Labs
+### Platform, Data & Application — 60 Labs
 
 - 🐧 Linux / Infrastructure — 20
 - 💾 SQL / Database — 20
+- ☕ Enterprise Application / Java — 20
+
+### Core Systems & Batch — 40 Labs
+
 - 🟩 COBOL / Business Systems — 20
 - ⚙️ JCL / Batch Operations — 20
 
-### Cloud — 4 Packages / 80 Labs
+### Cloud — 80 Labs
 
 - ☁️ Cloud Fundamentals — 20
 - 🟧 AWS for Financial IT — 20
@@ -21,27 +25,42 @@
 ### Final Practice
 
 - 📰 Field Incident Gate — 10 public-report reconstructions
-  - 企業・規制当局・公式postmortemを一次情報の軸にする
-  - Qiita / note / 新聞・技術メディアを補助線として使う
+  - 企業・規制当局・公式postmortemを事実の軸にする
+  - Zenn / Qiita / note / 新聞・技術メディアを補助線として使う
   - Engineer / Consultant / PM が各80点以上
 - 🚨 Financial War Room — 12 financial incident cases
-  - TRI-ROLE SIGN-OFF: Engineer / Consultant / PM が各85点以上
+  - Engineer / Consultant / PM が各85点以上
 
-**Total: 8 Complete Packages / 160 Labs + 10 Field Cases + 12 War Room Cases**
+**Total: 9 Complete Packages / 180 Labs + 10 Field Cases + 12 War Room Cases**
 
 ## Learning Route
 
 ```text
-Linux → SQL / Database → COBOL → JCL / Batch
-      → Cloud Fundamentals → AWS / Google Cloud / Azure
-      → Field Incident Gate
-      → Financial War Room
+Computer / OS Foundation
+  ↓
+Linux / Infrastructure
+  ↓
+SQL / Database
+  ↓
+Enterprise Application / Java
+  ↓
+COBOL / Business Systems → JCL / Batch
+  ↓
+Cloud Fundamentals → AWS / Google Cloud / Azure
+  ↓
+Field Incident Gate
+  ↓
+Financial War Room
 ```
+
+Javaは言語文法の独立講座ではありません。HTTP Requestを業務処理へ変換し、JVM上で動き、Database・Messaging・Linux・Cloudへつながる**Application層の代表Profile**として扱います。
+
+## Lab → Incident Transfer
 
 各Labの下には **🚨 War Room Link / この知識が効く事故** を表示します。
 
 ```text
-Concept / command / code
+Concept / Command / Code
         ↓
 どの障害で使える？
         ↓
@@ -52,78 +71,86 @@ Evidenceを自分で取り、仮説を潰す
 教材へ戻って弱点を補う
 ```
 
-## v16 Context Model
+## Context Model
 
-Linux v16で導入した「分類軸を混ぜない」設計を全教材へ展開します。
+教材全体で、次の順序を正本とします。
 
-**Concept → Product / Platform → Operational Evidence**
+```text
+Plain Language
+  ↓
+Need / Problem
+  ↓
+Capability / Common Concept
+  ↓
+Product / Platform Profile
+  ↓
+Component Origin
+  ↓
+Operational Evidence
+  ↓
+Safe Decision / Change
+  ↓
+Business Verification
+```
 
-製品間の対応は `=` ではなく **`≒ conceptual mapping`** として扱います。
+製品間の対応は `=` ではなく **`≒ conceptual mapping`**。同じ目的を見る代表実装であり、権限・仕様・性能・運用・Supportまで同一とはみなしません。
 
-- Linux: Debian/Ubuntu ↔ RHEL/Rocky/Alma、systemd、製品固有commandを別レイヤー表示
-- SQL: IBM Db2 / Oracle Database / PostgreSQL / Microsoft SQL Server profile
+### Profile examples
+
+- Linux: Common Linux + RHEL系（教材標準） / Ubuntu LTS / SLES / Oracle Linux
+- SQL: IBM Db2 / Oracle Database / PostgreSQL / Microsoft SQL Server
+- Application: Common Application Concept + Java / JVM / Spring Boot / JDBC / JMS
 - COBOL: IBM Enterprise COBOL / GnuCOBOL / Oracle Pro*COBOL context
-- JCL: JCL/JESと、Control-M / JP1/AJS3 / IBM Z Workload Scheduler等のScheduler層を分離
-- Cloud Fundamentals / War Room: Common / AWS / Google Cloud / Azure / Oracle Cloud Infrastructure (OCI) translation profile
-- AWS / GCP / Azure: provider固有サービスと共通Conceptを同時表示
-
-## Field Incident source policy
-
-Field Incident Gateは実在事故の完全再現ではありません。公開情報から学習論点を抽出し、匿名化・簡略化・再構成します。
-
-- 公式報告・企業発表・規制当局資料をFactの軸にする
-- Qiita / note / 新聞・技術メディアは概念翻訳・顧客影響の補助に使う
-- 原文を長く転載しない
-- 元事故とSourceはCase Result後に公開し、推理のspoilerを避ける
-- 詳細: [docs/FIELD_CASE_SOURCES.md](./docs/FIELD_CASE_SOURCES.md)
+- JCL周辺: JES / JCLとEnterprise Schedulerを別Layerで扱う
+- Cloud: Common / AWS / Google Cloud / Azure / OCI translation
 
 ## What “Complete Package” means
 
 20 Labsがあるだけでは完成扱いにしません。
 
 - Start from Zero
+- Need before Tool / Component Origin
 - Progressive Learning Modes
-- Layer Guide
+- Layer Guide / Stack Map
 - Concept → Product → Evidence
 - Financial Context
 - Field Questions
-- Glossary / Cheat Sheet
+- Plain-language Glossary / Expert Lens
 - Engineer / Consultant / PM視点
 - Final Capstone
-- War Room Link / Public Incident transfer
+- War Room Link / Public Incident Transfer
 - Completion / Next Path
 
 定義は [PACKAGE_STANDARD.md](./PACKAGE_STANDARD.md) を参照。
 
-## Final Goal
-
-以下を別々の単語ではなく、一つの金融システムとしてつなげる。
+## Final System Map
 
 ```text
-Customer / App
+Customer / Channel
   ↓
-Cloud / DNS / TLS / Load Balancer
+DNS / TLS / Load Balancer / API
   ↓
-VPC / VNet / VCN / Hybrid Network
+Java / Spring Boot Application
+  ├ JVM / Thread / Heap / GC
+  ├ JDBC / Connection Pool / Transaction
+  └ JMS / IBM MQ / External API
   ↓
-Linux / Compute / Application
+Linux / Container / Cloud Compute
   ↓
-SQL / Database / Transaction
+Database / Authoritative Data
   ↓
-On-prem / Mainframe
-  ↓
-COBOL / Db2 / Oracle / CICS
+COBOL / Db2 / CICS
   ↓
 JCL / JES / Enterprise Scheduler
   ↓
 Reconciliation / Operational Resilience
 ```
 
-## Investigation rule
+## Investigation Rule
 
-Field Incident Gate / Financial War Roomは原因当てゲームではありません。
+Field Incident Gate、Java War Room、Financial War Roomは原因当てクイズではありません。
 
-**Impact → Free Investigation → Evidence Diversity → Hypothesis elimination → Cause declaration → Safe Recovery → Verification/Reconciliation → Communication**
+**Impact → Free Investigation → Evidence Diversity → Hypothesis elimination → Cause declaration → Safe Recovery → Verification / Reconciliation → Communication**
 
 を評価します。
 
