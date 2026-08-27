@@ -59,7 +59,10 @@ function renderLab(panel,p,lab){
   // 用語注釈がtext nodeを分割していると、下のreplaceTextの文字列一致が外れてProfile差分が反映されない。
   // 先に注釈を外してから置換し、再注釈は用語側のobserverへ任せる。
   try{if(window.FIT_FOUNDATION_GLOSSARY&&window.FIT_FOUNDATION_GLOSSARY.unwrap)window.FIT_FOUNDATION_GLOSSARY.unwrap(panel)}catch(e){}
-  replaceText(panel,p);var old=panel.querySelector('.flp-lab-context');if(old)old.remove();var f=labFocus(lab,p),box=document.createElement('div');box.className='flp-lab-context';box.innerHTML='<div><small>COMMON ROLE</small><b>'+esc(f[0])+'</b></div><div><small>'+esc(p.short)+' IMPLEMENTATION</small><code>'+esc(f[1])+'</code></div><div><small>DO NOT MIX</small><span>'+esc(f[2])+'</span></div>';var head=panel.querySelector('.cr-head');if(head)head.insertAdjacentElement('afterend',box);else panel.insertBefore(box,panel.firstChild)
+  replaceText(panel,p);
+  // unwrap→normalize でtext nodeを差し戻すと observer の addedNodes には現れないため、
+  // 置換が済んだこの時点で明示的に再注釈させる。
+  try{if(window.FIT_FOUNDATION_GLOSSARY&&window.FIT_FOUNDATION_GLOSSARY.decorate)window.FIT_FOUNDATION_GLOSSARY.decorate(panel)}catch(e){}var old=panel.querySelector('.flp-lab-context');if(old)old.remove();var f=labFocus(lab,p),box=document.createElement('div');box.className='flp-lab-context';box.innerHTML='<div><small>COMMON ROLE</small><b>'+esc(f[0])+'</b></div><div><small>'+esc(p.short)+' IMPLEMENTATION</small><code>'+esc(f[1])+'</code></div><div><small>DO NOT MIX</small><span>'+esc(f[2])+'</span></div>';var head=panel.querySelector('.cr-head');if(head)head.insertAdjacentElement('afterend',box);else panel.insertBefore(box,panel.firstChild)
 }
 function bindHome(panel,p){
   var ss=stages(p);panel.querySelectorAll('[data-flp-stage]').forEach(function(b){b.onclick=function(){var i=Number(b.dataset.flpStage),s=ss[i];if(!s)return;panel.querySelectorAll('[data-flp-stage]').forEach(function(x){x.classList.toggle('active',x===b)});var map=panel.querySelector('#flpMap'),con=panel.querySelector('#flpConsole');if(map)map.textContent=s.map;if(con)con.textContent=s.console}});

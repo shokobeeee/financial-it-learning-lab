@@ -80,6 +80,16 @@ expect('[class*=kicker i]' in js,
        'decorative all-caps kickers must be excluded from annotation (case-insensitive)')
 # 「記録」は名詞にも動詞語幹（記録し）にもなり、注釈先が読み込みごとに変わる。
 expect("aliases:['Log','ログ']" in js,'Log must not claim the ambiguous 記録')
+# display:none の中へ印が付くと、1ページ1回の規則で本文側の出現まで潰れる。
+# 折りたたみ（details）は非表示ではないので、祖先のdisplay/visibility/[hidden]だけを見る。
+expect('function renderedIn(el)' in js and 'if(!renderedIn(node.parentElement))return;' in js,
+       'markers must not be placed inside hidden containers')
+# unwrap→normalize したtext nodeは observer の addedNodes に現れないため、
+# 置換側から明示的に再注釈させる導線が要る。
+expect('decorate:function(root)' in js,'the glossary must expose a decorate() entry point')
+profiles_js=read('linux/ui-financial-profiles.js')
+expect('FIT_FOUNDATION_GLOSSARY.decorate(panel)' in profiles_js,
+       'profile replacement must re-decorate the panel it unwrapped')
 expect('function renderGloss(scope,terms)' in js and 'function showTip(btn)' in js,
        'per-scope gloss strip and hover tooltip must exist')
 expect('.fitb-term{' in css and 'display:inline;' in css.split('.fitb-term{',1)[-1].split('}',1)[0],

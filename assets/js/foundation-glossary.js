@@ -217,6 +217,14 @@ function termButton(term,original){
 }
 // 入れ子のcard/sectionそれぞれに用語メモを付けると、注釈の箱が画面に散らばる。
 // 一番外側のcardを1つだけ選び、そこへまとめる。
+function renderedIn(el){
+  for(var n=el;n&&n.nodeType===1;n=n.parentElement){
+    if(n.hasAttribute&&n.hasAttribute('hidden'))return false;
+    var cs=window.getComputedStyle&&window.getComputedStyle(n);
+    if(cs&&(cs.display==='none'||cs.visibility==='hidden'))return false;
+  }
+  return true;
+}
 function glossScope(node){
   const p=node.parentElement;if(!p||!p.closest)return null;
   let el=p.closest(GLOSS_SCOPE_SELECTOR),outer=el;
@@ -263,6 +271,7 @@ function decorateRoot(root){
       let state=scopes.get(scope);if(!state){state=scopeState(scope);scopes.set(scope,state)}
       if(state.terms.length>=MAX_TERMS_PER_SCOPE)return;
       const match=findMatch(node.nodeValue,seen);if(!match)return;
+      if(!renderedIn(node.parentElement))return;
       const start=match.index,end=start+match.alias.alias.length,original=node.nodeValue.slice(start,end),frag=document.createDocumentFragment();
       frag.appendChild(document.createTextNode(node.nodeValue.slice(0,start)));
       frag.appendChild(termButton(match.alias.term,original));
@@ -370,7 +379,7 @@ function observe(){
 function init(){
   ensureCss();setRootLevel();createLauncher();ensureDrawer();document.addEventListener('click',handleTermClick);document.addEventListener('keydown',handleTermKey);bindTip();renderFoundation(false);if(level!=='compact')decorateAll();observe();
   window.addEventListener('hashchange',function(){if(location.hash==='#foundation')openFoundationAndScroll()});if(location.hash==='#foundation')openFoundationAndScroll();
-  window.FIT_FOUNDATION_GLOSSARY={terms:TERMS,levels:LEVELS,getLevel:function(){return level},setLevel:setLevel,open:openDrawer,unwrap:unwrapTerms,foundationComplete:foundationComplete};
+  window.FIT_FOUNDATION_GLOSSARY={terms:TERMS,levels:LEVELS,getLevel:function(){return level},setLevel:setLevel,open:openDrawer,unwrap:unwrapTerms,decorate:function(root){if(level!=='compact')decorateRoot(root||document.querySelector('main'))},foundationComplete:foundationComplete};
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
