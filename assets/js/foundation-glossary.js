@@ -161,7 +161,7 @@ function setLevel(next){
 }
 function excluded(node){
   const p=node&&node.parentElement;if(!p)return true;
-  return !!p.closest('script,style,code,pre,kbd,samp,button,a,input,textarea,select,option,[data-no-glossary],.fitb-drawer,.fitb-launcher,.cosf-foundation,.fitb-gloss,.fitb-tip,.terminal,.mini-console,.diag-console,.mobile-live-terminal-body');
+  return !!p.closest('script,style,code,pre,kbd,samp,button,a,input,textarea,select,option,[data-no-glossary],.fitb-drawer,.fitb-launcher,.cosf-foundation,.fitb-gloss,.fitb-tip,.fitb-term,.terminal,.mini-console,.diag-console,.mobile-live-terminal-body');
 }
 function aliasIndex(){
   const out=[];TERMS.forEach(function(t){(t.aliases||[t.label]).forEach(function(a){out.push({term:t,alias:a,lower:a.toLowerCase(),ascii:/^[A-Za-z0-9_ ./+-]+$/.test(a)})})});
@@ -171,7 +171,7 @@ const ALIASES=aliasIndex();
 // 短い一般語（Data / Tool / Log 等）は識別子やPathの一部にも一致してしまう。
 // www-data の "data"、backup-tool の "tool"、/data の "data" を弾くため、
 // 直前は区切り記号も含めて識別子文字を許さない。直後は Console/CLI の '/' を残す。
-const ASCII_BEFORE=/[A-Za-z0-9_./-]/,ASCII_AFTER=/[A-Za-z0-9_-]/;
+const ASCII_BEFORE=/[A-Za-z0-9_./-]/,ASCII_AFTER=/[A-Za-z0-9_.-]/;
 // カタカナ語は語境界が空白で示されないため、隣がカタカナ・長音・漢字なら複合語の一部とみなす。
 // これが無いと「データセット」が Data、「未インストール」が install として注釈される。
 const JA_ADJACENT=/[\u30A1-\u30FA\u30FC-\u30FF\u4E00-\u9FFF\u3005]/;
@@ -180,9 +180,15 @@ function boundaryOk(text,index,alias){
   if(!alias.ascii)return !JA_ADJACENT.test(before)&&!JA_ADJACENT.test(after);
   return !ASCII_BEFORE.test(before)&&!ASCII_AFTER.test(after);
 }
+// 語境界を満たす最初の出現を探す。1回目が識別子の一部でも、後続の正当な出現は拾う。
+function firstValidIndex(text,lower,a){
+  let i=lower.indexOf(a.lower);
+  while(i>=0){if(boundaryOk(text,i,a))return i;i=lower.indexOf(a.lower,i+1)}
+  return -1;
+}
 function findMatch(text,seen){
   const lower=text.toLowerCase();let best=null;
-  ALIASES.forEach(function(a){if(seen.has(a.term.id))return;const i=lower.indexOf(a.lower);if(i<0||!boundaryOk(text,i,a))return;if(!best||i<best.index||(i===best.index&&a.alias.length>best.alias.alias.length))best={index:i,alias:a}});
+  ALIASES.forEach(function(a){if(seen.has(a.term.id))return;const i=firstValidIndex(text,lower,a);if(i<0)return;if(!best||i<best.index||(i===best.index&&a.alias.length>best.alias.alias.length))best={index:i,alias:a}});
   return best;
 }
 // 本文へ説明文を割り込ませない。行内は「印の付いた語」のまま、意味はscope単位の用語メモへ集約する。
@@ -201,7 +207,8 @@ function ensureDesc(term){
   return id;
 }
 function termButton(term,original){
-  const b=document.createElement('button');b.type='button';b.className='fitb-term';b.dataset.fitbTerm=term.id;b.dataset.fitbOriginal=original;
+  const b=document.createElement('span');b.className='fitb-term';b.dataset.fitbTerm=term.id;b.dataset.fitbOriginal=original;
+  b.setAttribute('role','button');b.setAttribute('tabindex','0');
   b.setAttribute('aria-describedby',ensureDesc(term));
   b.textContent=original;return b;
 }
@@ -333,6 +340,11 @@ function bindFoundation(panel){
 function openFoundationAndScroll(){renderFoundation(true);setTimeout(function(){const p=document.getElementById('computerOsFoundationPanel');if(!p)return;const d=p.querySelector('.cosf-details');if(d)d.open=true;p.scrollIntoView({behavior:'smooth',block:'start'})},60)}
 
 function handleTermClick(e){const b=e.target.closest('[data-fitb-term]');if(!b)return;e.preventDefault();hideTip();openDrawer(b.dataset.fitbTerm)}
+function handleTermKey(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const b=e.target.closest&&e.target.closest('span.fitb-term');if(!b)return;
+  e.preventDefault();hideTip();openDrawer(b.dataset.fitbTerm);
+}
 function observe(){
   const observer=new MutationObserver(function(records){
     if(isLinuxHome())renderFoundation(false);
@@ -353,7 +365,7 @@ function observe(){
   observer.observe(document.body,{childList:true,subtree:true});
 }
 function init(){
-  ensureCss();setRootLevel();createLauncher();ensureDrawer();document.addEventListener('click',handleTermClick);bindTip();renderFoundation(false);if(level!=='compact')decorateAll();observe();
+  ensureCss();setRootLevel();createLauncher();ensureDrawer();document.addEventListener('click',handleTermClick);document.addEventListener('keydown',handleTermKey);bindTip();renderFoundation(false);if(level!=='compact')decorateAll();observe();
   window.addEventListener('hashchange',function(){if(location.hash==='#foundation')openFoundationAndScroll()});if(location.hash==='#foundation')openFoundationAndScroll();
   window.FIT_FOUNDATION_GLOSSARY={terms:TERMS,levels:LEVELS,getLevel:function(){return level},setLevel:setLevel,open:openDrawer,unwrap:unwrapTerms,foundationComplete:foundationComplete};
 }

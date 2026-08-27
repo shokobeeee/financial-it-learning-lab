@@ -147,7 +147,9 @@ expect("placement:['Providerが用意した区分から選ぶ'" in js,
 expect("  9:['Failure Domain','一緒に壊れる範囲を分けて配置する仕組み','placement'," in js,
        'Lab09 must use the placement origin, not provisioned')
 expect('const placed=' not in js,'the lab===9 special case must not come back')
-expect(profiles.index('FIT_FOUNDATION_GLOSSARY.unwrap(panel)')<profiles.index('replaceText(panel,p);'),
+_unwrap_at=profiles.find('FIT_FOUNDATION_GLOSSARY.unwrap(panel)')
+_replace_at=profiles.find('replaceText(panel,p);')
+expect(_unwrap_at>=0 and _replace_at>=0 and _unwrap_at<_replace_at,
        'glossary markers must be unwrapped before replaceText runs')
 
 for marker in (

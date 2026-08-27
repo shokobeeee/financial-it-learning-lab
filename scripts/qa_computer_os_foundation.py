@@ -67,6 +67,13 @@ expect("{id:'system-resource'" in js,
        'the OS-level resource meaning needs its own glossary term')
 expect('b.textContent=original;return b;' in js,
        'inline term marker must render only the original word')
+# <button> は display:inline を指定しても inline-block になり、複数語の用語が行内で折り返せない。
+expect("createElement('span');b.className='fitb-term'" in js,
+       'inline term marker must be a span so multi-word terms can wrap')
+expect("b.setAttribute('role','button')" in js and "b.setAttribute('tabindex','0')" in js,
+       'the span marker must stay focusable and expose a button role')
+expect('function handleTermKey(e)' in js,
+       'the span marker needs Enter/Space handling that a button would give for free')
 expect('function renderGloss(scope,terms)' in js and 'function showTip(btn)' in js,
        'per-scope gloss strip and hover tooltip must exist')
 expect('.fitb-term{' in css and 'display:inline;' in css.split('.fitb-term{',1)[-1].split('}',1)[0],
