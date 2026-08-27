@@ -74,6 +74,12 @@ expect("b.setAttribute('role','button')" in js and "b.setAttribute('tabindex','0
        'the span marker must stay focusable and expose a button role')
 expect('function handleTermKey(e)' in js,
        'the span marker needs Enter/Space handling that a button would give for free')
+# 装飾用の全大文字ラベル（NEED BEFORE TOOL 等）に Tool/System/Cloud が一致すると、
+# 1ページ1回の規則で本文側の出現まで潰れる。camelCaseのclassもあるため大小を無視する。
+expect('[class*=kicker i]' in js,
+       'decorative all-caps kickers must be excluded from annotation (case-insensitive)')
+# 「記録」は名詞にも動詞語幹（記録し）にもなり、注釈先が読み込みごとに変わる。
+expect("aliases:['Log','ログ']" in js,'Log must not claim the ambiguous 記録')
 expect('function renderGloss(scope,terms)' in js and 'function showTip(btn)' in js,
        'per-scope gloss strip and hover tooltip must exist')
 expect('.fitb-term{' in css and 'display:inline;' in css.split('.fitb-term{',1)[-1].split('}',1)[0],

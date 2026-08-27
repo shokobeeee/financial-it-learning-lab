@@ -43,7 +43,7 @@ const TERMS=[
   {id:'package-manager',label:'Package Manager',aliases:['Package Manager','パッケージマネージャー'],plain:'Softwareの導入・更新・削除を管理する道具',summary:'RepositoryからPackageを取得し、依存関係やVersionを管理します。',where:'apt・dnf・zypperなどが代表例です。',without:'Softwareの由来・依存・更新履歴を管理しにくくなります。',confuse:'Package ManagerはnginxなどのApplication本体ではありません。',category:'software'},
   {id:'repository',label:'Repository',aliases:['Repository','リポジトリ'],plain:'Packageの配布元',summary:'PackageとVersion・依存関係等の情報を保管し、Package Managerへ提供する場所です。',where:'Distribution公式やVendorのRepositoryがあります。',without:'信頼できる取得先と更新情報を一元管理しにくくなります。',confuse:'GitHub RepositoryとLinux Package Repositoryは目的が異なります。',category:'software'},
   {id:'firewall',label:'Firewall',aliases:['Firewall','ファイアウォール'],plain:'通信を通す・止める門番',summary:'送信元・宛先・Portなどの条件で、Network通信を許可または拒否します。',where:'Host Firewall、Cloud Security Group、Network Firewallなど複数レイヤーにあります。',without:'不要な相手やPortからの通信まで到達しやすくなります。',confuse:'FirewallはNetworkそのものではなく、通信を制御する部品です。',category:'network'},
-  {id:'log',label:'Log',aliases:['Log','ログ','記録'],plain:'何が起きたかの記録',summary:'時刻・処理・Error・利用者・Requestなどを後から確認できるように残した記録です。',where:'Application Log、OS Log、Audit Logなどがあります。',without:'障害時に事実を確認しにくくなります。',confuse:'Logは原因そのものではなく、仮説を確認するEvidenceの一つです。',category:'software'},
+  {id:'log',label:'Log',aliases:['Log','ログ'],plain:'何が起きたかの記録',summary:'時刻・処理・Error・利用者・Requestなどを後から確認できるように残した記録です。',where:'Application Log、OS Log、Audit Logなどがあります。',without:'障害時に事実を確認しにくくなります。',confuse:'Logは原因そのものではなく、仮説を確認するEvidenceの一つです。',category:'software'},
   {id:'evidence',label:'Evidence',aliases:['Evidence','エビデンス','証跡'],plain:'判断の根拠にする確認材料',summary:'Log・Metrics・設定差分・件数・金額・顧客導線など、判断を事実で支える材料です。',where:'障害対応では異なるレイヤーのEvidenceを組み合わせます。',without:'推測だけで原因や復旧完了を決めてしまいます。',confuse:'同種Logを大量に集めることと、Evidenceが十分なことは同じではありません。',category:'software'},
   {id:'database',label:'Database',aliases:['Database','データベース'],plain:'整理して保管されるDataの集まり',summary:'検索・更新しやすい形で、口座・顧客・取引などのDataを保持します。',where:'DBMSがDatabaseを管理します。',without:'共有Dataを安全・効率的に扱いにくくなります。',confuse:'DatabaseとDBMSとSQLは別です。',category:'data'},
   {id:'dbms',label:'DBMS',aliases:['DBMS'],plain:'Databaseを安全に管理するSoftware',summary:'SQLの実行、Data保存、Transaction、Lock、Recovery、権限等を管理します。',where:'Db2・Oracle Database・PostgreSQL・SQL Server等が代表例です。',without:'Application側で同時更新や復旧をすべて実装する必要があります。',confuse:'SQLは言語、DBMSはその言語を実行してDataを管理するSoftwareです。',category:'data'},
@@ -161,7 +161,7 @@ function setLevel(next){
 }
 function excluded(node){
   const p=node&&node.parentElement;if(!p)return true;
-  return !!p.closest('script,style,code,pre,kbd,samp,button,a,input,textarea,select,option,[data-no-glossary],.fitb-drawer,.fitb-launcher,.cosf-foundation,.fitb-gloss,.fitb-tip,.fitb-term,.terminal,.mini-console,.diag-console,.mobile-live-terminal-body');
+  return !!p.closest('script,style,code,pre,kbd,samp,button,a,input,textarea,select,option,[data-no-glossary],.fitb-drawer,.fitb-launcher,.cosf-foundation,.fitb-gloss,.fitb-tip,.fitb-term,.kicker,[class*=kicker i],.terminal,.mini-console,.diag-console,.mobile-live-terminal-body');
 }
 function aliasIndex(){
   const out=[];TERMS.forEach(function(t){(t.aliases||[t.label]).forEach(function(a){out.push({term:t,alias:a,lower:a.toLowerCase(),ascii:/^[A-Za-z0-9_ ./+-]+$/.test(a)})})});
@@ -178,7 +178,10 @@ const JA_ADJACENT=/[\u30A1-\u30FA\u30FC-\u30FF\u4E00-\u9FFF\u3005]/;
 function boundaryOk(text,index,alias){
   const before=text[index-1]||'',after=text[index+alias.alias.length]||'';
   if(!alias.ascii)return !JA_ADJACENT.test(before)&&!JA_ADJACENT.test(after);
-  return !ASCII_BEFORE.test(before)&&!ASCII_AFTER.test(after);
+  // 直前が '/' のときは、並記（Software/Cloud Resource）か Path（/var/log）かで分かれる。
+  // 実際に一致した文字が大文字なら固有名の並記とみなす。
+  const beforeOk=before==='/'?/[A-Z]/.test(text.charAt(index)):!ASCII_BEFORE.test(before);
+  return beforeOk&&!ASCII_AFTER.test(after);
 }
 // 語境界を満たす最初の出現を探す。1回目が識別子の一部でも、後続の正当な出現は拾う。
 function firstValidIndex(text,lower,a){
