@@ -131,6 +131,7 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
 .difference-note{margin-top:16px;border:1px solid #e5d8c2;background:#fff9ec;border-radius:12px;padding:17px 19px;font-size:12px;line-height:1.85;color:#796242}.difference-note strong{color:#57462d}
 .bottom{border-top:1px solid #dce4eb;margin-top:36px;padding-top:19px;font-size:11px;color:#7e90a0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .hidden{display:none!important}
+.setup-path{margin-top:12px;border:1px solid #d8e4e9;border-radius:11px;background:#f3f8fa;padding:15px 16px}.path-line{display:grid;grid-template-columns:105px 1fr;gap:14px;align-items:start;border-top:1px solid #dce7eb;padding:9px 0;font-size:11px;line-height:1.75}.path-line:first-of-type{margin-top:5px}.path-line:last-child{padding-bottom:0}.path-line b{color:#2d6279}.path-line span{color:#516a7e}@media(max-width:590px){.path-line{grid-template-columns:1fr;gap:1px}}
 @keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1070px){.explore{grid-template-columns:295px 1fr}.source-grid{grid-template-columns:repeat(2,1fr)}.scenario-layout{grid-template-columns:285px 1fr}.head-nav button{padding:8px 9px}}
 @media(max-width:830px){.toprow{flex-wrap:wrap;padding-top:11px;padding-bottom:9px}.header-meta{display:none}.head-nav{width:100%;justify-content:space-between}.head-nav button{flex:1;padding:10px 5px}.owner-map{grid-template-columns:1fr 1fr;gap:9px}.link-panel{grid-column:1/-1;grid-row:2;flex-direction:row;padding:4px}.link-panel:before{height:1px;width:80%;top:50%;left:10%;bottom:auto}.link-chip{padding:8px 14px}.link-chip strong{display:inline;margin-right:8px}.explore,.scenario-layout{grid-template-columns:1fr}.topic-list{padding:15px}.topic-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -218,6 +219,18 @@ const topics=[
 {id:'approve',title:'承認・差戻し・自己承認防止',owner:'shared',level:'verify',summary:'承認ボタンがあるだけでは、誰でも押してよいわけではない。',hcan:'承認者本人がログインしたかどうかという「認証」を担当します。',hdo:'承認に必要な業務役割や案件状態を、SSOが自動保証するものと扱わないよう整理します。',mcan:'データ更新アクションは構成できますが、銀行独自の承認・差戻しルールが標準機能で全て守れるかは未確認です。',mdo:'承認待ち、担当者、所属支店、自己承認禁止、二重承認防止を定義します。実行時の最終判定が必要ならDB・APIなどと責任分担します。',tests:['起票者による自己承認を防げるか','承認待ち以外での承認や差戻しを拒否できるか','複数利用者の同時操作で不整合が起きないか'],risk:'これは製品標準の承認ロール仕様ではなく、銀行業務の要件として個別に実装・検証する項目です。',refs:['maction','minput','hsso']},
 {id:'lifecycle',title:'異動・退職時の権限変更',owner:'shared',level:'verify',summary:'HENNGEで入れなくするだけでなく、MotionBoardに残る利用者・ロールも管理する。',hcan:'ユーザーのアクセス許可や認証ポリシーを管理できます。',hdo:'退職・異動・休職のイベントを定義し、SSOアクセスの停止と再付与を管理します。',mcan:'ユーザー・グループ・ロールの設定機能があります。',mdo:'HENNGE側と連動しないアカウントの更新・無効化・棚卸し方法を決めます。',tests:['HENNGE停止後にMotionBoardの既存セッションから操作が継続しないか','異動時の旧支店の閲覧権限が残らないか','アカウント棚卸し・権限申請の責任者を決めたか'],risk:'MotionBoard向けHENNGE SSO連携では自動プロビジョニングがないため、アカウントのライフサイクル管理を別途設計します。',refs:['hsso','mrole','haccess']}
 ];
+
+const configPaths={
+auth:{h:'Access Control：サービスプロバイダー設定／アクセスポリシーグループ',m:'［管理］→［システム設定］→［接続/認証］→［認証］'},
+sso:{h:'Access Control：サービスプロバイダー／SAMLメタデータ／Name ID',m:'［システム設定］→［接続/認証］→［認証］・［シングルサインオン］'},
+account:{h:'Access Control：MotionBoardへアクセスさせる利用者・グループを管理',m:'［管理］→［システム設定］→［ユーザー］→［ユーザー］／［グループ］'},
+board:{h:'サービスへの接続許可と、ボードの閲覧許可を分けて管理',m:'ボードのフォルダー権限設定／グループの閲覧・書き込み範囲'},
+data:{h:'SSOで渡す本人識別子（メールアドレスなど）を確認',m:'ログインマスタ・ログインユーザーIDを使った検索条件の設定'},
+buttons:{h:'ログイン判定まで。個別ボタンの承認権限は別に設計',m:'［ボード管理］→［ボタン管理］／アクション「表示非表示切り替え」※自動ロール連動は要検証'},
+write:{h:'認証・SSOの実施。データ更新可否とは分ける',m:'［データソースエディタ］→［入力］→［更新キー／入力許可］、［ボード管理］→［データベース入力］→［編集セット］'},
+approve:{h:'ログインした本人の確認。承認者かどうかは別の業務判定',m:'業務用の承認条件・更新経路を個別設計。必要ならDB・APIで最終検証'},
+lifecycle:{h:'異動・退職時のアクセス許可見直し',m:'［システム設定］→［ユーザー］→［ユーザー／グループ］で残存権限を確認'}
+};
 const review=[
 {title:'認証・SSOの前提を確定する',desc:'MotionBoardの本番版数、HENNGE One連携方法、Name ID（メールアドレス）を確認'},
 {title:'ユーザー・業務ロール対応表を作る',desc:'支店担当、承認者、本部閲覧の役割と、MotionBoard側のユーザー・グループを紐づける'},
@@ -260,6 +273,10 @@ for(const which of ['h','m']){
  addDetailBox(bd,'できること',t[which+'can']);addDetailBox(bd,'今回やること',t[which+'do']);box.append(hd,bd);lanes.append(box);
 }
 root.append(lanes);
+const pathInfo=configPaths[t.id],pathBox=el('div','setup-path');
+pathBox.append(el('div','mini-heading','設定箇所・構成の目安'));
+for(const [name,value] of [['HENNGE One',pathInfo.h],['MotionBoard',pathInfo.m]]){const line=el('div','path-line');line.append(el('b','',name),el('span','',value));pathBox.append(line)}
+root.append(pathBox);
 const val=el('div','validation'),vh=el('div','validation-head');vh.append(el('b','','実機で確認すること'),el('small','','IMPLEMENTATION TEST'));val.append(vh);
 const ul=el('ul','tests');t.tests.forEach(test=>ul.append(el('li','',test)));val.append(ul,el('div','caveat','設計上の注意：'+t.risk));root.append(val);
 const refs=el('div','refs');for(const id of t.refs){const s=sources.find(x=>x.id===id);const a=el('a','ref-link','出典 '+s.n+'　'+s.vendor+' ↗');a.href='#source-'+id;refs.append(a)}root.append(refs);
