@@ -275,61 +275,158 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
 @keyframes exp-down{0%{top:0;opacity:0}20%{opacity:1}85%{opacity:1}100%{top:calc(100% - 6px);opacity:0}}
 @media(prefers-reduced-motion:reduce){.exp-traveller,.exp-live{animation:none!important}.exp-traveller{opacity:1!important;left:50%!important;top:50%!important}.exp-gate,.exp-verdict,.exp-curtain,.exp-scenario,.exp-scenario:hover{transform:none!important}}
 
+
+/* SIMPLIFIED PRESENTATION — prioritize the two actual product boundaries */
+body{background:#f8fafb}
+.topbar{box-shadow:0 3px 17px #122f4807}
+.top-details-link{font-size:12px;text-decoration:none;font-weight:750;border:1px solid #d8e5e8;background:#f5f9fa;border-radius:9px;color:#356270;padding:8px 12px}
+.top-details-link:hover{background:#e9f4f3}
+.hero{padding:30px 0 23px}
+.hero h1{margin:10px 0 12px;font-size:clamp(28px,3.6vw,44px)}
+.hero p{line-height:1.8;max-width:680px;font-size:13px}
+.canvas{margin-top:0}
+.experience{margin-bottom:21px}
+.experience-titlebar{margin-bottom:12px}
+.experience-titlebar h2{font-size:clamp(19px,2.2vw,25px);margin:4px 0 3px}
+.experience-titlebar p{font-size:11px}
+.exp-scenarios{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:9px}
+.exp-scenario{min-height:68px;padding:11px 15px;border-radius:10px;gap:2px}
+.exp-scenario .scene-num{font-size:9px}
+.exp-scenario .scene-label{font-size:12px}
+.exp-scenario .scene-sub{font-size:10px}
+.exp-scenario.is-selected{box-shadow:inset 0 2px 0 #138779;background:#f1faf6}
+.more-scenes{margin-bottom:13px;padding:0 2px}
+.more-scenes summary{cursor:pointer;color:#597789;font-size:11px;font-weight:800;padding:7px 0;list-style:none;width:max-content}
+.more-scenes summary::-webkit-details-marker{display:none}
+.more-scenes summary span{font-size:15px;margin-left:6px;display:inline-block;transition:transform .2s}
+.more-scenes[open] summary span{transform:rotate(45deg)}
+.more-scenes .additional{margin-top:9px;margin-bottom:10px}
+.more-scenes .exp-play{margin:1px 0 10px;background:#f0f5f7;border:1px solid #d6e5e9;color:#285c69}
+.more-scenes .exp-play:hover{background:#e2f2ef}
+.exp-layout{grid-template-columns:minmax(0,1.15fr) minmax(300px,.75fr);border-color:#d6e2e9;box-shadow:0 12px 31px #17395013}
+.exp-main{background:#19374d;padding:22px 23px 17px}
+.exp-main::before{display:none}
+.exp-topline{font-size:10px;color:#bad1dd}
+.exp-track{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);margin-top:16px}
+#exp-gate-b,#exp-wire-2{display:none!important}
+.exp-gate{min-height:187px;padding:16px;border:1px solid #648898;background:#24465b;border-radius:10px}
+.exp-gate:hover{transform:none}
+.exp-gate-icon{height:33px;width:33px;font-size:21px;margin:11px 0 7px}
+.exp-gate strong{font-size:17px}
+.exp-gate-kind{font-size:11px;margin-top:2px}
+.exp-gate-state{font-size:12px;margin-top:13px}
+.exp-gate-foot{display:none}
+.exp-more{font-size:10px;padding-top:8px;margin-top:auto}
+.exp-wire{height:2px}
+.exp-wire-label{font-size:9px;bottom:11px}
+.exp-verdict{margin-top:14px;padding:13px;border-radius:10px}
+.exp-verdict-body strong{font-size:15px}
+.exp-verdict-body p{font-size:11px;line-height:1.65;margin-top:3px}
+.exp-progress{display:none}
+.exp-adjust{padding-top:14px;gap:9px 15px}
+.exp-adjust-title{font-size:10px}
+.exp-advanced{display:inline-block;position:relative}
+.exp-advanced>summary{color:#cce4eb;font-size:10px;cursor:pointer;list-style:none}
+.exp-advanced>summary::-webkit-details-marker{display:none}
+.exp-advanced[open]{display:flex;align-items:center;gap:8px}
+.exp-advanced[open]>summary{color:#d3eae9}
+.exp-side{padding:21px 18px;background:#f1f6f7}
+.exp-window{min-height:250px;box-shadow:0 7px 20px #183f4a13}
+.exp-side-heading{font-size:10px;letter-spacing:0;margin-bottom:12px}
+.exp-guide{margin-top:12px}
+.exp-guide p{font-size:11px}
+.exp-disclaimer{font-size:11px;margin:9px 0 0;padding:8px 12px;background:#f1f5f6;border:0;color:#788c98}
+.deep-dive,.source-details{border:1px solid #e0e8ef;background:white;border-radius:14px;margin-top:14px;overflow:hidden;box-shadow:0 4px 16px #173c4e06}
+.deep-summary,.source-summary{list-style:none;cursor:pointer;padding:19px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.deep-summary::-webkit-details-marker,.source-summary::-webkit-details-marker{display:none}
+.deep-summary strong,.source-summary strong{font-size:15px;color:#22465b;display:block;line-height:1.5}
+.deep-summary small,.source-summary small{font-size:11px;color:#8192a0;display:block;margin-top:3px;line-height:1.65}
+.plus-icon{display:grid;place-items:center;flex:none;height:28px;width:28px;border-radius:8px;color:#3a6e72;background:#eaf4f2;font-size:17px;font-weight:500;transition:transform .2s}
+.deep-dive[open] .plus-icon,.source-details[open] .plus-icon{transform:rotate(45deg)}
+.deep-content{border-top:1px solid #e7edf1;padding:19px 19px 22px}
+.deep-content .boundary-strip{margin:0 0 17px}
+.sub-nav{border-bottom:1px solid #e7edf2;display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap}
+.sub-nav button{padding:10px 13px}
+.deep-content .interface{margin-top:16px}
+.deep-content .section-heading{margin-top:13px}
+.source-details .sources{padding:12px 19px 20px;margin-top:0;border-top:1px solid #e7edf1}
+.source-details .source-grid{gap:9px}
+.source-details .source-card{box-shadow:none}
+.source-details .section-heading{margin-top:6px}
+.bottom{margin-top:22px}
+@media(max-width:1080px){.exp-layout{grid-template-columns:1fr}.exp-side{display:block;border-top:1px solid #d5e2e8;padding:18px}.exp-window{max-width:520px}.exp-guide{margin-top:13px}}
+@media(max-width:650px){
+.hero{padding:24px 0 15px}
+.hero h1{font-size:clamp(28px,7vw,36px)}
+.exp-scenarios{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.exp-scenario{padding:9px 8px;min-height:82px}
+.exp-scenario .scene-label{font-size:11px}
+.exp-scenario .scene-sub{font-size:9px}
+.exp-track{grid-template-columns:1fr}
+.exp-gate{min-height:0;padding:11px 13px}
+.exp-gate strong{font-size:13px}
+.exp-gate-icon{margin:0}
+.exp-main{padding:17px 14px 13px}
+.exp-adjust-title{flex-basis:100%}
+.deep-summary,.source-summary{padding:16px}
+.deep-content{padding:12px}
+.source-details .sources{padding:12px}
+}
+
 </style></head>
 <body>
 <header class="topbar"><div class="wrap toprow">
 <a class="identity" href="#top"><span class="symbol">A<span style="color:#74d6c0">/</span>C</span><span>ACCESS DESIGN<span class="brand-sub">金融業務システム / 権限設計ガイド</span></span></a>
-<nav class="head-nav" aria-label="コンテンツ切り替え">
-<button type="button" data-view="boundary" class="active">責任分界を整理</button>
-<button type="button" data-view="matrix">一覧で比較</button>
-<button type="button" data-view="scenario">操作を試す</button>
-<button type="button" data-view="checklist">進め方を確認</button>
-</nav><span class="header-meta">DESIGN REFERENCE / 2026</span>
+<a class="top-details-link" id="open-deep-link" href="#deep-dive">仕様・設定を詳しく見る ↗</a>
 </div></header>
 <div class="wrap" id="top">
 <section class="hero">
-<div class="eyebrow">ACCESS / RESPONSIBILITY / IMPLEMENTATION</div>
-<h1>入口の認証と、<em>業務の権限</em>を、<br>分けて考える。</h1>
-<p>HENNGE OneとMotionBoard。どちらが何を担当し、どこまでできるのか。<br>銀行向けの登録・承認業務を例に、必要な設定、検証事項、根拠となる資料まで、一つずつ整理します。</p>
-<div class="stat-row"><span class="stat"><strong>6つの場面</strong> を体感</span><span class="stat"><strong>2製品</strong> の役割</span><span class="stat"><strong>出典付き</strong> で確認</span><span class="stat"><strong>架空データ</strong> のデモ</span></div>
+<div class="eyebrow">HENNGE ONE × MOTIONBOARD</div>
+<h1>ログインと操作。<br><em>どこで決まる？</em></h1>
+<p>入口を守るのはHENNGE One。画面の中でできることを管理するのはMotionBoard。<br>担当者を切り替えて、その違いを確かめてみよう。</p>
 </section>
 <main class="canvas">
 
 <section class="experience" id="journey" aria-labelledby="experience-title">
   <div class="experience-titlebar">
-    <div><div class="kicker">01 / INTERACTIVE ACCESS JOURNEY</div>
-      <h2 id="experience-title">ひとりの行員になって、権限の境界を通ってみる。</h2>
-      <p>下の場面を切り替えるだけで、どこまで進めるのかが変わります。色の変化と、動くアクセス経路に注目してみてください。</p>
+    <div><div class="kicker">01 / TOUCH & UNDERSTAND</div>
+      <h2 id="experience-title">場面を選ぶと、権限の流れが変わる。</h2>
+      <p>まずは3つのケースで、HENNGE OneとMotionBoardの違いを見てみよう。</p>
     </div>
-    <div class="exp-head-actions"><button type="button" id="exp-play" class="exp-play" aria-pressed="false">▶ 6つの場面を順に見る</button><span class="experience-badge"><span class="exp-live"></span>操作できる設計デモ</span></div>
   </div>
   <div class="exp-scenarios" role="group" aria-label="業務シナリオを選択">
-    <button type="button" class="exp-scenario" data-exp-scene="register"><span class="scene-num">01</span><span class="scene-label">登録担当</span><span class="scene-sub">登録まで進む</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="approve"><span class="scene-num">02</span><span class="scene-label">承認担当</span><span class="scene-sub">承認まで進む</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="viewer"><span class="scene-num">03</span><span class="scene-label">閲覧担当</span><span class="scene-sub">画面を見るだけ</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="authstop"><span class="scene-num">04</span><span class="scene-label">認証未完了</span><span class="scene-sub">入口で止まる</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="boardstop"><span class="scene-num">05</span><span class="scene-label">利用者未登録</span><span class="scene-sub">画面で止まる</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="self"><span class="scene-num">06</span><span class="scene-label">自己承認</span><span class="scene-sub">最後の操作で止まる</span></button>
+    <button type="button" class="exp-scenario" data-exp-scene="register"><span class="scene-num">01 / OK</span><span class="scene-label">登録できる</span><span class="scene-sub">入口も画面も通過</span></button>
+    <button type="button" class="exp-scenario" data-exp-scene="authstop"><span class="scene-num">02 / HENNGE</span><span class="scene-label">ログインできない</span><span class="scene-sub">入口で止まる</span></button>
+    <button type="button" class="exp-scenario" data-exp-scene="boardstop"><span class="scene-num">03 / MOTIONBOARD</span><span class="scene-label">画面を開けない</span><span class="scene-sub">ログイン後に止まる</span></button>
   </div>
+  <details class="more-scenes" id="more-scenes">
+    <summary>ほかの場面も試してみる <span>＋</span></summary>
+    <div class="exp-scenarios additional" role="group" aria-label="追加の業務シナリオ">
+      <button type="button" class="exp-scenario" data-exp-scene="approve"><span class="scene-num">04 / APPROVAL</span><span class="scene-label">承認できる</span><span class="scene-sub">承認担当の操作</span></button>
+      <button type="button" class="exp-scenario" data-exp-scene="viewer"><span class="scene-num">05 / READ ONLY</span><span class="scene-label">閲覧だけできる</span><span class="scene-sub">本部の確認担当</span></button>
+      <button type="button" class="exp-scenario" data-exp-scene="self"><span class="scene-num">06 / RULE</span><span class="scene-label">自己承認できない</span><span class="scene-sub">業務ルールで止まる</span></button>
+    </div>
+    <button type="button" id="exp-play" class="exp-play" aria-pressed="false">▶ 6つの場面を順に見る</button>
+  </details>
   <div class="exp-layout" id="exp-layout">
     <div class="exp-main">
-      <div class="exp-topline"><span><i class="exp-live"></i> LIVE ACCESS ROUTE</span><span id="exp-identity">支店担当 / 契約 DEMO-K00001</span></div>
+      <div class="exp-topline"><span><i class="exp-live"></i> アクセスの流れ</span><span id="exp-identity">支店担当 / 契約 DEMO-K00001</span></div>
       <div class="exp-track" aria-label="アクセスの流れ">
         <button type="button" id="exp-gate-h" data-exp-topic="auth" class="exp-gate">
-          <span class="exp-gate-num">01 / ENTRANCE</span>
+          <span class="exp-gate-num">01 / ENTRY</span>
           <span class="exp-gate-icon" aria-hidden="true">◎</span>
           <strong>HENNGE One</strong>
-          <span class="exp-gate-kind">入口に入れる？</span>
+          <span class="exp-gate-kind">ログインできる？</span>
           <span class="exp-gate-state" id="exp-h-state">確認中</span>
           <span class="exp-gate-foot" id="exp-h-foot">本人認証・MFA・端末</span>
           <span class="exp-more">設定や出典を見る ↗</span>
         </button>
-        <div class="exp-wire" id="exp-wire-1" aria-hidden="true"><span class="exp-traveller"></span><span class="exp-wire-label">SAML / SSO</span></div>
+        <div class="exp-wire" id="exp-wire-1" aria-hidden="true"><span class="exp-traveller"></span><span class="exp-wire-label">SSO</span></div>
         <button type="button" id="exp-gate-m" data-exp-topic="board" class="exp-gate">
-          <span class="exp-gate-num">02 / PERMISSION</span>
+          <span class="exp-gate-num">02 / BOARD</span>
           <span class="exp-gate-icon" aria-hidden="true">▦</span>
           <strong>MotionBoard</strong>
-          <span class="exp-gate-kind">この画面を開ける？</span>
+          <span class="exp-gate-kind">画面を開ける？</span>
           <span class="exp-gate-state" id="exp-m-state">確認中</span>
           <span class="exp-gate-foot" id="exp-m-foot">ユーザー・ロール・閲覧範囲</span>
           <span class="exp-more">設定や出典を見る ↗</span>
@@ -347,18 +444,20 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
       </div>
       <div class="exp-verdict" id="exp-verdict">
         <div class="exp-verdict-symbol" id="exp-verdict-symbol" aria-hidden="true">✓</div>
-        <div class="exp-verdict-body"><div class="exp-verdict-caption">この条件での結果</div><strong id="exp-outcome">登録まで進めます</strong><p id="exp-outcome-note">設定を切り替えると、ここに理由が表示されます。</p></div>
+        <div class="exp-verdict-body"><div class="exp-verdict-caption">登録・承認はどうなる？</div><strong id="exp-outcome">登録まで進めます</strong><p id="exp-outcome-note">設定を切り替えると、ここに理由が表示されます。</p></div>
         <div class="exp-progress" id="exp-progress" aria-label="判定が進んだ段階"><span></span><span></span><span></span></div>
       </div>
-      <div class="exp-adjust" role="group" aria-label="権限条件を手元で切り替える">
-        <span class="exp-adjust-title">条件を動かす</span>
+      <div class="exp-adjust" role="group" aria-label="権限条件を切り替える">
+        <span class="exp-adjust-title">条件を変える</span>
         <label class="exp-toggle"><input id="exp-switch-auth" type="checkbox" checked><span class="exp-toggle-slider"></span><span>HENNGEの認証</span></label>
         <label class="exp-toggle"><input id="exp-switch-board" type="checkbox" checked><span class="exp-toggle-slider"></span><span>MotionBoardの閲覧権限</span></label>
+        <details class="exp-advanced"><summary>業務ルール ▾</summary>
         <label class="exp-toggle"><input id="exp-switch-self" type="checkbox"><span class="exp-toggle-slider"></span><span>自分が登録した案件</span></label>
+        </details>
       </div>
     </div>
     <aside class="exp-side" aria-label="銀行業務の画面プレビュー">
-      <div class="exp-side-heading"><span>SCREEN PREVIEW</span><span class="exp-preview-dot">架空の画面</span></div>
+      <div class="exp-side-heading"><span>業務画面のイメージ</span><span class="exp-preview-dot">架空のデータ</span></div>
       <div class="exp-window">
         <div class="exp-appbar"><span class="exp-app-brand"><span class="exp-app-mark">M</span>業務ダッシュボード</span><span class="exp-avatar" id="exp-avatar">担</span></div>
         <div class="exp-app-content">
@@ -370,19 +469,21 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
         </div>
         <div class="exp-curtain" id="exp-curtain" aria-hidden="true"><span class="exp-curtain-lock">◇</span><strong id="exp-curtain-title">画面へのアクセスを確認中</strong><small id="exp-curtain-note">認証・権限によって表示が変わります</small></div>
       </div>
-      <div class="exp-guide"><span class="exp-guide-label">いま、どこが判断した？</span><p id="exp-owner-explain">HENNGE Oneがログイン条件を確認します。</p><button type="button" id="exp-follow" class="exp-follow">この判断の設定を見てみる <span>→</span></button></div>
+      <div class="exp-guide"><span class="exp-guide-label">ここがポイント</span><p id="exp-owner-explain">HENNGE Oneがログイン条件を確認します。</p><button type="button" id="exp-follow" class="exp-follow">この判断の設定を見てみる <span>→</span></button></div>
     </aside>
   </div>
-  <div class="exp-disclaimer"><span>設計の読み方</span> 光る経路は、アクセス条件を満たした段階を示します。3段階目は業務ルールの説明用で、独立した製品を指すものではありません。登録・承認は架空データを使った操作例です。</div>
+  <p class="exp-disclaimer">※ この画面は説明用のシミュレーションです。MotionBoardの標準機能だけで承認権限を完全に制御できることを保証するものではありません。</p>
 </section>
-<div class="section-heading"><div><div class="kicker">02 / OWNERSHIP</div><h2>まずは、この2つを分けて考える</h2></div></div>
-<div class="owner-map" aria-label="製品の責任分界">
-<div class="panel owner-card"><div class="owner-top"><span class="eyeline">HENNGE ONE</span><span>入口のアクセス制御</span></div><h3>安全に「入れる」条件を整える。</h3><p>本人確認、MFA、端末条件。MotionBoardに入るまでを主に担当します。</p><div class="owner-pills"><span>SSO</span><span>本人認証</span><span>MFA</span><span>端末ポリシー</span></div><button type="button" class="owner-action" data-owner="hennge">HENNGE側の論点を詳しく見る →</button></div>
-<div class="link-panel"><div class="link-chip"><strong>SAML</strong>メールアドレス等で連携</div></div>
-<div class="panel owner-card mb"><div class="owner-top"><span class="eyeline">MOTIONBOARD</span><span>ログイン後の権限制御</span></div><h3>入ってからの「できる」を決める。</h3><p>利用者・グループ・ロール・画面・データ・操作の権限を主に担当します。</p><div class="owner-pills"><span>ユーザー</span><span>ロール</span><span>フォルダー</span><span>表示・入力</span></div><button type="button" class="owner-action" data-owner="mb">MotionBoard側の論点を詳しく見る →</button></div>
-</div>
-<div class="boundary-strip"><div class="boundary-icon">i</div><p><strong>重要な境界：</strong>SSOでログインできても、そのまま「承認者」になるわけではありません。HENNGE公式のMotionBoard向け手順では、<strong>アカウントの自動作成はなし</strong>、接続方式は<strong>SP-Initiatedのみ</strong>とされています。<a href="#source-hsso">公式資料を見る</a></p></div>
-<div class="extras"><strong>承認や更新の最終チェックは？</strong>　MotionBoardの画面権限だけで担保できない業務ルールがある場合、DB・APIなども含めて設計します。ここは主題の2製品の責任分界を整理した後に検討します。</div>
+<details class="deep-dive" id="deep-dive">
+<summary class="deep-summary"><span><strong>仕組みや設定を詳しく見る</strong><small>HENNGE One・MotionBoardの責任分界、9つの設計論点と実機で確かめること</small></span><span class="plus-icon" aria-hidden="true">＋</span></summary>
+<div class="deep-content">
+<div class="boundary-strip"><div class="boundary-icon">i</div><p><strong>ここだけは押さえたい：</strong>HENNGE Oneでログインできても、MotionBoardのユーザー登録や承認権限は自動的に付与されません。HENNGE公式のMotionBoard向けSSOでは、<strong>ユーザーの自動作成なし</strong>と明記されています。<a href="#source-hsso">公式資料を見る</a></p></div>
+<nav class="head-nav sub-nav" aria-label="詳細資料の切り替え">
+<button type="button" data-view="boundary" class="active">担当と設定</button>
+<button type="button" data-view="matrix">比較表</button>
+<button type="button" data-view="scenario">詳細シミュレーター</button>
+<button type="button" data-view="checklist">確認リスト</button>
+</nav>
 <section class="interface">
 <div class="section-heading"><div><div class="kicker">03 / INTERACTIVE REFERENCE</div><h2 id="view-heading">各論点を、実装の粒度まで見ていく</h2><p id="view-subtitle">気になる項目を選ぶと、HENNGE One・MotionBoardの担当と、実際にやることを並べて確認できます。</p></div></div>
 <div id="view-boundary" class="views active">
@@ -409,8 +510,13 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
 </div></div></div></div>
 <div id="view-checklist" class="views"><div class="panel check-card"><div class="check-head"><div><div class="kicker">IMPLEMENTATION CHECKLIST</div><h2>設計・検証で実際にやること</h2><p class="muted">実施した項目にチェックして整理できます。チェック状態はページを閉じるとリセットされます。</p></div><div id="check-progress" style="font-size:12px;font-weight:850;color:var(--teal)">0 / 8 確認</div></div><div class="progress-track"><div class="progress-fill" id="check-fill"></div></div><div class="checks" id="check-items"></div><div class="check-actions"><button class="secondary-btn" type="button" id="reset-checks">チェックをクリア</button><button class="secondary-btn" type="button" id="copy-checks">確認事項をコピー</button></div></div></div>
 </section>
+</div>
+</details>
+<details class="source-details" id="source-details">
+<summary class="source-summary"><span><strong>公式資料・出典を確認する</strong><small>HENNGE OneとMotionBoardの設定根拠を9件掲載</small></span><span class="plus-icon" aria-hidden="true">＋</span></summary>
 <section class="sources" id="sources"><div class="section-heading"><div><div class="kicker">04 / PRIMARY & IMPLEMENTATION SOURCES</div><h2>公式資料から、根拠をたどれるように</h2><p>製品の仕様と運用上の設計案は分けて記載しています。検証前の論点は「要確認」として残します。</p></div></div><div class="source-grid" id="source-grid"></div>
 <div class="difference-note"><strong>バージョンについて：</strong>ここで示すMotionBoardの操作例にはClassic版やCloud版の記事が含まれます。検証環境のCloudと本番想定のオンプレ版で、機能・ライセンス・バージョン・SSO設定が一致するかは必ず別途確認してください。今回のロールマトリクスはあくまで業務設計例です。</div></section>
+</details>
 <div class="bottom"><span>ACCESS DESIGN / HENNGE One × MotionBoard / 2026-10-12</span><span>架空のデータのみ。実際の認証情報・契約情報にはアクセスしません。</span></div>
 </main></div>
 <script>
@@ -624,9 +730,9 @@ const target=key==='auth'?'sim-auth':key==='board'?'sim-board':'sim-self';
 $(target).checked=$('exp-switch-'+key).checked;note='';simRender();
 });
 document.querySelectorAll('[data-exp-topic]').forEach(b=>b.addEventListener('click',()=>{
-const name=b.dataset.expTopic;filter='all';selectTopic(name);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'});
+const name=b.dataset.expTopic;$('deep-dive').open=true;filter='all';selectTopic(name);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'});
 }));
-$('exp-follow').addEventListener('click',()=>{filter='all';selectTopic(expFocus);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})});
+$('exp-follow').addEventListener('click',()=>{$('deep-dive').open=true;filter='all';selectTopic(expFocus);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})});
 $('exp-register').addEventListener('click',()=>{if(!$('exp-register').disabled)$('sim-register').click()});
 $('exp-approve').addEventListener('click',()=>{if(!$('exp-approve').disabled)$('sim-approve').click()});
 
@@ -645,6 +751,11 @@ $('copy-checks').addEventListener('click',()=>{
  const lines=review.map((r,i)=>'['+(document.querySelector('[data-check="'+i+'"]').checked?'x':' ')+'] '+r.title+' — '+r.desc);
  const content='HENNGE One × MotionBoard 権限設計チェックリスト\n'+lines.join('\n');
  if(navigator.clipboard?.writeText){navigator.clipboard.writeText(content).then(()=>{$('copy-checks').textContent='コピーしました'}).catch(()=>{$('copy-checks').textContent='コピーできませんでした'})}else{$('copy-checks').textContent='コピー非対応のブラウザです'}
+});
+$('open-deep-link').addEventListener('click',()=>{$('deep-dive').open=true});
+document.addEventListener('click',event=>{
+const link=event.target.closest?.('a[href^="#source-"]');
+if(link)$('source-details').open=true;
 });
 renderList();renderDetail();renderMatrix();renderSources();renderChecks();resetSim();setExpScene('register');setView('boundary');
 })();
