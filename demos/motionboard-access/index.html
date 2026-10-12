@@ -1,180 +1,314 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark"><meta name="theme-color" content="#070c12">
-<title>ACCESS CONTROL / LAB | MotionBoard × HENNGE One</title>
-<meta name="description" content="銀行業務の登録・承認権限を、認証・画面・DBの3層で検討できる架空データの対話型デモ。製品機能と公式の出典つき。">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f8fb">
+<meta name="description" content="HENNGE OneとMotionBoardの権限の責任分界を、公式資料・設計作業・検証事項まで比較できる金融システム向けインタラクティブ設計ガイド。">
+<title>権限設計の分担を整理する | HENNGE One × MotionBoard</title>
 <style>
-:root{--bg:#070c12;--surface:#121d27;--panel:#15222d;--edge:#334652;--fg:#eaf1f4;--muted:#9aacba;--lime:#d2ff58;--cyan:#7ce9c8;--lav:#ad98ff;--red:#ff7c91;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;z-index:-1;inset:0;background:radial-gradient(ellipse 500px 500px at 98% 5%,#38499428,transparent 85%),radial-gradient(ellipse 500px 650px at 1% 90%,#275b5130,transparent 85%);pointer-events:none}
-a{color:var(--lime);text-underline-offset:4px}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
-header{position:relative;background:radial-gradient(circle at 78% 51%,#385f5550,transparent 36%),linear-gradient(150deg,#131e2a,#0a1017 80%);border-bottom:1px solid #344b53;padding:0 22px 85px;overflow:hidden;isolation:isolate}
-header::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(90deg,transparent 28%,black);z-index:-1}
-.shell{max-width:1270px;margin:auto}.topbar{display:flex;align-items:center;gap:16px;border-bottom:1px solid #ffffff20;min-height:75px}.brand{display:flex;align-items:center;gap:11px;font:850 13px var(--mono);letter-spacing:.035em;color:var(--fg);text-decoration:none}.mark{display:grid;place-items:center;width:41px;height:41px;background:var(--lime);border-radius:12px;transform:rotate(-7deg);color:#0a150d;font:950 17px var(--mono);box-shadow:0 0 35px #c2ff5863}.mark span{transform:rotate(7deg)}.nav-links{display:flex;align-items:center;gap:26px;margin-left:auto}.nav-links a{font:750 10px var(--mono);color:#b8c8cf;text-decoration:none}.nav-links a:hover{color:var(--lime)}.nav-live{margin-left:8px;border:1px solid #65875a;padding:8px 12px;border-radius:99px;background:#cdff5612;color:var(--lime);font:800 10px var(--mono);white-space:nowrap}.nav-live::before{content:"●";margin-right:8px;text-shadow:0 0 14px var(--lime);animation:pulse 2s infinite}
-.hero{position:relative;display:grid;grid-template-columns:1fr .7fr;gap:18px;align-items:center;min-height:350px}.eyebrow{color:var(--lime);letter-spacing:.16em;font:800 11px var(--mono)}h1{color:#f5fcf7;font-weight:900;font-size:clamp(40px,6vw,76px);line-height:1.11;letter-spacing:-.075em;margin:17px 0 23px}h1 .outline{color:transparent;-webkit-text-stroke:1px #bdcdbb}h1 .acid{color:var(--lime)}.hero-lead{font-size:14px;max-width:580px;color:#b4c3ca;line-height:1.95}.hero-labels{display:flex;gap:8px;flex-wrap:wrap;margin-top:23px}.hero-labels span{border:1px solid #527067;border-radius:6px;padding:6px 9px;font:750 10px var(--mono);color:#a7cbc0;background:#ffffff08}
-.orbit{position:relative;min-height:300px}.orbit::before{content:"";position:absolute;right:8%;top:3%;width:min(26vw,290px);aspect-ratio:1;border:1px solid #b5f9977c;border-radius:50%;box-shadow:0 0 0 30px #aeff800b,0 0 0 60px #aeff8009,0 0 0 90px #aeff8006,inset 0 0 70px #83ff9220;animation:slow 25s linear infinite}.orbit::after{content:"";position:absolute;top:48%;right:34%;height:15px;width:15px;border-radius:50%;border:2px solid var(--lime);box-shadow:0 0 0 8px #ccff5b29,0 0 30px var(--lime)}.orbit strong{position:absolute;right:0;bottom:9%;font:900 clamp(42px,6vw,85px)/1 var(--mono);letter-spacing:-.095em;color:#f0fff013;-webkit-text-stroke:1px #b1f69860}.orbit small{position:absolute;right:3%;top:4%;font:750 10px var(--mono);letter-spacing:.14em;color:#b7d6bc}
-main{position:relative;max-width:1270px;margin:-39px auto 0;padding:0 20px 44px}.grid{display:grid;grid-template-columns:minmax(307px,355px) minmax(0,1fr);gap:16px;align-items:start}
-.card{position:relative;border:1px solid #415360;background:linear-gradient(160deg,#172430,#111b26 78%);padding:22px;border-radius:19px;box-shadow:0 20px 65px #0005}
-.sidebar{position:sticky;top:14px;background:linear-gradient(160deg,#1e2e3a,#121d28 70%);border-color:#587066;overflow:hidden}.sidebar::before{content:"";position:absolute;height:3px;left:0;right:0;top:0;background:linear-gradient(90deg,var(--lime),var(--cyan),var(--lav))}
-.section-kicker{font:850 10px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--lime)}h2{font-size:20px;line-height:1.35;letter-spacing:-.035em;color:#f6fafb;margin:9px 0}h3{color:#eef5f8;font-size:14px;margin:0}p{margin:6px 0 0}.muted{color:var(--muted);font-size:12px;line-height:1.8}
-.field{display:block;font-size:12px;font-weight:800;color:#dfe9ef;margin:19px 0 7px}.select{width:100%;border-radius:10px;border:1px solid #516574;background:#0c151d;color:#eef5f8;padding:10px 12px}.select:focus{border-color:var(--lime)}
-#role{display:none}.role-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.role-option{border:1px solid #4b5d67;background:#162732;color:#d1e1e6;border-radius:9px;text-align:left;padding:10px 8px;min-height:85px;transition:.2s}.role-option strong{display:block;color:#e6f2f3;font-size:12px}.role-option small{display:block;color:#9bb0b4;font-size:10px;margin-top:4px}.role-option .num{display:block;color:#84b9a4;font:900 10px var(--mono);margin-bottom:9px}.role-option[aria-pressed=true]{border-color:var(--lime);background:#c5ff5514;box-shadow:inset 0 3px 0 var(--lime),0 0 21px #c5ff5512}.role-option[aria-pressed=true] .num{color:var(--lime)}.role-option:hover{border-color:var(--lime)}
-.scenarios{margin-top:14px}.preset-btns{display:flex;gap:6px;margin-top:8px}.preset{flex:1;border:1px solid #647871;border-radius:8px;color:#dbeadf;background:#ffffff0b;padding:9px 3px;font:800 10px var(--mono);transition:.2s}.preset:hover{border-color:var(--lime);background:#caff5a24;color:var(--lime)}
-.rule{height:1px;margin:20px 0;background:linear-gradient(90deg,#56676f,transparent)}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #ffffff10;font-size:12px;color:#e0e9ed}.toggle-row:last-child{border:0}.toggle-row small{display:block;font-size:10px;color:#90a0af;line-height:1.5;margin-top:2px}.toggle-row input{appearance:none;-webkit-appearance:none;position:relative;flex:none;height:23px;width:42px;border-radius:99px;border:1px solid #788991;background:#384753;transition:background .2s}.toggle-row input::before{content:"";position:absolute;top:3px;left:3px;height:15px;width:15px;background:#a4b4be;border-radius:50%;transition:.2s}.toggle-row input:checked{background:#bef85e35;border-color:var(--lime)}.toggle-row input:checked::before{background:var(--lime);transform:translateX(18px);box-shadow:0 0 8px #cbff62a3}
-.note{background:#203039;border:1px solid #47605c;border-radius:10px;padding:12px;color:#bed1cc;font-size:11px;margin-top:18px}
-.workspace{display:flex;flex-direction:column;gap:16px;min-width:0}.signal{position:relative;overflow:hidden;isolation:isolate;min-height:215px;background:linear-gradient(125deg,#1e3634,#13232b 60%,#10202a);border:1px solid #6f9c72;border-radius:19px;padding:24px 28px;box-shadow:0 20px 60px #0005}.signal::before{content:"";position:absolute;right:-105px;top:-150px;width:385px;height:385px;border-radius:50%;border:1px solid #d1ff7480;box-shadow:0 0 0 36px #baff720d,0 0 0 72px #baff7209,0 0 0 108px #baff7206;z-index:-1}.signal[data-tone=deny]{border-color:#9f5061;background:linear-gradient(125deg,#3a202e,#152029 80%)}.signal[data-tone=deny]::before{border-color:#ff8c9866;box-shadow:0 0 0 36px #ff87920f,0 0 0 72px #ff879209}.signal[data-tone=neutral]{border-color:#736799;background:linear-gradient(125deg,#30283e,#15202a 80%)}.signal[data-tone=neutral]::before{border-color:#aa94ff88;box-shadow:0 0 0 36px #ad92ff0e,0 0 0 72px #ad92ff08}
-.signal-kicker{font:850 10px var(--mono);color:#bce5cf;letter-spacing:.13em}.signal-kicker::before{content:"●";margin-right:9px;color:var(--lime);text-shadow:0 0 10px var(--lime)}.signal-value{font:900 clamp(35px,4.9vw,61px)/1.15 var(--mono);letter-spacing:-.075em;color:var(--lime);margin:22px 0 8px;overflow-wrap:anywhere}.signal[data-tone=deny] .signal-value{color:var(--red)}.signal[data-tone=neutral] .signal-value{color:var(--lav)}.signal-detail{font-size:12px;color:#c4d8d4}.signal-meta{display:flex;gap:25px;flex-wrap:wrap;margin-top:20px;padding-top:12px;border-top:1px solid #d3e8dc2a;font:750 10px var(--mono);color:#a4b7ba}.signal-meta b{color:#e5f5e9;margin-left:8px}
-.headline{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.chip{display:inline-flex;align-items:center;border:1px solid #5c7080;border-radius:8px;background:#2a4050;color:#e3edf3;padding:6px 10px;font:850 10px var(--mono)}.chip.good{color:var(--lime);background:#31452c;border-color:#7ca766}.chip.bad{color:var(--red);background:#472b37;border-color:#975264}.chip.warn{color:#d4c0ff;background:#322d4a;border-color:#685e97}
-.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}.stage{position:relative;min-width:0;border:1px solid #4b6271;border-radius:13px;background:#0c1721;padding:15px;transition:border .2s,box-shadow .2s,transform .2s}.stage:hover{transform:translateY(-3px)}.stage[data-state=good]{border-color:#80aa79;box-shadow:inset 0 2px 0 #bff95b7a}.stage[data-state=bad]{border-color:#906070;box-shadow:inset 0 2px 0 #ff809054}.stage:not(:last-child)::after{content:"→";position:absolute;z-index:2;right:-15px;top:40%;font:900 18px var(--mono);color:var(--lime);text-shadow:0 0 16px #b9ff63}.stage .index{color:#83a5b3;font:850 10px var(--mono);letter-spacing:.08em}.stage .brand{margin:18px 0 9px;font-size:17px;font-weight:900;color:#f3f9f9}.stage p{font-size:11px;color:#a5b7c5;line-height:1.7;min-height:60px}.stage .state{font-size:11px;font-weight:850;margin:11px 0 4px}.stage .state.good{color:var(--lime)}.stage .state.bad{color:var(--red)}.doc-btn{border:1px solid #526779;background:#2739447a;color:#c9e0e2;border-radius:8px;font:800 10px var(--mono);padding:8px 9px;margin-top:9px;transition:.2s}.doc-btn:hover{background:var(--lime);color:#111d18;border-color:var(--lime)}
-.decision{background:linear-gradient(135deg,#192a37,#0e1923);border:1px solid #506572;border-radius:13px;padding:18px;margin-top:18px}.decision strong{color:#f5f8fb;font-size:16px}.contract{display:flex;align-items:center;flex-wrap:wrap;gap:9px;color:#b3c6d2;font-size:12px;margin:16px 0}.contract b{color:var(--lime);font:850 12px var(--mono)}.terminal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.action{width:100%;border:1px solid #c9ff83;background:var(--lime);color:#132012;padding:12px 10px;border-radius:9px;font-weight:850;box-shadow:0 6px 26px #a4ff5a24;transition:transform .2s,box-shadow .2s}.action:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 35px #a4ff5a4b}.action.approve{background:var(--lav);border-color:#c5b5ff;color:#18112a;box-shadow:0 6px 25px #ac98ff24}.action:disabled{background:#2e404c;color:#8194a2;border-color:#536774;box-shadow:none;cursor:not-allowed}.action-note{font-size:11px;color:#9fb2c1;margin-top:8px}.audit{margin-top:14px;border-left:2px solid var(--lime);background:#d1ff5a0e;padding:10px 12px;color:#c8dbd6;font:650 11px/1.7 var(--mono)}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.smallcard{background:#0b1821;border:1px solid #405461;border-radius:12px;padding:15px}.smallcard .answer{color:#e3f1f2;font-size:13px;font-weight:900;margin-top:7px}.smallcard p{font-size:11px;color:#a3b6c4;line-height:1.8}.smallcard .doc-btn{margin-top:13px}
-.sect{margin-top:20px}.tabs{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0}.tab{font-size:12px;font-weight:750;border:1px solid #455966;border-radius:8px;background:#152630;color:#aabeca;padding:8px 11px;transition:.2s}.tab:hover{border-color:var(--lime);color:var(--lime)}.tab.current{color:#101c15;border-color:var(--lime);background:var(--lime);font-weight:850}.evidence{border:1px solid #405560;background:linear-gradient(150deg,#152632,#101a23);border-radius:12px;padding:18px}.evidence .status{font:850 10px var(--mono);color:#ffd395}.evidence strong{display:block;color:#f4f8f8;font-size:17px;margin:9px 0}.evidence .definition{font-size:12px;line-height:1.9;color:#c8d5dc}.evidence .impl{margin-top:15px;border-left:2px solid var(--lav);background:#ab91ff12;border-radius:0 7px 7px 0;padding:11px 13px;color:#d3c8ff;font-size:12px;line-height:1.7}#evidence-links a{color:var(--lime);font-size:11px}
-.source-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}.source{border:1px solid #455d68;border-radius:12px;background:linear-gradient(150deg,#192a35,#0e1923);padding:17px;display:flex;flex-direction:column;min-height:230px;transition:.2s}.source:hover{transform:translateY(-3px);border-color:var(--lime)}.source h3{font-size:14px;line-height:1.5;margin:13px 0 8px}.source p{color:#a7b9c6;font-size:11px;line-height:1.8;flex:1}.source a{display:inline-block;margin-top:16px;font-size:11px;font-weight:850;color:var(--lime)}.number{font:850 10px var(--mono);color:var(--lav);letter-spacing:.03em}.warning{background:#3d2e1c6b;border:1px solid #906c45;border-radius:11px;color:#f0d4aa;padding:16px;font-size:12px;line-height:1.85;margin-top:20px}.warning b{color:#ffdaa2}
-footer{padding:28px 4px;color:#8b9ba9;font:750 10px var(--mono)}.foot-accent{color:var(--lime)}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}@keyframes slow{to{transform:rotate(360deg)}}
-@media(max-width:1160px){.source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage .brand{font-size:15px}}
-@media(max-width:920px){.grid{grid-template-columns:1fr}.sidebar{position:static}.hero{grid-template-columns:1fr .5fr}.flow .stage p{min-height:55px}}
-@media(max-width:640px){header{padding:0 15px 70px}.topbar{min-height:65px}.nav-links{display:none}.nav-live{margin-left:auto;font-size:9px;padding:7px}.brand{font-size:11px}.mark{width:35px;height:35px}.hero{display:block;min-height:auto;padding:35px 0 0}.hero h1{font-size:clamp(42px,10vw,61px)}.hero-lead{font-size:12px}.orbit{display:none}main{padding:0 11px 38px;margin-top:-35px}.grid{gap:12px}.card,.signal{padding:18px;border-radius:15px}.workspace{gap:12px}.role-option{min-height:83px;padding:9px 6px}.role-option strong{font-size:11px}.role-option small{font-size:9px}.signal{min-height:210px}.signal-value{font-size:clamp(36px,10vw,55px)}.signal::before{right:-190px}.signal-meta{gap:9px 15px}.flow{grid-template-columns:1fr;gap:9px}.stage{padding:13px}.stage p{min-height:0}.stage .brand{margin:7px 0}.stage:not(:last-child)::after{right:15px;top:auto;bottom:-15px;transform:rotate(90deg)}.split,.source-grid{grid-template-columns:1fr}.terminal{gap:8px}.action{font-size:12px}.source{min-height:0}.tab{padding:8px 10px;font-size:11px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+:root{color-scheme:light;--paper:#f5f7fa;--white:#fff;--ink:#13263b;--muted:#64768a;--line:#dfe6ed;--edge:#b9c7d5;--navy:#142e47;--navy2:#0b2034;--blue:#346cbd;--blue-soft:#edf3fc;--teal:#087d76;--teal-soft:#eaf7f4;--gold:#b78b48;--gold-soft:#faf4e8;--red:#b45a4a;--red-soft:#fff1ef;--shadow:0 14px 40px #1f41600a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.68;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{cursor:pointer}a{color:var(--blue);text-underline-offset:3px}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #6fa8e1;outline-offset:2px}
+.wrap{max-width:1272px;margin:auto;padding:0 24px}
+.topbar{position:sticky;top:0;z-index:30;background:#fffffff5;backdrop-filter:blur(17px);border-bottom:1px solid var(--line)}
+.toprow{min-height:65px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.identity{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-size:12px;letter-spacing:.045em;font-weight:850}
+.symbol{height:34px;width:34px;border-radius:10px;background:var(--navy);color:white;display:grid;place-items:center;font:850 15px ui-monospace,monospace}
+.brand-sub{font-size:10px;color:var(--muted);display:block;font-weight:630;letter-spacing:.015em}
+.head-nav{display:flex;gap:3px;flex-wrap:wrap}.head-nav button{border:0;border-radius:9px;color:#6c7d8a;background:transparent;padding:9px 13px;font-size:12px;font-weight:700}
+.head-nav button.active{color:#193e6e;background:#edf2f9}
+.header-meta{font:800 10px ui-monospace,monospace;letter-spacing:.05em;color:var(--teal);background:#e7f6f2;border:1px solid #cde7df;border-radius:99px;padding:6px 11px;white-space:nowrap}
+.hero{padding:47px 0 28px;position:relative;overflow:hidden}
+.eyebrow{color:var(--teal);font:830 10px ui-monospace,monospace;letter-spacing:.16em}
+.hero h1{font-size:clamp(30px,4.2vw,52px);line-height:1.28;letter-spacing:-.061em;max-width:890px;margin:17px 0;color:var(--navy);font-weight:830}
+.hero h1 em{font-style:normal;color:var(--teal);border-bottom:3px solid #aedfd2}
+.hero p{font-size:14px;max-width:830px;color:#5b6f81;line-height:1.95}
+.stat-row{display:flex;gap:11px;flex-wrap:wrap;margin-top:21px}.stat{border:1px solid var(--line);background:white;border-radius:9px;padding:9px 13px;font-size:11px;color:var(--muted)}.stat strong{font-size:12px;color:var(--navy)}
+.canvas{margin-top:8px;padding-bottom:64px}
+.kicker{font:850 10px ui-monospace,monospace;letter-spacing:.12em;color:var(--teal);text-transform:uppercase}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin:22px 0 15px}
+.section-heading h2{font-size:22px;letter-spacing:-.035em;line-height:1.4;margin:5px 0 0;color:var(--navy)}.section-heading p{font-size:12px;color:var(--muted);margin:3px 0}
+.panel{background:white;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}
+.owner-map{display:grid;grid-template-columns:minmax(0,1fr) 135px minmax(0,1fr);align-items:stretch;gap:13px}
+.owner-card{padding:23px 24px 22px;min-width:0;border-top:3px solid var(--blue);position:relative;transition:transform .2s,box-shadow .2s,border-color .2s}
+.owner-card.mb{border-top-color:var(--teal)}.owner-card:hover{transform:translateY(-2px);box-shadow:0 17px 34px #18395612}
+.owner-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.owner-top span{font-size:10px;color:#93a3af;font-weight:850;letter-spacing:.12em}
+.eyeline{color:var(--blue);font:900 11px ui-monospace,monospace;letter-spacing:.12em}.mb .eyeline{color:var(--teal)}
+.owner-card h3{font-size:21px;letter-spacing:-.038em;margin:14px 0 7px;color:#183249;line-height:1.38}.owner-card p{font-size:12px;color:var(--muted);min-height:42px}
+.owner-pills{display:flex;flex-wrap:wrap;gap:7px;margin:17px 0 15px}.owner-pills span{font-size:11px;font-weight:680;border:1px solid #e1e8ef;border-radius:6px;padding:5px 8px;background:#f8fafc}
+.owner-action{border:0;padding:0;color:var(--blue);font-weight:780;background:none;font-size:12px}.mb .owner-action{color:var(--teal)}
+.link-panel{align-self:stretch;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#6f8793;text-align:center;font-size:10px;line-height:1.4}
+.link-panel:before{content:"";position:absolute;top:18%;bottom:18%;left:50%;width:1px;background:linear-gradient(#bfcad6,#8cb9aa,#bfcad6)}
+.link-chip{z-index:1;background:#e9f0f4;border:1px solid #cbd7df;border-radius:9px;padding:12px 10px;color:#466271;font:800 10px ui-monospace,monospace;box-shadow:0 2px 12px #153f5010}
+.link-chip strong{color:#173f57;display:block;font-size:13px;margin-bottom:4px}
+.boundary-strip{display:flex;gap:12px;align-items:flex-start;margin-top:13px;background:#f4f7fa;border:1px solid #e1e7ec;border-radius:12px;padding:15px 18px}
+.boundary-icon{background:#dde9f0;display:grid;place-items:center;height:26px;width:26px;flex:none;border-radius:8px;color:#325b74;font-weight:900}
+.boundary-strip p{margin:0;font-size:12px;color:#476071}.boundary-strip strong{color:#213f54}
+.extras{margin-top:12px;background:#fff;border:1px dashed #c6d3df;padding:13px 16px;border-radius:11px;font-size:12px;color:#5e6f7d}
+.extras strong{color:#243f57}
+.interface{margin-top:30px}
+.views{display:none;animation:rise .28s ease-out}.views.active{display:block}
+.explore{display:grid;grid-template-columns:330px minmax(0,1fr);gap:17px}
+.topic-list{padding:17px;align-self:start}
+.list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+.list-head h3{font-size:14px;margin:0}.count{font:800 11px ui-monospace,monospace;color:#81919f}
+.filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
+.filter{border:1px solid #e2e9ee;background:#f7f9fb;padding:5px 9px;font-size:10px;color:#617588;border-radius:7px;font-weight:750}
+.filter.on{color:white;background:#253f58;border-color:#253f58}
+.topic-buttons{display:grid;gap:7px}
+.topic{position:relative;background:white;border:1px solid #e1e8ee;border-radius:11px;text-align:left;width:100%;padding:13px 13px;display:grid;grid-template-columns:29px 1fr;gap:10px;align-items:start;transition:.16s}
+.topic:hover{background:#f6f9fd;border-color:#c1d5e2}.topic.selected{border-color:#85bdb5;background:#f0f8f6;box-shadow:inset 3px 0 0 var(--teal)}
+.topic .idx{font:850 11px ui-monospace,monospace;color:#8da0ae;padding-top:1px}
+.topic b{display:block;color:#213c51;font-size:12px;line-height:1.45}.topic small{display:block;font-size:10px;color:#798b99;margin-top:4px}
+.topic-owner{font-weight:750;color:var(--teal)}
+.detail{padding:25px 27px;min-width:0}
+.detail-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.micro-label{font:850 10px ui-monospace,monospace;color:#8195a4;letter-spacing:.1em}
+.pill{font-size:10px;border-radius:7px;padding:5px 9px;color:#466277;background:#eff3f7;border:1px solid #e0e8ef;font-weight:750}
+.pill.verified{color:#2b6f62;background:#eaf7f2;border-color:#ccebe0}.pill.needs{color:#895f26;background:#fff7e8;border-color:#f1e1bb}
+.detail h3{font-size:clamp(20px,2.5vw,27px);letter-spacing:-.043em;color:#183449;line-height:1.42;margin:13px 0 8px}
+.lede{font-size:13px;line-height:1.9;color:#607184;margin:0 0 20px}
+.lane-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lane{border:1px solid #dce6ef;border-radius:12px;overflow:hidden;background:#fbfdff}
+.lane.mb{border-color:#d0e6e1;background:#fbfefd}
+.lane-title{padding:12px 14px 11px;display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e3e9ed;background:#f3f7fc}
+.lane.mb .lane-title{background:#edf8f5}
+.lane-title b{font-size:12px;color:#225389}.lane.mb .lane-title b{color:#117168}
+.lane-title span{font-size:10px;color:#73879b}
+.lane-body{padding:14px}
+.mini-heading{font:800 10px ui-monospace,monospace;color:#798c9c;letter-spacing:.09em;margin-bottom:5px}
+.lane-body p{font-size:12px;color:#455e70;line-height:1.87;margin:0 0 14px}
+.lane-body p:last-child{margin-bottom:0}
+.divider{height:1px;background:#e6ebf0;margin:15px 0}
+.validation{margin-top:13px;padding:17px;border:1px solid #e5e5df;background:#fbfaf7;border-radius:12px}
+.validation-head{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}.validation-head b{font-size:13px;color:#5f5038}.validation-head small{font-size:10px;color:#9f8764;font-weight:720}
+.tests{display:grid;gap:9px;margin:12px 0 0;padding-left:18px;font-size:12px;line-height:1.8;color:#605e58}
+.caveat{margin-top:12px;color:#776653;font-size:12px;line-height:1.75}
+.refs{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.ref-link{display:inline-flex;align-items:center;text-decoration:none;border:1px solid #cddde9;background:#f5f9fb;border-radius:7px;padding:8px 10px;color:#2d597a;font-size:11px;font-weight:750}.ref-link:hover{background:#e9f4fa}
+.matrix-card,.scenario-card,.check-card{padding:25px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:#64798b;font-size:11px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:3px;background:var(--blue);display:inline-block}.dot.mb{background:var(--teal)}.dot.both{background:#b49a6a}.dot.need{background:#b98345}
+.data-table{border:1px solid var(--line);border-radius:12px;overflow:auto;margin-top:17px}
+table{border-collapse:collapse;width:100%;text-align:left;font-size:12px;min-width:720px}
+th{padding:13px 15px;background:#f5f8fb;color:#60788b;font-size:11px;font-weight:790;border-bottom:1px solid var(--line)}
+td{padding:13px 15px;border-bottom:1px solid #edf1f4;color:#38536b;vertical-align:top}
+tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
+.table-topic{border:0;background:transparent;color:#1d4264;text-align:left;font-weight:780;padding:0;text-decoration:underline;text-decoration-color:#ccdae5;text-underline-offset:3px}
+.ownerline{display:inline-block;color:#2a668a;font-size:11px;font-weight:730}.ownerline.mb{color:var(--teal)}.ownerline.both{color:#896536}
+.table-note{background:#f7f9fb;border-radius:9px;padding:12px 13px;font-size:11px;color:#728495;margin-top:15px;line-height:1.8}
+.scenario-layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
+.formside{background:#f8fafc;border:1px solid #e2eaf0;border-radius:13px;padding:19px}
+.formgroup{margin-bottom:17px}.formgroup:last-child{margin-bottom:0}
+.formgroup>label,.formlegend{display:block;color:#486276;font-size:11px;font-weight:830;margin-bottom:7px}
+.choice{display:flex;gap:6px;flex-wrap:wrap}.choice button{border:1px solid #dce6ed;color:#60778c;background:white;font-size:11px;font-weight:750;padding:8px 12px;border-radius:8px}.choice button.on{border-color:#247b70;background:#e4f5f0;color:#176b60}
+.formside select{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #cfdce6;color:var(--ink);background:#fff;font-size:12px}
+.toggle{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:9px 0;border-bottom:1px solid #e7edf2;font-size:12px;color:#38536b}.toggle input{accent-color:var(--teal);height:17px;width:17px}
+.workflow{min-width:0}.lane-result{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result{border:1px solid #dae4ea;border-radius:12px;padding:16px 18px;background:white}.result .result-label{font-size:11px;font-weight:850;color:#6c8295}.result .result-state{font-size:16px;font-weight:840;margin:9px 0 4px;color:#1e536b}.result.ok{border-color:#b9ddd2;background:#f4fbf8}.result.no{border-color:#ebd3cc;background:#fff9f8}.result.no .result-state{color:#99574e}.result p{font-size:11px;color:#657b88;margin:0;min-height:36px}
+.workflow .testcase{margin-top:13px;background:#f7f9fc;border:1px solid #e0e7ee;border-radius:12px;padding:19px}
+.testcase h3{font-size:16px;color:var(--navy);margin-bottom:5px}
+.testcase .case-meta{font-size:11px;color:#758799}.case-actions{display:flex;gap:8px;margin-top:16px}
+.action{flex:1;border-radius:9px;border:1px solid #2a5778;background:#194767;color:white;padding:11px;font-weight:800;font-size:12px}
+.action.alt{background:#168077;border-color:#168077}.action:disabled{background:#edf0f3;border-color:#d5e0e8;color:#93a3b1;cursor:not-allowed}
+.reason{margin-top:12px;background:white;border:1px solid #dce5ec;border-left:3px solid #7b9eb4;border-radius:8px;padding:12px 14px;font-size:12px;color:#4e6576;line-height:1.7}
+.smallhelp{margin-top:14px;font-size:11px;line-height:1.85;color:#6d8191}
+.check-head{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap}
+.progress-track{width:100%;height:7px;background:#ecf1f4;border-radius:99px;overflow:hidden;margin:15px 0 18px}.progress-fill{height:100%;background:linear-gradient(90deg,#2a678e,#10a68e);width:0;transition:width .25s}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.check-item{display:flex;align-items:flex-start;gap:11px;border:1px solid #e2eaf0;border-radius:11px;padding:14px 16px;background:#fbfcfd}
+.check-item input{accent-color:#16827a;height:18px;width:18px;flex:none;margin-top:2px}
+.check-item b{display:block;font-size:12px;color:#1d4057}.check-item small{display:block;font-size:11px;color:#7b8c9a;margin-top:4px;line-height:1.65}
+.check-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+.secondary-btn{border:1px solid #c5d4e0;background:white;color:#37607d;font-size:11px;font-weight:800;border-radius:8px;padding:9px 14px}
+.sources{margin-top:34px}
+.source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.source-card{background:white;border:1px solid var(--line);border-radius:12px;padding:17px;min-width:0}
+.source-card .number{font:850 10px ui-monospace,monospace;letter-spacing:.1em;color:#7491a2}
+.source-card h3{font-size:13px;line-height:1.5;margin:10px 0 8px;color:#1f455c}
+.source-card p{font-size:11px;color:#788896;line-height:1.75;margin:0 0 14px;min-height:46px}
+.source-card a{font-size:11px;font-weight:810;text-decoration:none}
+.difference-note{margin-top:16px;border:1px solid #e5d8c2;background:#fff9ec;border-radius:12px;padding:17px 19px;font-size:12px;line-height:1.85;color:#796242}.difference-note strong{color:#57462d}
+.bottom{border-top:1px solid #dce4eb;margin-top:36px;padding-top:19px;font-size:11px;color:#7e90a0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.hidden{display:none!important}
+@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1070px){.explore{grid-template-columns:295px 1fr}.source-grid{grid-template-columns:repeat(2,1fr)}.scenario-layout{grid-template-columns:285px 1fr}.head-nav button{padding:8px 9px}}
+@media(max-width:830px){.toprow{flex-wrap:wrap;padding-top:11px;padding-bottom:9px}.header-meta{display:none}.head-nav{width:100%;justify-content:space-between}.head-nav button{flex:1;padding:10px 5px}.owner-map{grid-template-columns:1fr 1fr;gap:9px}.link-panel{grid-column:1/-1;grid-row:2;flex-direction:row;padding:4px}.link-panel:before{height:1px;width:80%;top:50%;left:10%;bottom:auto}.link-chip{padding:8px 14px}.link-chip strong{display:inline;margin-right:8px}.explore,.scenario-layout{grid-template-columns:1fr}.topic-list{padding:15px}.topic-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:590px){.wrap{padding:0 14px}.hero{padding:32px 0 20px}.hero h1{font-size:clamp(28px,7vw,39px)}.hero p{font-size:12px}.owner-map,.lane-grid,.checks,.lane-result,.source-grid{grid-template-columns:1fr}.link-panel{grid-column:1;grid-row:auto}.owner-card{padding:19px}.owner-card p{min-height:0}.owner-card h3{font-size:18px}.detail,.matrix-card,.scenario-card,.check-card{padding:17px}.topic-buttons{grid-template-columns:1fr}.topic-list{padding:13px}.topic{padding:10px}.formside{padding:14px}.section-heading h2{font-size:19px}.stat-row{gap:7px}.stat{padding:7px 9px}.bottom{font-size:10px}.owner-pills{margin:13px 0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style></head>
 <body>
-<header id="top"><div class="shell">
-<nav class="topbar" aria-label="ページ内ナビゲーション"><a href="#top" class="brand"><span class="mark"><span>AC</span></span>ACCESS CONTROL / LAB</a><div class="nav-links"><a href="#simulator">01 / SIMULATE</a><a href="#explain">02 / CAPABILITIES</a><a href="#sources">03 / EVIDENCE</a></div><div class="nav-live">LIVE SANDBOX</div></nav>
-<div class="hero"><div><div class="eyebrow">FINANCIAL IT / PERMISSION ARCHITECTURE</div><h1>だれが、何を<br><span class="outline">できるのか。</span><span class="acid">ひと目で。</span></h1><p class="hero-lead">同じ画面でも、担当する人や案件の状態によって、できる操作は変わります。その違いを、HENNGE One・MotionBoard・業務DBの役割と一緒に確かめられます。</p><div class="hero-labels"><span>THREE LAYERS</span><span>REAL-TIME DECISION</span><span>OFFICIAL SOURCES</span></div></div><div class="orbit" aria-hidden="true"><small>IDENTITY → PERMISSION → EXECUTION</small><strong>ACL/03</strong></div></div>
+<header class="topbar"><div class="wrap toprow">
+<a class="identity" href="#top"><span class="symbol">A<span style="color:#74d6c0">/</span>C</span><span>ACCESS DESIGN<span class="brand-sub">金融業務システム / 権限設計ガイド</span></span></a>
+<nav class="head-nav" aria-label="コンテンツ切り替え">
+<button type="button" data-view="boundary" class="active">責任分界を整理</button>
+<button type="button" data-view="matrix">一覧で比較</button>
+<button type="button" data-view="scenario">操作を試す</button>
+<button type="button" data-view="checklist">進め方を確認</button>
+</nav><span class="header-meta">DESIGN REFERENCE / 2026</span>
 </div></header>
-<main id="simulator">
-<div class="grid">
-<aside class="card sidebar">
-<div class="section-kicker">01 / Scenario Controls</div><h2>使う人と条件を選ぶ</h2><p class="muted">いくつか切り替えてみてください。誰が何をできるのか、右側の画面に反映されます。</p>
-<label class="field" for="role">WHO / だれの画面を見てみる？</label>
-<div class="role-switch" role="group" aria-label="ロール切替"><button type="button" class="role-option" data-role-preset="staff" aria-pressed="true"><span class="num">01 / STAFF</span><strong>支店担当</strong><small>登録する人</small></button><button type="button" class="role-option" data-role-preset="manager" aria-pressed="false"><span class="num">02 / APPROVE</span><strong>承認者</strong><small>承認する人</small></button><button type="button" class="role-option" data-role-preset="head" aria-pressed="false"><span class="num">03 / READ</span><strong>本部閲覧</strong><small>確認する人</small></button></div>
-<div class="scenarios"><div class="section-kicker">QUICK START / まずは試してみる</div><div class="preset-btns"><button type="button" class="preset" data-scenario="register">↗ 登録できる</button><button type="button" class="preset" data-scenario="approve">✓ 承認できる</button><button type="button" class="preset" data-scenario="deny">— 承認できない</button></div></div>
-<select class="select" id="role"><option value="staff">支店担当者（登録する人）</option><option value="manager">支店承認者（承認する人）</option><option value="head">本部閲覧担当（見るだけ）</option></select>
-<div class="rule"></div>
-<div class="section-kicker">HENNGE One / Access Control</div>
-<label class="toggle-row"><span>ログインが完了している<small>本人認証の結果を想定</small></span><input type="checkbox" id="idOk" checked></label>
-<label class="toggle-row"><span>追加の認証も完了している<small>MFA（多要素認証）の条件</small></span><input type="checkbox" id="mfa" checked></label>
-<label class="toggle-row"><span>許可された端末を使っている<small>端末のアクセス条件</small></span><input type="checkbox" id="device" checked></label>
-<div class="rule"></div>
-<div class="section-kicker">MotionBoard / Local Settings</div>
-<label class="toggle-row"><span>MotionBoardに利用者登録がある<small>SSOだけでは自動作成されません</small></span><input type="checkbox" id="mbAccount" checked></label>
-<label class="toggle-row"><span>この画面を開く権限がある<small>フォルダー・グループの設定</small></span><input type="checkbox" id="folder" checked></label>
-<label class="toggle-row"><span>使えないボタンを隠してみる<small>見せ方の例。実装方法は要検証</small></span><input type="checkbox" id="hide"></label>
-<div class="rule"></div>
-<div class="section-kicker">DB / Business Rules</div>
-<label class="field" for="status">いま、案件はどんな状態？</label>
-<select class="select" id="status"><option value="draft" selected>下書き</option><option value="pending">承認待ち</option><option value="approved">承認済み</option></select>
-<label class="field" for="scope">この契約はどこの支店のもの？</label>
-<select class="select" id="scope"><option value="own">自分の所属支店</option><option value="other">別の支店</option></select>
-<label class="toggle-row"><span>自分が登録した案件である<small>自分の案件を自分で承認しないルール</small></span><input type="checkbox" id="self"></label>
-<div class="note">ここでの操作はお試し用です。実際のHENNGE One・MotionBoard・業務DBには接続せず、銀行のデータも変更しません。</div>
-</aside>
-<div class="workspace">
-<section class="signal" id="signal" data-tone="neutral" aria-live="polite">
-<div class="signal-kicker">● CURRENT ACCESS / いまの条件でできること</div><div class="signal-value" id="signal-value">VERIFYING...</div><div class="signal-detail" id="signal-detail">選んだ条件を確認しています</div><div class="signal-meta"><span>SUBJECT <b id="signal-subject">BRANCH</b></span><span>CONTRACT <b>DEMO-K00001</b></span><span>ACTION <b id="signal-action">NONE</b></span></div></section>
-<section class="card">
-<div class="headline"><div><div class="section-kicker">02 / Live Decision</div><h2>どこで、何が決まるの？</h2></div><span class="chip" id="summary-chip">判定中</span></div>
-<div class="flow">
-<div class="stage"><div class="index">STEP 01 — まず、本人確認</div><div class="brand">HENNGE One</div><p>ログインした人と、アクセス条件を確認します。</p><div class="state" id="hstate">判定中</div><button class="doc-btn" data-guide="auth">使う機能と出典を見る ↗</button></div>
-<div class="stage"><div class="index">STEP 02 — 次に、画面の権限</div><div class="brand">MotionBoard</div><p>この画面やデータを見てよいか確認します。</p><div class="state" id="mstate">判定中</div><button class="doc-btn" data-guide="board">使う機能と出典を見る ↗</button></div>
-<div class="stage"><div class="index">STEP 03 — 最後に、業務の判断</div><div class="brand">業務DB・処理</div><p>登録・承認を進めてよいか、最後に確かめます。</p><div class="state" id="bstate">判定中</div><button class="doc-btn" data-guide="guard">設計の考え方を見る ↗</button></div>
-</div>
-<div class="decision">
-<div class="headline"><div><div class="section-kicker">TRY AN ACTION / 操作を試す</div><strong>この担当者の操作画面</strong></div><span class="chip" id="role-chip">支店担当者</span></div>
-<div class="contract"><span>契約番号 <b>DEMO-K00001</b></span><span>・</span><span id="status-label">承認待ち</span><span>・</span><span id="scope-label">所属支店</span></div>
-<div class="terminal"><div id="register-box"><button class="action" id="register">登録（承認申請）</button><p class="action-note" id="register-note"></p></div><div id="approve-box"><button class="action approve" id="approve">承認</button><p class="action-note" id="approve-note"></p></div></div>
-<div class="audit" role="status" aria-live="polite" id="audit">条件を切り替えると判定理由が表示されます。</div>
-</div>
-<div class="split"><div class="smallcard"><div class="section-kicker">VIEW / 見られる範囲</div><div class="answer" id="visible-answer">確認中</div><p>ボタンを隠すことと、操作を許可することは別の仕組みです。</p><button class="doc-btn" data-guide="visibility">表示の仕組みを見る ↗</button></div><div class="smallcard"><div class="section-kicker">ACTION / 操作できる範囲</div><div class="answer" id="update-answer">確認中</div><p>登録や承認の直前にも、権限と案件の状態を確認する設計が大切です。</p><button class="doc-btn" data-guide="write">登録の仕組みを見る ↗</button></div></div>
+<div class="wrap" id="top">
+<section class="hero">
+<div class="eyebrow">ACCESS / RESPONSIBILITY / IMPLEMENTATION</div>
+<h1>入口の認証と、<em>業務の権限</em>を、<br>分けて考える。</h1>
+<p>HENNGE OneとMotionBoard。どちらが何を担当し、どこまでできるのか。<br>銀行向けの登録・承認業務を例に、必要な設定、検証事項、根拠となる資料まで、一つずつ整理します。</p>
+<div class="stat-row"><span class="stat"><strong>9つの論点</strong> を比較</span><span class="stat"><strong>2製品</strong> の責任範囲</span><span class="stat"><strong>出典付き</strong> で確認</span><span class="stat"><strong>架空データ</strong> のデモ</span></div>
 </section>
-<section class="card sect" id="explain">
-<div class="section-kicker">03 / Feature × Evidence</div><h2>この動き、どう作るの？</h2><p class="muted">製品にある機能と、これから確かめたいこと。どちらも出典と一緒に確認できます。</p>
-<div class="tabs"><button class="tab current" data-guide="auth">認証・SSO</button><button class="tab" data-guide="board">ロール・閲覧</button><button class="tab" data-guide="visibility">ボタン表示</button><button class="tab" data-guide="write">登録・更新</button><button class="tab" data-guide="guard">承認の最終制御</button></div>
-<div class="evidence"><div class="status" id="evidence-status"></div><strong id="evidence-title"></strong><p class="definition" id="evidence-body"></p><div class="impl" id="evidence-impl"></div><div id="evidence-links"></div></div>
-</section>
+<main class="canvas">
+<div class="section-heading"><div><div class="kicker">01 / OWNERSHIP</div><h2>まずは、この2つを分けて考える</h2></div></div>
+<div class="owner-map" aria-label="製品の責任分界">
+<div class="panel owner-card"><div class="owner-top"><span class="eyeline">HENNGE ONE</span><span>入口のアクセス制御</span></div><h3>安全に「入れる」条件を整える。</h3><p>本人確認、MFA、端末条件。MotionBoardに入るまでを主に担当します。</p><div class="owner-pills"><span>SSO</span><span>本人認証</span><span>MFA</span><span>端末ポリシー</span></div><button type="button" class="owner-action" data-owner="hennge">HENNGE側の論点を詳しく見る →</button></div>
+<div class="link-panel"><div class="link-chip"><strong>SAML</strong>メールアドレス等で連携</div></div>
+<div class="panel owner-card mb"><div class="owner-top"><span class="eyeline">MOTIONBOARD</span><span>ログイン後の権限制御</span></div><h3>入ってからの「できる」を決める。</h3><p>利用者・グループ・ロール・画面・データ・操作の権限を主に担当します。</p><div class="owner-pills"><span>ユーザー</span><span>ロール</span><span>フォルダー</span><span>表示・入力</span></div><button type="button" class="owner-action" data-owner="mb">MotionBoard側の論点を詳しく見る →</button></div>
+</div>
+<div class="boundary-strip"><div class="boundary-icon">i</div><p><strong>重要な境界：</strong>SSOでログインできても、そのまま「承認者」になるわけではありません。HENNGE公式のMotionBoard向け手順では、<strong>アカウントの自動作成はなし</strong>、接続方式は<strong>SP-Initiatedのみ</strong>とされています。<a href="#source-hsso">公式資料を見る</a></p></div>
+<div class="extras"><strong>承認や更新の最終チェックは？</strong>　MotionBoardの画面権限だけで担保できない業務ルールがある場合、DB・APIなども含めて設計します。ここは主題の2製品の責任分界を整理した後に検討します。</div>
+<section class="interface">
+<div class="section-heading"><div><div class="kicker">02 / INTERACTIVE REFERENCE</div><h2 id="view-heading">各論点を、実装の粒度まで見ていく</h2><p id="view-subtitle">気になる項目を選ぶと、HENNGE One・MotionBoardの担当と、実際にやることを並べて確認できます。</p></div></div>
+<div id="view-boundary" class="views active">
+<div class="explore">
+<aside class="panel topic-list"><div class="list-head"><h3>確認するテーマ</h3><span class="count" id="topic-count">9件</span></div>
+<div class="filters" role="group" aria-label="テーマの絞り込み"><button type="button" class="filter on" data-filter="all">すべて</button><button type="button" class="filter" data-filter="hennge">HENNGE側</button><button type="button" class="filter" data-filter="mb">MotionBoard側</button><button type="button" class="filter" data-filter="shared">連携・追加設計</button></div>
+<div class="topic-buttons" id="topic-buttons"></div></aside>
+<article class="panel detail" id="topic-detail" aria-live="polite"></article>
 </div></div>
-<section class="card sect" id="sources">
-<div class="section-kicker">04 / Traceable Sources</div><h2>気になったら、ここから確かめよう</h2><p class="muted">機能の説明には、メーカー公式資料を中心に出典を付けています。SCSKの資料は販売パートナーの解説として掲載。Cloud版と本番想定のオンプレ版で違いがないかは、導入前に確認が必要です。</p>
-<div class="source-grid">
-<article class="source" id="s1"><div class="number">SOURCE 01 — HENNGE公式</div><h3>MotionBoardのSSO設定</h3><p>SAML連携。メールアドレスによる連携、SP-Initiatedのみ、自動プロビジョニングなしと明記。</p><a target="_blank" rel="noopener noreferrer" href="https://support.hdeone.com/hc/ja/articles/60832202230425-MotionBoard%E3%81%AE%E3%82%B7%E3%83%B3%E3%82%B0%E3%83%AB%E3%82%B5%E3%82%A4%E3%83%B3%E3%82%AA%E3%83%B3%E8%A8%AD%E5%AE%9A">連携設定の手順を開く ↗</a></article>
-<article class="source" id="s2"><div class="number">SOURCE 02 — HENNGE公式</div><h3>アクセスポリシーグループ</h3><p>HENNGE Access Controlのアクセス許可条件。MFA・端末認証の設定と判定に関係。</p><a target="_blank" rel="noopener noreferrer" href="https://support.hdeone.com/hc/ja/articles/22397876848153--Access-Control-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%83%9D%E3%83%AA%E3%82%B7%E3%83%BC%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97%E3%81%AE%E4%BD%9C%E6%88%90-%E7%B7%A8%E9%9B%86">設定を開く ↗</a></article>
-<article class="source" id="s3"><div class="number">SOURCE 03 — WingArc公式</div><h3>ユーザー・グループ・ロール</h3><p>MotionBoardのシステム設定でユーザーをグループへ所属させ、ロールを割り当てる例。</p><a target="_blank" rel="noopener noreferrer" href="https://cs.academy.wingarc.com/setup-c00001">設定例を開く ↗</a></article>
-<article class="source" id="s4"><div class="number">SOURCE 04 — WingArc公式</div><h3>ボタンの表示非表示切り替え</h3><p>ボタンアクションでアイテムを表示・非表示にできる。ユーザー別の承認権限制御とは別。</p><a target="_blank" rel="noopener noreferrer" href="https://navi.wingarc.com/product/motionboard-classic/28075">ボタン機能の解説を開く ↗</a></article>
-<article class="source" id="s5"><div class="number">SOURCE 05 — WingArc公式</div><h3>データベース入力・明細表</h3><p>データソース設定、更新キー、追加・更新・削除許可を設定。オンプレ版を含むClassic向け。</p><a target="_blank" rel="noopener noreferrer" href="https://navi.wingarc.com/product/motionboard-classic/9453">入力機能の説明を開く ↗</a></article>
-<article class="source" id="s6"><div class="number">SOURCE 06 — WingArc公式</div><h3>ボタンからのDB入力</h3><p>「データベース入力」アクションと編集セットによってデータを更新する構成例。</p><a target="_blank" rel="noopener noreferrer" href="https://navi.wingarc.com/product/motionboard/17747">実装例を開く ↗</a></article>
-<article class="source" id="s7"><div class="number">SOURCE 07 — SCSK解説</div><h3>ログインユーザー別のデータ絞り込み</h3><p>ログインIDと部署マスタを使った表示データの絞り込み例。DB側の行権限とは区別。</p><a target="_blank" rel="noopener noreferrer" href="https://www.scsk.jp/sp/motionboard/faq/qa023/">実装方針を確認する ↗</a></article>
-<article class="source" id="s8"><div class="number">SOURCE 08 — WingArc公式</div><h3>オンプレ版の製品マニュアル入口</h3><p>バージョンごとの正式な仕様を確認する入口。今回の実機・契約版数に照らして検証する。</p><a target="_blank" rel="noopener noreferrer" href="https://www.wingarc.com/product/motionboard/introduce/">マニュアル案内を開く ↗</a></article>
+<div id="view-matrix" class="views"><div class="panel matrix-card"><div class="section-heading" style="margin-top:0"><div><div class="kicker">RESPONSIBILITY MATRIX</div><h2>誰が担うかを、ひとつの表に</h2><p>行をクリックすると、できること・設定内容・実機テストに移れます。</p></div></div><div class="legend"><span><i class="dot"></i> HENNGE主体</span><span><i class="dot mb"></i> MotionBoard主体</span><span><i class="dot both"></i> 連携・共同検討</span><span><i class="dot need"></i> 実機検証が必要</span></div><div class="data-table"><table><thead><tr><th>テーマ</th><th>HENNGE One</th><th>MotionBoard</th><th>確認状況</th></tr></thead><tbody id="matrix-body"></tbody></table></div><div class="table-note">担当欄は今回の設計案における主たる責任分担です。標準機能の存在と、銀行業務で安全に運用できることは同じではありません。</div></div></div>
+<div id="view-scenario" class="views"><div class="panel scenario-card"><div class="section-heading" style="margin-top:0"><div><div class="kicker">ROLE EXPERIENCE / MOCK DEMO</div><h2>同じ画面でも、操作はどう変わる？</h2><p>ログイン・閲覧・登録・承認を、役割を変えながら試せます。実際の製品には接続していません。</p></div></div>
+<div class="scenario-layout"><div class="formside">
+<div class="formgroup"><div class="formlegend">操作する人</div><div class="choice" id="sim-roles"><button type="button" data-role="staff" class="on">支店担当</button><button type="button" data-role="manager">承認者</button><button type="button" data-role="hq">本部閲覧</button></div></div>
+<div class="formgroup"><label for="sim-status">案件の状態</label><select id="sim-status"><option value="draft">下書き</option><option value="pending">承認待ち</option><option value="approved">承認済み</option></select></div>
+<div class="formgroup"><div class="formlegend">HENNGE One（入口）</div><label class="toggle">本人認証・MFA・端末条件を満たす<input type="checkbox" id="sim-auth" checked></label></div>
+<div class="formgroup"><div class="formlegend">MotionBoard（内部）</div><label class="toggle">利用者登録・画面権限あり<input type="checkbox" id="sim-board" checked></label><label class="toggle">担当支店の案件である<input type="checkbox" id="sim-branch" checked></label></div>
+<div class="formgroup"><div class="formlegend">業務上の追加ルール</div><label class="toggle">自分が登録した案件である<input type="checkbox" id="sim-self"></label></div>
+<button type="button" class="secondary-btn" id="sim-reset">最初の状態に戻す</button>
 </div>
-<div class="warning"><b>実装前に確かめておきたいこと：</b>担当者に合わせてボタンを自動で隠すことや、自己承認・他支店の更新を防ぐことが、MotionBoardの標準機能だけで完結するかは未確認です。ボタンを隠すだけでは操作の権限を守れません。DB・APIなどで更新時にも確かめる設計を検討します。また、HENNGE One側のグループとMotionBoard側の業務ロールが自動で連動する前提にはしません。</div>
-</section><footer>ACCESS DESIGN / DEMO · 2026-10-12 · 架空のデータを使った説明用デモです。実際の銀行情報やログイン情報は使っていません。</footer>
-</main>
+<div class="workflow">
+<div class="lane-result"><div class="result" id="sim-hennge-result"><div class="result-label">HENNGE One / 入口の判定</div><div class="result-state" id="sim-h-state"></div><p id="sim-h-note"></p></div><div class="result" id="sim-mb-result"><div class="result-label">MotionBoard / 内部の判定</div><div class="result-state" id="sim-m-state"></div><p id="sim-m-note"></p></div></div>
+<div class="testcase"><div class="kicker">コベナンツ業務 / 操作例</div><h3>契約 DEMO-K00001</h3><div class="case-meta" id="case-meta"></div><div class="case-actions"><button class="action" id="sim-register" type="button">登録する</button><button class="action alt" id="sim-approve" type="button">承認する</button></div><div class="reason" id="sim-reason" role="status" aria-live="polite"></div></div>
+<p class="smallhelp"><strong>ここでのポイント：</strong>HENNGE Oneが通っても、MotionBoard側の登録や画面権限がなければ閲覧できません。登録・承認の可否は、業務上のルールも合わせて判断します。※この操作画面は構成例で、製品標準の自動連携を保証するものではありません。</p>
+</div></div></div></div>
+<div id="view-checklist" class="views"><div class="panel check-card"><div class="check-head"><div><div class="kicker">IMPLEMENTATION CHECKLIST</div><h2>設計・検証で実際にやること</h2><p class="muted">実施した項目にチェックして整理できます。チェック状態はページを閉じるとリセットされます。</p></div><div id="check-progress" style="font-size:12px;font-weight:850;color:var(--teal)">0 / 8 確認</div></div><div class="progress-track"><div class="progress-fill" id="check-fill"></div></div><div class="checks" id="check-items"></div><div class="check-actions"><button class="secondary-btn" type="button" id="reset-checks">チェックをクリア</button><button class="secondary-btn" type="button" id="copy-checks">確認事項をコピー</button></div></div></div>
+</section>
+<section class="sources" id="sources"><div class="section-heading"><div><div class="kicker">03 / PRIMARY & IMPLEMENTATION SOURCES</div><h2>公式資料から、根拠をたどれるように</h2><p>製品の仕様と運用上の設計案は分けて記載しています。検証前の論点は「要確認」として残します。</p></div></div><div class="source-grid" id="source-grid"></div>
+<div class="difference-note"><strong>バージョンについて：</strong>ここで示すMotionBoardの操作例にはClassic版やCloud版の記事が含まれます。検証環境のCloudと本番想定のオンプレ版で、機能・ライセンス・バージョン・SSO設定が一致するかは必ず別途確認してください。今回のロールマトリクスはあくまで業務設計例です。</div></section>
+<div class="bottom"><span>ACCESS DESIGN / HENNGE One × MotionBoard / 2026-10-12</span><span>架空のデータのみ。実際の認証情報・契約情報にはアクセスしません。</span></div>
+</main></div>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id), vals=['role','idOk','mfa','device','mbAccount','folder','hide','status','scope','self'];
-const roles={staff:'支店担当者',manager:'支店承認者',head:'本部閲覧担当'},states={draft:'下書き',pending:'承認待ち',approved:'承認済み'};
-const features={
- auth:{s:'公式に確認できる機能',title:'HENNGE Access Control：アクセス条件＋SAML SSO',body:'まず、HENNGE Oneがログイン時の本人確認やアクセス条件を担当します。条件を満たすとMotionBoardへSSOでつながります。ただし、公式ガイドではMotionBoard側のユーザーは自動作成されません。また、銀行業務の「承認者」をHENNGE Oneだけで決められるわけではありません。',impl:'検証：SSO方式はSP-Initiatedのみ。MFA・端末条件と、MotionBoard側アカウントとのID対応を確認。',refs:['s1','s2']},
- board:{s:'標準機能を確認／ロールの業務適用は要設計',title:'MotionBoard：ユーザー・グループ・ロール＋フォルダー権限',body:'次に、MotionBoardでユーザー・グループ・ロールを設定します。画面を置くフォルダーの権限や、ログインユーザーに合わせたデータの絞り込みも検討できます。ただし、MotionBoardの標準ロールだけで業務上の承認可否まで決まるとは限りません。',impl:'検証：支店担当／承認者／本部閲覧の3ユーザーを分けてログインし、ボード閲覧・編集・対象支店の見え方を確認。',refs:['s3','s7','s8']},
- visibility:{s:'標準の表示切替は確認済／ユーザー連動は要検証',title:'MotionBoard：ボタンアクション「表示非表示切り替え」',body:'MotionBoardには、ボタンアクションで画面上のアイテムを表示・非表示にする機能があります。ただし、ログインした人の役割に合わせて自動で切り替えられるかは別途確認が必要です。このデモは、その完成イメージを試すためのものです。',impl:'検証：ロールを変えてログインし、ボタン自動表示の可否を確認。不可ならボード分離、条件付き表示、画面側の実装方法を比較する。',refs:['s4','s3']},
- write:{s:'標準機能を確認／更新権限の細分化は要検証',title:'MotionBoard：データベース入力・編集セット・更新キー',body:'MotionBoard Classicには、データベースへの追加・更新・削除や更新キー、ボタンアクション「データベース入力」の仕組みがあります。登録ボタンはこうした機能を組み合わせて作れますが、担当者ごとの更新権限を確実に分けられるかは、実際の構成で検証します。',impl:'検証：編集可・不可のテストアカウントを使って、画面からの入力だけでなく他経路の更新も拒否されるか確認。',refs:['s5','s6']},
- guard:{s:'銀行業務向けの設計提案／標準機能のみでは未確認',title:'DB・API層：承認状態と業務権限を再判定',body:'最後に、DBや業務処理で「承認待ちか」「承認できる担当者か」「担当支店の案件か」「自分で登録した案件ではないか」を確かめます。画面でボタンを隠していても、更新時のチェックは省かない設計が安心です。',impl:'検証：権限外更新、承認済み再更新、自己承認、同時更新、他支店更新を否認できるかDB・API等でテスト。DB連携構成・実装方法は案件ごとに決める。',refs:['s5','s6','s7']}
-};
-function showEvidence(k,scroll=false){const x=features[k];if(!x)return;
- document.querySelectorAll('[data-guide].tab').forEach(e=>e.classList.toggle('current',e.dataset.guide===k));
- $('evidence-status').textContent=x.s;$('evidence-title').textContent=x.title;$('evidence-body').textContent=x.body;$('evidence-impl').textContent=x.impl;
- $('evidence-links').replaceChildren();x.refs.forEach(id=>{const e=document.createElement('a');e.href='#'+id;e.textContent='参照した公式資料 '+id.slice(1)+' を見る →';e.style.cssText='display:inline-block;margin:10px 12px 0 0;font-size:12px;font-weight:800';$('evidence-links').appendChild(e)});
- if(scroll)$('explain').scrollIntoView({behavior:'smooth',block:'start'});
+const $=id=>document.getElementById(id);
+const sources=[
+{id:'hsso',n:'01',vendor:'HENNGE公式',title:'MotionBoardのシングルサインオン設定',note:'メールアドレス連携、ユーザーの自動作成なし、SP-Initiatedのみ。SAMLの設定画面も掲載。',url:'https://support.hdeone.com/hc/ja/articles/60832202230425-MotionBoard%E3%81%AE%E3%82%B7%E3%83%B3%E3%82%B0%E3%83%AB%E3%82%B5%E3%82%A4%E3%83%B3%E3%82%AA%E3%83%B3%E8%A8%AD%E5%AE%9A'},
+{id:'haccess',n:'02',vendor:'HENNGE公式',title:'アクセス制限・MFA・端末認証',note:'端末証明書、本人認証、アクセスポリシーを組み合わせる機能。',url:'https://hennge.com/jp/service/one/identity/access/'},
+{id:'mrole',n:'03',vendor:'WingArc公式',title:'ユーザー・グループ・ロールの設定',note:'MotionBoard Cloudでグループにユーザーとロールを紐づける操作例。',url:'https://cs.academy.wingarc.com/setup-c00001'},
+{id:'mfolder',n:'04',vendor:'WingArc公式',title:'ユーザー・グループとフォルダーアクセス権限',note:'MotionBoard Ver.6.1向け活用講座。オンプレ想定版数との照合が必要。',url:'https://cs.academy.wingarc.com/course/c00005'},
+{id:'mdata',n:'05',vendor:'WingArc公式',title:'ログインユーザーごとのデータ表示',note:'ログインマスタとログインIDを利用するデータ絞り込みの実装例。',url:'https://navi.wingarc.com/product/motionboard/13510'},
+{id:'mbutton',n:'06',vendor:'WingArc公式',title:'表示非表示切り替えボタン',note:'ボタンアクションで表示を切り替える例。ロール別の自動制御は別途検証。',url:'https://navi.wingarc.com/product/motionboard-classic/28075'},
+{id:'minput',n:'07',vendor:'WingArc公式',title:'明細表からのデータ入力',note:'データソースの更新キー、追加・更新・削除の許可設定。',url:'https://navi.wingarc.com/product/motionboard-classic/9453'},
+{id:'maction',n:'08',vendor:'WingArc公式',title:'ボタンからのデータベース入力',note:'ボタンアクションと編集セットを使った入力フォームの実装例。',url:'https://navi.wingarc.com/product/motionboard-classic/17747'},
+{id:'manual',n:'09',vendor:'WingArc公式',title:'製品マニュアル（Cloud／オンプレ版）',note:'実際に導入する版数で設定項目と動作を確認する入口。',url:'https://www.wingarc.com/product/motionboard/introduce/'}
+];
+const topics=[
+{id:'auth',title:'本人認証・MFA・端末条件',owner:'hennge',level:'confirmed',summary:'MotionBoardに入る前のアクセス条件を、HENNGE One側で判定する。',hcan:'ログイン認証、MFA、端末証明書などの条件をポリシーとして組み合わせられます。',hdo:'MotionBoardへのアクセス許可対象、MFA要件、許可端末・例外条件を決めます。',mcan:'HENNGEからのSSO先としてMotionBoardを設定できます。',mdo:'SAML外部認証・シングルサインオンの設定を行い、実際にログインできることを確認します。',tests:['許可ユーザー・拒否ユーザーでログイン動作が分かれるか','MFA未実施／許可されない端末から入れないか','アクセス失敗時にどちらのログを調べるか'],risk:'認証で通過したことと、ボードの業務操作権限があることは分けて考えます。',refs:['haccess','hsso']},
+{id:'sso',title:'SSOの接続方式・属性連携',owner:'shared',level:'confirmed',summary:'認証結果をSAMLで受け渡す。銀行内の業務ロールがそのまま引き継がれるわけではない。',hcan:'HENNGE OneでSAML連携用のサービスプロバイダーを設定し、Name IDなどを構成できます。',hdo:'連携元ユーザーのメールアドレス、メタデータ、証明書、許可ポリシーを用意します。',mcan:'MotionBoardの外部認証タイプ「SAML」、シングルサインオン設定が案内されています。',mdo:'HENNGEからのSAML署名証明書・ターゲットURLを登録し、フェデレーションメタデータを返します。',tests:['メールアドレスとMotionBoardのユーザー識別子が正しく対応するか','SP-Initiated経由でログインできるか（IdP-Initiatedは非対応の案内）','CloudでのSSO設定が本番想定のオンプレ版にも適合するか'],risk:'HENNGEのMotionBoard向け公式記事では「プロビジョニングなし」。グループ・承認ロール自動反映は前提にしません。',refs:['hsso','manual']},
+{id:'account',title:'利用者登録・業務ロール',owner:'mb',level:'confirmed',summary:'「誰が支店担当で、誰が承認者か」は、MotionBoard側で使うロール設計として整理する。',hcan:'HENNGE Oneではサービスへのアクセス対象となる利用者を管理できます。',hdo:'SSO対象者と、入社・異動・退職時にどの情報を更新するかを整理します。',mcan:'ユーザー・グループ・ロールを管理する標準機能があります。',mdo:'利用者を登録し、所属グループとロールを割り当てます。支店担当・承認者という業務上の役割との対応表を作ります。',tests:['HENNGE側だけで利用者を作ってもMotionBoardアカウントが自動生成されないこと','支店担当・承認者・閲覧者のテストユーザーを作成して違いを確認','役割変更時の設定担当・更新手順を確定する'],risk:'MotionBoardの標準ロール名が、銀行独自の「承認可能」という条件と同じ意味とは限りません。',refs:['hsso','mrole','mfolder']},
+{id:'board',title:'ボード・フォルダーの閲覧権限',owner:'mb',level:'confirmed',summary:'ログインできても、閲覧を許可されたフォルダーやボードにしか入れない構成にする。',hcan:'MotionBoardへの入り口である認証・アクセス許可条件を制御できます。',hdo:'ボードの閲覧権限と混同せず、サービス利用可否の条件を定義します。',mcan:'フォルダーに対するグループのアクセス権限設定が可能です。',mdo:'閲覧・編集できるグループをフォルダー単位で整理し、ボード配置と権限の継承も確認します。',tests:['担当ユーザーだけが対象フォルダーを開けるか','URLを直接指定しても権限外フォルダーを開けないか','編集権限のないユーザーがボード設定を変更できないか'],risk:'「画面を見られる」と「データを更新できる」は別の判定です。',refs:['mfolder','mrole','manual']},
+{id:'data',title:'支店ごとの表示データ',owner:'mb',level:'pattern',summary:'ログインした人に合わせて、閲覧対象の支店や案件を絞り込む。',hcan:'認証されたユーザーを区別して、MotionBoardへ接続する入口を担います。',hdo:'ユーザー識別子が一貫して受け渡されるよう確認します。',mcan:'ログインマスタとユーザーIDによる検索条件を使った、ログインユーザー別の表示絞り込み例があります。',mdo:'ユーザーID・支店コードの対応マスタを設計し、各データソースの絞り込み条件を揃えます。',tests:['本店・支店・兼務者で期待したデータが表示されるか','検索・出力・別ボードから表示対象外のデータが見えないか','DB直接操作まで禁止する必要があるか'],risk:'表示データの絞り込みと、DB側の行単位の更新・閲覧制限は同じものではありません。',refs:['mdata','mfolder']},
+{id:'buttons',title:'登録・承認ボタンの見せ方',owner:'mb',level:'verify',summary:'担当者にとって必要な操作を分かりやすく見せる。ただし非表示だけで権限を守らない。',hcan:'MotionBoardへの認証・アクセスまでが担当範囲です。',hdo:'ボタンごとの業務操作権限をHENNGE側だけで制御する想定にはしません。',mcan:'ボタンアクション「表示非表示切り替え」で、アイテムの表示状態を変更する実装例があります。',mdo:'登録者・承認者・閲覧者の操作一覧を整理します。ロール別自動表示が可能か実機で確認し、難しければボード分離等も検討します。',tests:['ログインユーザーの役割に応じてボタンを自動表示できるか','権限外ボタンを隠しても他の経路から更新できないか','Cloud／オンプレ版で表示制御の設定が同じか'],risk:'表示切替アクションがあることは、ログインロール別の自動制御があることの証明ではありません。',refs:['mbutton','mrole']},
+{id:'write',title:'登録ボタンからのデータ更新',owner:'mb',level:'pattern',summary:'画面から登録できることと、更新権限を強制できることを分けて確かめる。',hcan:'ログインする利用者の認証を担当します。',hdo:'更新できるかどうかの業務判定をHENNGEのログイン成功だけで決めないよう整理します。',mcan:'データソースの入力設定・更新キー・追加／更新／削除許可、データベース入力ボタンの実装例があります。',mdo:'対象テーブル、更新キー、編集セット、処理結果、必須項目チェックを設計します。必要に応じてDB・API側の認可も設計します。',tests:['支店担当では登録でき、権限外ユーザーでは更新できないか','承認済みデータを再登録・上書きできないか','同時更新や画面外からの更新が想定外に成功しないか'],risk:'フォームやボタンの無効化だけで安全性を完結させず、書き込み処理側でも検証します。',refs:['minput','maction']},
+{id:'approve',title:'承認・差戻し・自己承認防止',owner:'shared',level:'verify',summary:'承認ボタンがあるだけでは、誰でも押してよいわけではない。',hcan:'承認者本人がログインしたかどうかという「認証」を担当します。',hdo:'承認に必要な業務役割や案件状態を、SSOが自動保証するものと扱わないよう整理します。',mcan:'データ更新アクションは構成できますが、銀行独自の承認・差戻しルールが標準機能で全て守れるかは未確認です。',mdo:'承認待ち、担当者、所属支店、自己承認禁止、二重承認防止を定義します。実行時の最終判定が必要ならDB・APIなどと責任分担します。',tests:['起票者による自己承認を防げるか','承認待ち以外での承認や差戻しを拒否できるか','複数利用者の同時操作で不整合が起きないか'],risk:'これは製品標準の承認ロール仕様ではなく、銀行業務の要件として個別に実装・検証する項目です。',refs:['maction','minput','hsso']},
+{id:'lifecycle',title:'異動・退職時の権限変更',owner:'shared',level:'verify',summary:'HENNGEで入れなくするだけでなく、MotionBoardに残る利用者・ロールも管理する。',hcan:'ユーザーのアクセス許可や認証ポリシーを管理できます。',hdo:'退職・異動・休職のイベントを定義し、SSOアクセスの停止と再付与を管理します。',mcan:'ユーザー・グループ・ロールの設定機能があります。',mdo:'HENNGE側と連動しないアカウントの更新・無効化・棚卸し方法を決めます。',tests:['HENNGE停止後にMotionBoardの既存セッションから操作が継続しないか','異動時の旧支店の閲覧権限が残らないか','アカウント棚卸し・権限申請の責任者を決めたか'],risk:'MotionBoard向けHENNGE SSO連携では自動プロビジョニングがないため、アカウントのライフサイクル管理を別途設計します。',refs:['hsso','mrole','haccess']}
+];
+const review=[
+{title:'認証・SSOの前提を確定する',desc:'MotionBoardの本番版数、HENNGE One連携方法、Name ID（メールアドレス）を確認'},
+{title:'ユーザー・業務ロール対応表を作る',desc:'支店担当、承認者、本部閲覧の役割と、MotionBoard側のユーザー・グループを紐づける'},
+{title:'フォルダー・ボードの閲覧権限を設計する',desc:'業務画面ごとに閲覧・編集・管理の可否を一覧化'},
+{title:'担当支店ごとのデータ閲覧範囲を設計する',desc:'支店マスタ、兼務、本部閲覧、検索・出力を含めて範囲を確認'},
+{title:'登録・承認ボタンの表示設計を検証する',desc:'ログインユーザー別の自動表示が可能か、代替案も含めて確認'},
+{title:'データ更新時の最終的な権限判定を決める',desc:'自己承認、承認待ち、他支店、同時更新などの業務ルールを検証'},
+{title:'異動・退職時の更新手順を決める',desc:'HENNGE側のアクセス停止とMotionBoard側の権限剥奪を揃える'},
+{title:'Cloudと本番オンプレ版で差分検証する',desc:'利用予定バージョン・ライセンス・認証設定・入力機能・制限事項を比較'}
+];
+const ownerText={hennge:'主に HENNGE One',mb:'主に MotionBoard',shared:'両方で設計'};
+const ownerShort={hennge:'HENNGE',mb:'MotionBoard',shared:'連携・追加設計'};
+const levelText={confirmed:'公式機能を確認',pattern:'実装例を確認',verify:'実機で要検証'};
+let currentTopic='auth',currentView='boundary',filter='all',note='';
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e}
+function ownerColor(owner){return owner==='mb'?'mb':owner==='shared'?'both':''}
+function setView(id){
+currentView=id;
+document.querySelectorAll('[data-view]').forEach(b=>{const on=b.dataset.view===id;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on))});
+document.querySelectorAll('.views').forEach(x=>x.classList.toggle('active',x.id==='view-'+id));
+const headings={boundary:['各論点を、実装の粒度まで見ていく','気になる項目を選ぶと、2製品の担当と、実際にやることを並べて確認できます。'],matrix:['何をどちらで担当するか、一覧で比べる','画面・認証・業務操作を同じ粒度で比較。行を選ぶと詳細に移れます。'],scenario:['担当者を切り替え、操作を確かめる','承認ボタンは、ログインだけでなく業務条件も必要。その違いを体験できます。'],checklist:['設計・検証でやることを整理する','製品の設定だけではなく、実機での確認や運用まで、抜け漏れを防ぎます。']};
+$('view-heading').textContent=headings[id][0];$('view-subtitle').textContent=headings[id][1];
 }
-function get(){const v={};vals.forEach(id=>{const el=$(id);v[id]=el.type==='checkbox'?el.checked:el.value});return v}
-let notice='';
-function render(){const v=get();let h=v.idOk&&v.mfa&&v.device;
- let m=h&&v.mbAccount&&v.folder;
- let scope=v.scope==='own'||v.role==='head';
- let visible=m&&scope;
- let canReg=visible&&v.role==='staff'&&v.status==='draft';
- let canApp=visible&&v.role==='manager'&&v.status==='pending'&&!v.self;
- let guard=visible&&(v.status==='draft'||v.status==='pending');
- let allow=canReg||canApp;
- $('hstate').textContent=h?'ログインできます':'認証条件を確認してください';$('hstate').className='state '+(h?'good':'bad');
- $('mstate').textContent=!h?'ログイン後に確認':!m?'画面を開く条件が足りません':!scope?'この支店の案件は対象外':'この画面を開けます';$('mstate').className='state '+(visible?'good':'bad');
- $('bstate').textContent=!visible?'画面の権限を先に確認':canReg?'登録できます':canApp?'承認できます':'登録・承認はできません';$('bstate').className='state '+(allow?'good':'bad');
- $('summary-chip').textContent=!h?'ログイン条件を確認':!visible?'閲覧条件を確認':allow?'操作できます':'閲覧のみ';$('summary-chip').className='chip '+(allow?'good':!visible?'bad':'warn');
- $('role-chip').textContent=roles[v.role];$('status-label').textContent=states[v.status];$('scope-label').textContent=v.scope==='own'?'所属支店':'別支店';
- $('register').disabled=!canReg;$('approve').disabled=!canApp;$('register-box').style.display=v.hide&&v.role!=='staff'?'none':'block';$('approve-box').style.display=v.hide&&v.role!=='manager'?'none':'block';
- $('register-note').textContent=canReg?'登録すると、承認待ちに進みます':!visible?'画面を開く条件の確認が必要です':v.role!=='staff'?'支店担当者が使う操作です':v.status!=='draft'?'下書きの案件で利用できます':'登録の条件を確認してください';
- $('approve-note').textContent=canApp?'承認すると、承認済みに進みます':!visible?'画面を開く条件の確認が必要です':v.role!=='manager'?'承認担当者が使う操作です':v.status!=='pending'?'承認待ちの案件で利用できます':v.self?'自分が登録した案件は承認できません':'承認の条件を確認してください';
- $('visible-answer').textContent=visible?'この契約を確認できます':'この契約は表示されません';$('update-answer').textContent=allow?'登録または承認を進められます':'登録・承認はできません';
- let reason=!v.idOk?'本人確認が終わっていません。HENNGE One側のログイン条件を確かめます。':!v.mfa?'追加認証（MFA）がまだ完了していません。':!v.device?'この端末からのアクセスは許可されていません。':!v.mbAccount?'MotionBoard側の利用者登録が必要です。':!v.folder?'この画面を開くための権限が必要です。':!scope?'別の支店の案件は、今の担当範囲では見られない想定です。':v.status==='approved'?'承認済みの案件です。再登録や再承認を防ぐ設計にしています。':v.self&&v.role==='manager'?'自分が登録した案件のため、別の承認担当者による確認が必要です。':allow?'今の条件で進められる操作があります。下のボタンを試してみてください。':'この担当と案件の状態では、登録・承認はできません。';
-
- const verdict=!h?'ログインできません':!visible?'画面を開けません':allow?'操作できます':'閲覧できます';
- const tone=!h||!visible?'deny':allow?'allow':'neutral';
- $('signal-value').textContent=verdict;
- $('signal-detail').textContent=!h?'まずHENNGE One側の認証条件を確かめましょう。':!visible?'MotionBoardの利用者登録・閲覧権限・対象支店を確認します。':allow?'この担当と案件の状態なら、下の操作を進められます。':'内容は確認できます。登録・承認ができない理由も下に表示しています。';
- $('signal').dataset.tone=tone;
- $('signal-subject').textContent=v.role==='staff'?'BRANCH STAFF':v.role==='manager'?'APPROVER':'HQ VIEWER';
- $('signal-action').textContent=canReg?'REGISTER':canApp?'APPROVE':'NONE';
- document.querySelectorAll('.flow .stage').forEach((node,i)=>{node.dataset.state=([h,visible,allow])[i]?'good':'bad'});
- document.querySelectorAll('[data-role-preset]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.rolePreset===v.role)));
- $('audit').textContent=notice||reason;
+function visibleTopics(){return topics.filter(t=>filter==='all'||t.owner===filter)}
+function renderList(){
+$('topic-buttons').replaceChildren();
+for(const t of visibleTopics()){const b=el('button','topic'+(t.id===currentTopic?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(t.id===currentTopic));const a=el('span','idx',String(topics.indexOf(t)+1).padStart(2,'0'));const w=el('span');w.append(el('b','',t.title),el('small','',ownerText[t.owner]+' / '+levelText[t.level]));b.append(a,w);b.addEventListener('click',()=>selectTopic(t.id));$('topic-buttons').append(b)}
+$('topic-count').textContent=visibleTopics().length+'件';
+document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('on',b.dataset.filter===filter));
 }
-vals.forEach(id=>$(id).addEventListener('change',()=>{notice='';render()}));
-document.querySelectorAll('[data-guide]').forEach(el=>el.addEventListener('click',()=>showEvidence(el.dataset.guide,true)));
-$('register').addEventListener('click',()=>{if($('register').disabled)return;$('status').value='pending';notice='登録を試しました。「承認待ち」に進みました。この画面だけのデモで、DBには保存していません。';render()});
-$('approve').addEventListener('click',()=>{if($('approve').disabled)return;$('status').value='approved';notice='承認を試しました。「承認済み」に進みました。この画面だけのデモで、DBには保存していません。';render()});
-
-document.querySelectorAll('[data-role-preset]').forEach(btn=>btn.addEventListener('click',()=>{$('role').value=btn.dataset.rolePreset;notice='';render()}));
-document.querySelectorAll('[data-scenario]').forEach(btn=>btn.addEventListener('click',()=>{
- const preset=btn.dataset.scenario;
- ['idOk','mfa','device','mbAccount','folder'].forEach(id=>$(id).checked=true);
- $('scope').value='own';$('hide').checked=false;$('self').checked=preset==='deny';
- $('role').value=preset==='register'?'staff':'manager';
- $('status').value=preset==='register'?'draft':'pending';
- notice='';render();
-}));
-showEvidence('auth');render();
+function selectTopic(id){currentTopic=id;renderList();renderDetail()}
+function addDetailBox(root,heading,paragraph){root.append(el('div','mini-heading',heading),el('p','',paragraph))}
+function renderDetail(){
+const t=topics.find(t=>t.id===currentTopic),root=$('topic-detail');root.replaceChildren();
+const top=el('div','detail-top');top.append(el('span','micro-label','TOPIC '+String(topics.indexOf(t)+1).padStart(2,'0')+' / '+ownerShort[t.owner]));top.append(el('span','pill '+(t.level==='verify'?'needs':'verified'),levelText[t.level]));root.append(top,el('h3','',t.title),el('p','lede',t.summary));
+const lanes=el('div','lane-grid');
+for(const which of ['h','m']){
+ const box=el('div','lane'+(which==='m'?' mb':'')),hd=el('div','lane-title'),bd=el('div','lane-body');
+ hd.append(el('b','',which==='h'?'HENNGE One':'MotionBoard'),el('span','',t.owner===(which==='h'?'hennge':'mb')?'主な担当':t.owner==='shared'?'共同で確認':'関係する設定'));
+ addDetailBox(bd,'できること',t[which+'can']);addDetailBox(bd,'今回やること',t[which+'do']);box.append(hd,bd);lanes.append(box);
+}
+root.append(lanes);
+const val=el('div','validation'),vh=el('div','validation-head');vh.append(el('b','','実機で確認すること'),el('small','','IMPLEMENTATION TEST'));val.append(vh);
+const ul=el('ul','tests');t.tests.forEach(test=>ul.append(el('li','',test)));val.append(ul,el('div','caveat','設計上の注意：'+t.risk));root.append(val);
+const refs=el('div','refs');for(const id of t.refs){const s=sources.find(x=>x.id===id);const a=el('a','ref-link','出典 '+s.n+'　'+s.vendor+' ↗');a.href='#source-'+id;refs.append(a)}root.append(refs);
+}
+function renderMatrix(){
+const tb=$('matrix-body');tb.replaceChildren();
+for(const t of topics){const tr=el('tr');const c1=el('td');const b=el('button','table-topic',t.title);b.type='button';b.addEventListener('click',()=>{filter='all';selectTopic(t.id);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})});c1.append(b);tr.append(c1);
+ const h=t.owner==='hennge'?'主に担当':t.owner==='shared'?'連携・調整':'認証・接続';const m=t.owner==='mb'?'主に担当':t.owner==='shared'?'連携・実装':'受け側の設定';
+ for(const [msg,cl] of [[h,t.owner==='hennge'?'':'both'],[m,t.owner==='mb'?'mb':'both']]){const td=el('td');td.append(el('span','ownerline '+cl,msg));tr.append(td)}
+ tr.append(el('td','',levelText[t.level]));tb.append(tr)}
+}
+function renderSources(){
+const root=$('source-grid');root.replaceChildren();
+for(const s of sources){const a=el('article','source-card');a.id='source-'+s.id;a.append(el('div','number','SOURCE '+s.n+' / '+s.vendor),el('h3','',s.title),el('p','',s.note));const link=el('a','', '資料を開く ↗');link.href=s.url;link.target='_blank';link.rel='noopener noreferrer';a.append(link);root.append(a)}
+}
+const sim={role:'staff',status:'draft',auth:true,board:true,branch:true,self:false};
+function simRead(){sim.status=$('sim-status').value;sim.auth=$('sim-auth').checked;sim.board=$('sim-board').checked;sim.branch=$('sim-branch').checked;sim.self=$('sim-self').checked}
+function simRender(){
+simRead();document.querySelectorAll('[data-role]').forEach(b=>b.classList.toggle('on',b.dataset.role===sim.role));
+const hin=sim.auth,mbin=hin&&sim.board&&sim.branch,canR=mbin&&sim.role==='staff'&&sim.status==='draft',canA=mbin&&sim.role==='manager'&&sim.status==='pending'&&!sim.self;
+const hc=$('sim-hennge-result'),mc=$('sim-mb-result');hc.className='result '+(hin?'ok':'no');mc.className='result '+(mbin?'ok':'no');
+$('sim-h-state').textContent=hin?'認証条件を満たしています':'ログインできません';
+$('sim-h-note').textContent=hin?'次にMotionBoard側の権限を確認します。':'HENNGE側の認証・端末条件が不足しています。';
+$('sim-m-state').textContent=!hin?'認証後に確認':mbin?'対象の画面を開けます':'閲覧条件を満たしません';
+$('sim-m-note').textContent=!hin?'まず入口の認証が必要です。':!sim.board?'利用者登録やボード権限を確認します。':!sim.branch?'担当支店の対象範囲を確認します。':'ここから先は業務上の更新条件を確認します。';
+$('sim-register').disabled=!canR;$('sim-approve').disabled=!canA;
+const roleNames={staff:'支店担当',manager:'承認者',hq:'本部閲覧'},stateNames={draft:'下書き',pending:'承認待ち',approved:'承認済み'};
+$('case-meta').textContent=roleNames[sim.role]+' / '+stateNames[sim.status]+' / '+(sim.branch?'所属支店':'別支店');
+const reason=!hin?'HENNGE側のアクセス条件を確認してください。':!sim.board?'MotionBoard側のアカウント・閲覧権限を確認してください。':!sim.branch?'担当外の支店は、今回は操作できない設計例です。':canR?'支店担当者として、この案件を登録できます。':canA?'承認担当者として、この案件を承認できます。':sim.self&&sim.role==='manager'&&sim.status==='pending'?'自分が登録した案件は、別の担当者による承認が必要です。':sim.status==='approved'?'承認済みの案件です。登録・再承認はできません。':'閲覧できますが、現在の役割・案件状態では操作できません。';
+$('sim-reason').textContent=note||reason;
+}
+function resetSim(){sim.role='staff';sim.status='draft';sim.auth=true;sim.board=true;sim.branch=true;sim.self=false;$('sim-status').value='draft';$('sim-auth').checked=true;$('sim-board').checked=true;$('sim-branch').checked=true;$('sim-self').checked=false;note='';simRender()}
+function renderChecks(){const root=$('check-items');root.replaceChildren();review.forEach((r,i)=>{const label=el('label','check-item');const input=el('input');input.type='checkbox';input.dataset.check=String(i);input.addEventListener('change',updateProgress);const span=el('span');span.append(el('b','',r.title),el('small','',r.desc));label.append(input,span);root.append(label)});updateProgress()}
+function updateProgress(){const checked=[...document.querySelectorAll('[data-check]')].filter(x=>x.checked).length;$('check-progress').textContent=checked+' / '+review.length+' 確認';$('check-fill').style.width=(checked/review.length*100)+'%'}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+document.querySelectorAll('[data-owner]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.owner;const first=visibleTopics()[0];selectTopic(first?.id||'auth');setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})}));
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;if(!visibleTopics().some(t=>t.id===currentTopic))currentTopic=visibleTopics()[0]?.id||'auth';renderList();renderDetail()}));
+document.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>{sim.role=b.dataset.role;note='';simRender()}));
+for(const id of ['sim-status','sim-auth','sim-board','sim-branch','sim-self'])$(id).addEventListener('change',()=>{note='';simRender()});
+$('sim-register').addEventListener('click',()=>{if($('sim-register').disabled)return;$('sim-status').value='pending';note='登録を試しました。「承認待ち」に進みました。実際のDBには保存していません。';simRender()});
+$('sim-approve').addEventListener('click',()=>{if($('sim-approve').disabled)return;$('sim-status').value='approved';note='承認を試しました。「承認済み」に進みました。実際のDBには保存していません。';simRender()});
+$('sim-reset').addEventListener('click',resetSim);
+$('reset-checks').addEventListener('click',()=>{document.querySelectorAll('[data-check]').forEach(c=>c.checked=false);updateProgress()});
+$('copy-checks').addEventListener('click',()=>{
+ const lines=review.map((r,i)=>'['+(document.querySelector('[data-check="'+i+'"]').checked?'x':' ')+'] '+r.title+' — '+r.desc);
+ const content='HENNGE One × MotionBoard 権限設計チェックリスト\n'+lines.join('\n');
+ if(navigator.clipboard?.writeText){navigator.clipboard.writeText(content).then(()=>{$('copy-checks').textContent='コピーしました'}).catch(()=>{$('copy-checks').textContent='コピーできませんでした'})}else{$('copy-checks').textContent='コピー非対応のブラウザです'}
+});
+renderList();renderDetail();renderMatrix();renderSources();renderChecks();resetSim();setView('boundary');
 })();
 </script>
 </body></html>
