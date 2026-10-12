@@ -43,61 +43,61 @@ footer{padding:28px 4px;color:#8b9ba9;font:750 10px var(--mono)}.foot-accent{col
 <body>
 <header id="top"><div class="shell">
 <nav class="topbar" aria-label="ページ内ナビゲーション"><a href="#top" class="brand"><span class="mark"><span>AC</span></span>ACCESS CONTROL / LAB</a><div class="nav-links"><a href="#simulator">01 / SIMULATE</a><a href="#explain">02 / CAPABILITIES</a><a href="#sources">03 / EVIDENCE</a></div><div class="nav-live">LIVE SANDBOX</div></nav>
-<div class="hero"><div><div class="eyebrow">FINANCIAL IT / PERMISSION ARCHITECTURE</div><h1>権限の境界を、<br><span class="outline">見える化</span><span class="acid">する。</span></h1><p class="hero-lead">承認ボタンを「見せる」ことと、「実行できる」ことは違う。HENNGE One × MotionBoard × 業務DBの3層を、操作して理解する権限設計シミュレーター。</p><div class="hero-labels"><span>THREE LAYERS</span><span>REAL-TIME DECISION</span><span>OFFICIAL SOURCES</span></div></div><div class="orbit" aria-hidden="true"><small>IDENTITY → PERMISSION → EXECUTION</small><strong>ACL/03</strong></div></div>
+<div class="hero"><div><div class="eyebrow">FINANCIAL IT / PERMISSION ARCHITECTURE</div><h1>だれが、何を<br><span class="outline">できるのか。</span><span class="acid">ひと目で。</span></h1><p class="hero-lead">同じ画面でも、担当する人や案件の状態によって、できる操作は変わります。その違いを、HENNGE One・MotionBoard・業務DBの役割と一緒に確かめられます。</p><div class="hero-labels"><span>THREE LAYERS</span><span>REAL-TIME DECISION</span><span>OFFICIAL SOURCES</span></div></div><div class="orbit" aria-hidden="true"><small>IDENTITY → PERMISSION → EXECUTION</small><strong>ACL/03</strong></div></div>
 </div></header>
 <main id="simulator">
 <div class="grid">
 <aside class="card sidebar">
-<div class="section-kicker">01 / Scenario Controls</div><h2>業務条件を変更する</h2><p class="muted">切り替えると、制御担当とボタン状態が連動します。</p>
-<label class="field" for="role">USER ROLE / 操作する人</label>
-<div class="role-switch" role="group" aria-label="ロール切替"><button type="button" class="role-option" data-role-preset="staff" aria-pressed="true"><span class="num">01 / STAFF</span><strong>支店担当</strong><small>登録・起票</small></button><button type="button" class="role-option" data-role-preset="manager" aria-pressed="false"><span class="num">02 / APPROVE</span><strong>承認者</strong><small>承認・確認</small></button><button type="button" class="role-option" data-role-preset="head" aria-pressed="false"><span class="num">03 / READ</span><strong>本部閲覧</strong><small>参照のみ</small></button></div>
-<div class="scenarios"><div class="section-kicker">QUICK SCENARIOS / 動作サンプル</div><div class="preset-btns"><button type="button" class="preset" data-scenario="register">↗ 登録可</button><button type="button" class="preset" data-scenario="approve">✓ 承認可</button><button type="button" class="preset" data-scenario="deny">× 拒否例</button></div></div>
+<div class="section-kicker">01 / Scenario Controls</div><h2>使う人と条件を選ぶ</h2><p class="muted">いくつか切り替えてみてください。誰が何をできるのか、右側の画面に反映されます。</p>
+<label class="field" for="role">WHO / だれの画面を見てみる？</label>
+<div class="role-switch" role="group" aria-label="ロール切替"><button type="button" class="role-option" data-role-preset="staff" aria-pressed="true"><span class="num">01 / STAFF</span><strong>支店担当</strong><small>登録する人</small></button><button type="button" class="role-option" data-role-preset="manager" aria-pressed="false"><span class="num">02 / APPROVE</span><strong>承認者</strong><small>承認する人</small></button><button type="button" class="role-option" data-role-preset="head" aria-pressed="false"><span class="num">03 / READ</span><strong>本部閲覧</strong><small>確認する人</small></button></div>
+<div class="scenarios"><div class="section-kicker">QUICK START / まずは試してみる</div><div class="preset-btns"><button type="button" class="preset" data-scenario="register">↗ 登録できる</button><button type="button" class="preset" data-scenario="approve">✓ 承認できる</button><button type="button" class="preset" data-scenario="deny">— 承認できない</button></div></div>
 <select class="select" id="role"><option value="staff">支店担当者（登録する人）</option><option value="manager">支店承認者（承認する人）</option><option value="head">本部閲覧担当（見るだけ）</option></select>
 <div class="rule"></div>
 <div class="section-kicker">HENNGE One / Access Control</div>
-<label class="toggle-row"><span>本人認証を通過<small>ログイン成功の想定</small></span><input type="checkbox" id="idOk" checked></label>
-<label class="toggle-row"><span>多要素認証（MFA）通過<small>OTP等のポリシーを想定</small></span><input type="checkbox" id="mfa" checked></label>
-<label class="toggle-row"><span>アクセス許可端末<small>端末制御ポリシーを想定</small></span><input type="checkbox" id="device" checked></label>
+<label class="toggle-row"><span>ログインが完了している<small>本人認証の結果を想定</small></span><input type="checkbox" id="idOk" checked></label>
+<label class="toggle-row"><span>追加の認証も完了している<small>MFA（多要素認証）の条件</small></span><input type="checkbox" id="mfa" checked></label>
+<label class="toggle-row"><span>許可された端末を使っている<small>端末のアクセス条件</small></span><input type="checkbox" id="device" checked></label>
 <div class="rule"></div>
 <div class="section-kicker">MotionBoard / Local Settings</div>
-<label class="toggle-row"><span>MotionBoardアカウントあり<small>SSOだけでは自動作成されない</small></span><input type="checkbox" id="mbAccount" checked></label>
-<label class="toggle-row"><span>対象ボードの閲覧権限あり<small>フォルダー／グループ単位</small></span><input type="checkbox" id="folder" checked></label>
-<label class="toggle-row"><span>権限外ボタンを非表示にする<small>UI設計案。実装方式は要検証</small></span><input type="checkbox" id="hide"></label>
+<label class="toggle-row"><span>MotionBoardに利用者登録がある<small>SSOだけでは自動作成されません</small></span><input type="checkbox" id="mbAccount" checked></label>
+<label class="toggle-row"><span>この画面を開く権限がある<small>フォルダー・グループの設定</small></span><input type="checkbox" id="folder" checked></label>
+<label class="toggle-row"><span>使えないボタンを隠してみる<small>見せ方の例。実装方法は要検証</small></span><input type="checkbox" id="hide"></label>
 <div class="rule"></div>
 <div class="section-kicker">DB / Business Rules</div>
-<label class="field" for="status">対象契約の状態</label>
-<select class="select" id="status"><option value="draft">下書き</option><option value="pending" selected>承認待ち</option><option value="approved">承認済み</option></select>
-<label class="field" for="scope">対象契約の所属支店</label>
+<label class="field" for="status">いま、案件はどんな状態？</label>
+<select class="select" id="status"><option value="draft" selected>下書き</option><option value="pending">承認待ち</option><option value="approved">承認済み</option></select>
+<label class="field" for="scope">この契約はどこの支店のもの？</label>
 <select class="select" id="scope"><option value="own">自分の所属支店</option><option value="other">別の支店</option></select>
-<label class="toggle-row"><span>自分が起票した案件<small>自己承認禁止の業務ルール例</small></span><input type="checkbox" id="self"></label>
-<div class="note">実環境のHENNGE One・MotionBoard・DBには一切接続していません。判定とボタン操作は、このブラウザ内だけのシミュレーションです。</div>
+<label class="toggle-row"><span>自分が登録した案件である<small>自分の案件を自分で承認しないルール</small></span><input type="checkbox" id="self"></label>
+<div class="note">ここでの操作はお試し用です。実際のHENNGE One・MotionBoard・業務DBには接続せず、銀行のデータも変更しません。</div>
 </aside>
 <div class="workspace">
 <section class="signal" id="signal" data-tone="neutral" aria-live="polite">
-<div class="signal-kicker">● LIVE POLICY DECISION / ACCESS ENGINE v1.1</div><div class="signal-value" id="signal-value">VERIFYING...</div><div class="signal-detail" id="signal-detail">認証と業務条件を評価しています</div><div class="signal-meta"><span>SUBJECT <b id="signal-subject">BRANCH</b></span><span>CONTRACT <b>DEMO-K00001</b></span><span>ACTION <b id="signal-action">NONE</b></span></div></section>
+<div class="signal-kicker">● CURRENT ACCESS / いまの条件でできること</div><div class="signal-value" id="signal-value">VERIFYING...</div><div class="signal-detail" id="signal-detail">選んだ条件を確認しています</div><div class="signal-meta"><span>SUBJECT <b id="signal-subject">BRANCH</b></span><span>CONTRACT <b>DEMO-K00001</b></span><span>ACTION <b id="signal-action">NONE</b></span></div></section>
 <section class="card">
-<div class="headline"><div><div class="section-kicker">02 / Live Decision</div><h2>3層の判定フロー</h2></div><span class="chip" id="summary-chip">判定中</span></div>
+<div class="headline"><div><div class="section-kicker">02 / Live Decision</div><h2>どこで、何が決まるの？</h2></div><span class="chip" id="summary-chip">判定中</span></div>
 <div class="flow">
-<div class="stage"><div class="index">LAYER 01 — ACCESS</div><div class="brand">HENNGE One</div><p>本人認証・MFA・端末ポリシー・SSO</p><div class="state" id="hstate">判定中</div><button class="doc-btn" data-guide="auth">機能と根拠を見る ↗</button></div>
-<div class="stage"><div class="index">LAYER 02 — BOARD</div><div class="brand">MotionBoard</div><p>ユーザー・ロール・フォルダー権限・表示</p><div class="state" id="mstate">判定中</div><button class="doc-btn" data-guide="board">機能と根拠を見る ↗</button></div>
-<div class="stage"><div class="index">LAYER 03 — WRITE</div><div class="brand">業務DB・処理</div><p>対象支店・案件状態・自己承認防止などの最終検証</p><div class="state" id="bstate">判定中</div><button class="doc-btn" data-guide="guard">設計根拠を見る ↗</button></div>
+<div class="stage"><div class="index">STEP 01 — まず、本人確認</div><div class="brand">HENNGE One</div><p>ログインした人と、アクセス条件を確認します。</p><div class="state" id="hstate">判定中</div><button class="doc-btn" data-guide="auth">使う機能と出典を見る ↗</button></div>
+<div class="stage"><div class="index">STEP 02 — 次に、画面の権限</div><div class="brand">MotionBoard</div><p>この画面やデータを見てよいか確認します。</p><div class="state" id="mstate">判定中</div><button class="doc-btn" data-guide="board">使う機能と出典を見る ↗</button></div>
+<div class="stage"><div class="index">STEP 03 — 最後に、業務の判断</div><div class="brand">業務DB・処理</div><p>登録・承認を進めてよいか、最後に確かめます。</p><div class="state" id="bstate">判定中</div><button class="doc-btn" data-guide="guard">設計の考え方を見る ↗</button></div>
 </div>
 <div class="decision">
-<div class="headline"><div><div class="section-kicker">OPERATION PREVIEW</div><strong>コベナンツ管理・操作パネル</strong></div><span class="chip" id="role-chip">支店担当者</span></div>
+<div class="headline"><div><div class="section-kicker">TRY AN ACTION / 操作を試す</div><strong>この担当者の操作画面</strong></div><span class="chip" id="role-chip">支店担当者</span></div>
 <div class="contract"><span>契約番号 <b>DEMO-K00001</b></span><span>・</span><span id="status-label">承認待ち</span><span>・</span><span id="scope-label">所属支店</span></div>
 <div class="terminal"><div id="register-box"><button class="action" id="register">登録（承認申請）</button><p class="action-note" id="register-note"></p></div><div id="approve-box"><button class="action approve" id="approve">承認</button><p class="action-note" id="approve-note"></p></div></div>
 <div class="audit" role="status" aria-live="polite" id="audit">条件を切り替えると判定理由が表示されます。</div>
 </div>
-<div class="split"><div class="smallcard"><div class="section-kicker">可視性</div><div class="answer" id="visible-answer">確認中</div><p>見えなくするだけでは、操作権限を保証できません。</p><button class="doc-btn" data-guide="visibility">表示切替の根拠を見る ↗</button></div><div class="smallcard"><div class="section-kicker">更新可否</div><div class="answer" id="update-answer">確認中</div><p>書き込み時にも本人・業務条件・データ状態の再確認が必要です。</p><button class="doc-btn" data-guide="write">入力機能の根拠を見る ↗</button></div></div>
+<div class="split"><div class="smallcard"><div class="section-kicker">VIEW / 見られる範囲</div><div class="answer" id="visible-answer">確認中</div><p>ボタンを隠すことと、操作を許可することは別の仕組みです。</p><button class="doc-btn" data-guide="visibility">表示の仕組みを見る ↗</button></div><div class="smallcard"><div class="section-kicker">ACTION / 操作できる範囲</div><div class="answer" id="update-answer">確認中</div><p>登録や承認の直前にも、権限と案件の状態を確認する設計が大切です。</p><button class="doc-btn" data-guide="write">登録の仕組みを見る ↗</button></div></div>
 </section>
 <section class="card sect" id="explain">
-<div class="section-kicker">03 / Feature × Evidence</div><h2>どの機能で実現する？</h2><p class="muted">上の「機能と根拠を見る」を選ぶと、該当する製品機能と確認事項が切り替わります。</p>
+<div class="section-kicker">03 / Feature × Evidence</div><h2>この動き、どう作るの？</h2><p class="muted">製品にある機能と、これから確かめたいこと。どちらも出典と一緒に確認できます。</p>
 <div class="tabs"><button class="tab current" data-guide="auth">認証・SSO</button><button class="tab" data-guide="board">ロール・閲覧</button><button class="tab" data-guide="visibility">ボタン表示</button><button class="tab" data-guide="write">登録・更新</button><button class="tab" data-guide="guard">承認の最終制御</button></div>
 <div class="evidence"><div class="status" id="evidence-status"></div><strong id="evidence-title"></strong><p class="definition" id="evidence-body"></p><div class="impl" id="evidence-impl"></div><div id="evidence-links"></div></div>
 </section>
 </div></div>
 <section class="card sect" id="sources">
-<div class="section-kicker">04 / Traceable Sources</div><h2>公式資料と実装の検証ポイント</h2><p class="muted">資料リンクは原則としてメーカー公式の技術記事・ヘルプ。SCSKの補助資料は販売パートナーの解説として区別します。Cloud Classicと本番想定のオンプレ版では必ず差分検証を行ってください。</p>
+<div class="section-kicker">04 / Traceable Sources</div><h2>気になったら、ここから確かめよう</h2><p class="muted">機能の説明には、メーカー公式資料を中心に出典を付けています。SCSKの資料は販売パートナーの解説として掲載。Cloud版と本番想定のオンプレ版で違いがないかは、導入前に確認が必要です。</p>
 <div class="source-grid">
 <article class="source" id="s1"><div class="number">SOURCE 01 — HENNGE公式</div><h3>MotionBoardのSSO設定</h3><p>SAML連携。メールアドレスによる連携、SP-Initiatedのみ、自動プロビジョニングなしと明記。</p><a target="_blank" rel="noopener noreferrer" href="https://support.hdeone.com/hc/ja/articles/60832202230425-MotionBoard%E3%81%AE%E3%82%B7%E3%83%B3%E3%82%B0%E3%83%AB%E3%82%B5%E3%82%A4%E3%83%B3%E3%82%AA%E3%83%B3%E8%A8%AD%E5%AE%9A">連携設定の手順を開く ↗</a></article>
 <article class="source" id="s2"><div class="number">SOURCE 02 — HENNGE公式</div><h3>アクセスポリシーグループ</h3><p>HENNGE Access Controlのアクセス許可条件。MFA・端末認証の設定と判定に関係。</p><a target="_blank" rel="noopener noreferrer" href="https://support.hdeone.com/hc/ja/articles/22397876848153--Access-Control-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%83%9D%E3%83%AA%E3%82%B7%E3%83%BC%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97%E3%81%AE%E4%BD%9C%E6%88%90-%E7%B7%A8%E9%9B%86">設定を開く ↗</a></article>
@@ -108,24 +108,24 @@ footer{padding:28px 4px;color:#8b9ba9;font:750 10px var(--mono)}.foot-accent{col
 <article class="source" id="s7"><div class="number">SOURCE 07 — SCSK解説</div><h3>ログインユーザー別のデータ絞り込み</h3><p>ログインIDと部署マスタを使った表示データの絞り込み例。DB側の行権限とは区別。</p><a target="_blank" rel="noopener noreferrer" href="https://www.scsk.jp/sp/motionboard/faq/qa023/">実装方針を確認する ↗</a></article>
 <article class="source" id="s8"><div class="number">SOURCE 08 — WingArc公式</div><h3>オンプレ版の製品マニュアル入口</h3><p>バージョンごとの正式な仕様を確認する入口。今回の実機・契約版数に照らして検証する。</p><a target="_blank" rel="noopener noreferrer" href="https://www.wingarc.com/product/motionboard/introduce/">マニュアル案内を開く ↗</a></article>
 </div>
-<div class="warning"><b>要検証／設計上の提案：</b>ログインロールに応じた個別ボタンの自動非表示、自己承認防止、他店データの更新禁止を、MotionBoard標準機能だけで一貫して強制できることは、この資料だけでは確認できていません。非表示は認可の代替になりません。DB・API・ストアドプロシージャ等による更新時判定を含めて設計し、テストしてください。また、HENNGE側のアクセスポリシーグループとMotionBoard業務ロールは自動同期前提にしないでください。</div>
-</section><footer>EXPLANATION DEMO · 2026-10-12 · このページ内の権限・操作・契約情報はすべて架空。個人情報、銀行システム、認証情報を含みません。</footer>
+<div class="warning"><b>実装前に確かめておきたいこと：</b>担当者に合わせてボタンを自動で隠すことや、自己承認・他支店の更新を防ぐことが、MotionBoardの標準機能だけで完結するかは未確認です。ボタンを隠すだけでは操作の権限を守れません。DB・APIなどで更新時にも確かめる設計を検討します。また、HENNGE One側のグループとMotionBoard側の業務ロールが自動で連動する前提にはしません。</div>
+</section><footer>ACCESS DESIGN / DEMO · 2026-10-12 · 架空のデータを使った説明用デモです。実際の銀行情報やログイン情報は使っていません。</footer>
 </main>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), vals=['role','idOk','mfa','device','mbAccount','folder','hide','status','scope','self'];
 const roles={staff:'支店担当者',manager:'支店承認者',head:'本部閲覧担当'},states={draft:'下書き',pending:'承認待ち',approved:'承認済み'};
 const features={
- auth:{s:'公式に確認できる機能',title:'HENNGE Access Control：アクセス条件＋SAML SSO',body:'HENNGE Oneが認証を担い、ポリシーに従ってMotionBoardへSSO連携します。公式連携ガイドはメールアドレスを連携キーとし、MotionBoard側ユーザーの自動プロビジョニングはないと記載。MotionBoardの「承認者」という業務ロールをHENNGEが直接決める仕様ではありません。',impl:'検証：SSO方式はSP-Initiatedのみ。MFA・端末条件と、MotionBoard側アカウントとのID対応を確認。',refs:['s1','s2']},
- board:{s:'標準機能を確認／ロールの業務適用は要設計',title:'MotionBoard：ユーザー・グループ・ロール＋フォルダー権限',body:'MotionBoardのシステム設定ではユーザーをグループへ所属させ、ロールを割り当てます。ボードを置くフォルダーへのアクセス制御と、データソースのログインIDによる検索条件設定も候補です。ただし標準ロールが銀行業務の承認権限を直接保証するとは限りません。',impl:'検証：支店担当／承認者／本部閲覧の3ユーザーを分けてログインし、ボード閲覧・編集・対象支店の見え方を確認。',refs:['s3','s7','s8']},
- visibility:{s:'標準の表示切替は確認済／ユーザー連動は要検証',title:'MotionBoard：ボタンアクション「表示非表示切り替え」',body:'ボタンアクションでアイテムの表示・非表示を切り替える機能はあります。一方、ログインロールに応じて登録／承認ボタンを自動的に隠す方式と、その実装手順はこの資料からは確定できません。今回の画面は設計イメージです。',impl:'検証：ロールを変えてログインし、ボタン自動表示の可否を確認。不可ならボード分離、条件付き表示、画面側の実装方法を比較する。',refs:['s4','s3']},
- write:{s:'標準機能を確認／更新権限の細分化は要検証',title:'MotionBoard：データベース入力・編集セット・更新キー',body:'Classic版ではデータベース入力の許可、追加・更新・削除の制御、更新キー、ボタンアクション「データベース入力」などを設定できます。「登録」ボタンの仕組みは組み立てられますが、ユーザーごとに更新可否を安全に分離できるかは別の確認事項です。',impl:'検証：編集可・不可のテストアカウントを使って、画面からの入力だけでなく他経路の更新も拒否されるか確認。',refs:['s5','s6']},
- guard:{s:'銀行業務向けの設計提案／標準機能のみでは未確認',title:'DB・API層：承認状態と業務権限を再判定',body:'承認待ちであること、承認者ロールであること、対象が担当範囲内であること、自己承認禁止などを更新処理の中で一括検証する設計です。ボタンの非表示や検索による絞り込みだけで業務データの変更を防げるとは考えない方が安全です。',impl:'検証：権限外更新、承認済み再更新、自己承認、同時更新、他支店更新を否認できるかDB・API等でテスト。DB連携構成・実装方法は案件ごとに決める。',refs:['s5','s6','s7']}
+ auth:{s:'公式に確認できる機能',title:'HENNGE Access Control：アクセス条件＋SAML SSO',body:'まず、HENNGE Oneがログイン時の本人確認やアクセス条件を担当します。条件を満たすとMotionBoardへSSOでつながります。ただし、公式ガイドではMotionBoard側のユーザーは自動作成されません。また、銀行業務の「承認者」をHENNGE Oneだけで決められるわけではありません。',impl:'検証：SSO方式はSP-Initiatedのみ。MFA・端末条件と、MotionBoard側アカウントとのID対応を確認。',refs:['s1','s2']},
+ board:{s:'標準機能を確認／ロールの業務適用は要設計',title:'MotionBoard：ユーザー・グループ・ロール＋フォルダー権限',body:'次に、MotionBoardでユーザー・グループ・ロールを設定します。画面を置くフォルダーの権限や、ログインユーザーに合わせたデータの絞り込みも検討できます。ただし、MotionBoardの標準ロールだけで業務上の承認可否まで決まるとは限りません。',impl:'検証：支店担当／承認者／本部閲覧の3ユーザーを分けてログインし、ボード閲覧・編集・対象支店の見え方を確認。',refs:['s3','s7','s8']},
+ visibility:{s:'標準の表示切替は確認済／ユーザー連動は要検証',title:'MotionBoard：ボタンアクション「表示非表示切り替え」',body:'MotionBoardには、ボタンアクションで画面上のアイテムを表示・非表示にする機能があります。ただし、ログインした人の役割に合わせて自動で切り替えられるかは別途確認が必要です。このデモは、その完成イメージを試すためのものです。',impl:'検証：ロールを変えてログインし、ボタン自動表示の可否を確認。不可ならボード分離、条件付き表示、画面側の実装方法を比較する。',refs:['s4','s3']},
+ write:{s:'標準機能を確認／更新権限の細分化は要検証',title:'MotionBoard：データベース入力・編集セット・更新キー',body:'MotionBoard Classicには、データベースへの追加・更新・削除や更新キー、ボタンアクション「データベース入力」の仕組みがあります。登録ボタンはこうした機能を組み合わせて作れますが、担当者ごとの更新権限を確実に分けられるかは、実際の構成で検証します。',impl:'検証：編集可・不可のテストアカウントを使って、画面からの入力だけでなく他経路の更新も拒否されるか確認。',refs:['s5','s6']},
+ guard:{s:'銀行業務向けの設計提案／標準機能のみでは未確認',title:'DB・API層：承認状態と業務権限を再判定',body:'最後に、DBや業務処理で「承認待ちか」「承認できる担当者か」「担当支店の案件か」「自分で登録した案件ではないか」を確かめます。画面でボタンを隠していても、更新時のチェックは省かない設計が安心です。',impl:'検証：権限外更新、承認済み再更新、自己承認、同時更新、他支店更新を否認できるかDB・API等でテスト。DB連携構成・実装方法は案件ごとに決める。',refs:['s5','s6','s7']}
 };
 function showEvidence(k,scroll=false){const x=features[k];if(!x)return;
  document.querySelectorAll('[data-guide].tab').forEach(e=>e.classList.toggle('current',e.dataset.guide===k));
  $('evidence-status').textContent=x.s;$('evidence-title').textContent=x.title;$('evidence-body').textContent=x.body;$('evidence-impl').textContent=x.impl;
- $('evidence-links').replaceChildren();x.refs.forEach(id=>{const e=document.createElement('a');e.href='#'+id;e.textContent='出典 '+id.slice(1)+' を読む →';e.style.cssText='display:inline-block;margin:10px 12px 0 0;font-size:12px;font-weight:800';$('evidence-links').appendChild(e)});
+ $('evidence-links').replaceChildren();x.refs.forEach(id=>{const e=document.createElement('a');e.href='#'+id;e.textContent='参照した公式資料 '+id.slice(1)+' を見る →';e.style.cssText='display:inline-block;margin:10px 12px 0 0;font-size:12px;font-weight:800';$('evidence-links').appendChild(e)});
  if(scroll)$('explain').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function get(){const v={};vals.forEach(id=>{const el=$(id);v[id]=el.type==='checkbox'?el.checked:el.value});return v}
@@ -137,21 +137,22 @@ function render(){const v=get();let h=v.idOk&&v.mfa&&v.device;
  let canReg=visible&&v.role==='staff'&&v.status==='draft';
  let canApp=visible&&v.role==='manager'&&v.status==='pending'&&!v.self;
  let guard=visible&&(v.status==='draft'||v.status==='pending');
- $('hstate').textContent=h?'認証・アクセス許可':'アクセス拒否';$('hstate').className='state '+(h?'good':'bad');
- $('mstate').textContent=!h?'認証待ち':!m?'ボードにアクセス不可':!scope?'他店データを対象外':'閲覧条件を満たす';$('mstate').className='state '+(visible?'good':'bad');
- $('bstate').textContent=!visible?'更新判定には進めない':canReg?'登録を許可':canApp?'承認を許可':'更新操作を拒否';$('bstate').className='state '+(allow?'good':'bad');
- let allow=canReg||canApp;$('summary-chip').textContent=!h?'HENNGEで停止':!visible?'MotionBoardで停止':allow?'操作可能なものあり':'参照のみ';$('summary-chip').className='chip '+(allow?'good':!visible?'bad':'warn');
+ let allow=canReg||canApp;
+ $('hstate').textContent=h?'ログインできます':'認証条件を確認してください';$('hstate').className='state '+(h?'good':'bad');
+ $('mstate').textContent=!h?'ログイン後に確認':!m?'画面を開く条件が足りません':!scope?'この支店の案件は対象外':'この画面を開けます';$('mstate').className='state '+(visible?'good':'bad');
+ $('bstate').textContent=!visible?'画面の権限を先に確認':canReg?'登録できます':canApp?'承認できます':'登録・承認はできません';$('bstate').className='state '+(allow?'good':'bad');
+ $('summary-chip').textContent=!h?'ログイン条件を確認':!visible?'閲覧条件を確認':allow?'操作できます':'閲覧のみ';$('summary-chip').className='chip '+(allow?'good':!visible?'bad':'warn');
  $('role-chip').textContent=roles[v.role];$('status-label').textContent=states[v.status];$('scope-label').textContent=v.scope==='own'?'所属支店':'別支店';
  $('register').disabled=!canReg;$('approve').disabled=!canApp;$('register-box').style.display=v.hide&&v.role!=='staff'?'none':'block';$('approve-box').style.display=v.hide&&v.role!=='manager'?'none':'block';
- $('register-note').textContent=canReg?'下書き → 承認待ち':v.role!=='staff'?'登録権限なし':v.status!=='draft'?'下書き状態ではない':!visible?'画面・支店の条件を満たさない':'業務条件を満たさない';
- $('approve-note').textContent=canApp?'承認待ち → 承認済み':v.role!=='manager'?'承認権限なし':v.status!=='pending'?'承認待ちではない':v.self?'自己承認は禁止':!visible?'画面・支店の条件を満たさない':'業務条件を満たさない';
- $('visible-answer').textContent=visible?'契約データを参照できる想定':'参照できない想定';$('update-answer').textContent=allow?'更新操作を1つ以上許可':'更新操作を拒否';
- let reason=!v.idOk?'本人認証失敗：HENNGE One側で停止':!v.mfa?'MFA条件未達：HENNGE One側で停止':!v.device?'端末条件未達：HENNGE One側で停止':!v.mbAccount?'アカウント未作成：MotionBoard側で停止':!v.folder?'フォルダー権限なし：MotionBoard側で停止':!scope?'他支店の情報：表示対象外の想定':v.status==='approved'?'承認済み：登録・再承認を禁止する設計':v.self&&v.role==='manager'?'自己承認防止：DB・業務処理で拒否する設計':allow?'現在の条件では許可される操作があります':'業務ロールまたは状態が操作条件を満たしません';
+ $('register-note').textContent=canReg?'登録すると、承認待ちに進みます':!visible?'画面を開く条件の確認が必要です':v.role!=='staff'?'支店担当者が使う操作です':v.status!=='draft'?'下書きの案件で利用できます':'登録の条件を確認してください';
+ $('approve-note').textContent=canApp?'承認すると、承認済みに進みます':!visible?'画面を開く条件の確認が必要です':v.role!=='manager'?'承認担当者が使う操作です':v.status!=='pending'?'承認待ちの案件で利用できます':v.self?'自分が登録した案件は承認できません':'承認の条件を確認してください';
+ $('visible-answer').textContent=visible?'この契約を確認できます':'この契約は表示されません';$('update-answer').textContent=allow?'登録または承認を進められます':'登録・承認はできません';
+ let reason=!v.idOk?'本人確認が終わっていません。HENNGE One側のログイン条件を確かめます。':!v.mfa?'追加認証（MFA）がまだ完了していません。':!v.device?'この端末からのアクセスは許可されていません。':!v.mbAccount?'MotionBoard側の利用者登録が必要です。':!v.folder?'この画面を開くための権限が必要です。':!scope?'別の支店の案件は、今の担当範囲では見られない想定です。':v.status==='approved'?'承認済みの案件です。再登録や再承認を防ぐ設計にしています。':v.self&&v.role==='manager'?'自分が登録した案件のため、別の承認担当者による確認が必要です。':allow?'今の条件で進められる操作があります。下のボタンを試してみてください。':'この担当と案件の状態では、登録・承認はできません。';
 
- const verdict=!h?'ACCESS DENIED':!visible?'BOARD LOCKED':allow?'AUTHORIZED':'VIEW ONLY';
+ const verdict=!h?'ログインできません':!visible?'画面を開けません':allow?'操作できます':'閲覧できます';
  const tone=!h||!visible?'deny':allow?'allow':'neutral';
  $('signal-value').textContent=verdict;
- $('signal-detail').textContent=!h?'HENNGE One：認証・アクセス条件を満たしていません':!visible?'MotionBoard：ボード・所属支店の条件を満たしていません':allow?'このロールには実行可能な操作があります':'閲覧は可能ですが、実行条件を満たす操作はありません';
+ $('signal-detail').textContent=!h?'まずHENNGE One側の認証条件を確かめましょう。':!visible?'MotionBoardの利用者登録・閲覧権限・対象支店を確認します。':allow?'この担当と案件の状態なら、下の操作を進められます。':'内容は確認できます。登録・承認ができない理由も下に表示しています。';
  $('signal').dataset.tone=tone;
  $('signal-subject').textContent=v.role==='staff'?'BRANCH STAFF':v.role==='manager'?'APPROVER':'HQ VIEWER';
  $('signal-action').textContent=canReg?'REGISTER':canApp?'APPROVE':'NONE';
@@ -161,8 +162,8 @@ function render(){const v=get();let h=v.idOk&&v.mfa&&v.device;
 }
 vals.forEach(id=>$(id).addEventListener('change',()=>{notice='';render()}));
 document.querySelectorAll('[data-guide]').forEach(el=>el.addEventListener('click',()=>showEvidence(el.dataset.guide,true)));
-$('register').addEventListener('click',()=>{if($('register').disabled)return;$('status').value='pending';notice='デモ操作：登録を受け付けた想定。状態が「承認待ち」に変わりました。DBには保存していません。';render()});
-$('approve').addEventListener('click',()=>{if($('approve').disabled)return;$('status').value='approved';notice='デモ操作：承認を受け付けた想定。状態が「承認済み」に変わりました。DBには保存していません。';render()});
+$('register').addEventListener('click',()=>{if($('register').disabled)return;$('status').value='pending';notice='登録を試しました。「承認待ち」に進みました。この画面だけのデモで、DBには保存していません。';render()});
+$('approve').addEventListener('click',()=>{if($('approve').disabled)return;$('status').value='approved';notice='承認を試しました。「承認済み」に進みました。この画面だけのデモで、DBには保存していません。';render()});
 
 document.querySelectorAll('[data-role-preset]').forEach(btn=>btn.addEventListener('click',()=>{$('role').value=btn.dataset.rolePreset;notice='';render()}));
 document.querySelectorAll('[data-scenario]').forEach(btn=>btn.addEventListener('click',()=>{
