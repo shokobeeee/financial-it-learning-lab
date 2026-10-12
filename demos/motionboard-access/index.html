@@ -1,527 +1,228 @@
-<!doctype html>
-<html lang="ja">
-<head>
+<!doctype html><html lang="ja"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f6f8fb">
-<meta name="description" content="HENNGE OneとMotionBoardの権限の責任分界を、公式資料・設計作業・検証事項まで比較できる金融システム向けインタラクティブ設計ガイド。">
-<title>権限設計の分担を整理する | HENNGE One × MotionBoard</title>
+<meta name="theme-color" content="#f5f7f9">
+<title>MotionBoardの実運用から考える権限設計 | HENNGE One × MotionBoard</title>
+<meta name="description" content="実際の銀行業務画面を起点に、ユーザーロール・閲覧・登録・承認の要件から、HENNGE OneとMotionBoardの責任分界や設定を逆算するインタラクティブ設計ガイド。">
 <style>
-:root{color-scheme:light;--paper:#f5f7fa;--white:#fff;--ink:#13263b;--muted:#64768a;--line:#dfe6ed;--edge:#b9c7d5;--navy:#142e47;--navy2:#0b2034;--blue:#346cbd;--blue-soft:#edf3fc;--teal:#087d76;--teal-soft:#eaf7f4;--gold:#b78b48;--gold-soft:#faf4e8;--red:#b45a4a;--red-soft:#fff1ef;--shadow:0 14px 40px #1f41600a}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:90px}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.68;-webkit-font-smoothing:antialiased}
-button,input,select{font:inherit}button{cursor:pointer}a{color:var(--blue);text-underline-offset:3px}
-button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #6fa8e1;outline-offset:2px}
-.wrap{max-width:1272px;margin:auto;padding:0 24px}
-.topbar{position:sticky;top:0;z-index:30;background:#fffffff5;backdrop-filter:blur(17px);border-bottom:1px solid var(--line)}
-.toprow{min-height:65px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.identity{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-size:12px;letter-spacing:.045em;font-weight:850}
-.symbol{height:34px;width:34px;border-radius:10px;background:var(--navy);color:white;display:grid;place-items:center;font:850 15px ui-monospace,monospace}
-.brand-sub{font-size:10px;color:var(--muted);display:block;font-weight:630;letter-spacing:.015em}
-.head-nav{display:flex;gap:3px;flex-wrap:wrap}.head-nav button{border:0;border-radius:9px;color:#6c7d8a;background:transparent;padding:9px 13px;font-size:12px;font-weight:700}
-.head-nav button.active{color:#193e6e;background:#edf2f9}
-.header-meta{font:800 10px ui-monospace,monospace;letter-spacing:.05em;color:var(--teal);background:#e7f6f2;border:1px solid #cde7df;border-radius:99px;padding:6px 11px;white-space:nowrap}
-.hero{padding:47px 0 28px;position:relative;overflow:hidden}
-.eyebrow{color:var(--teal);font:830 10px ui-monospace,monospace;letter-spacing:.16em}
-.hero h1{font-size:clamp(30px,4.2vw,52px);line-height:1.28;letter-spacing:-.061em;max-width:890px;margin:17px 0;color:var(--navy);font-weight:830}
-.hero h1 em{font-style:normal;color:var(--teal);border-bottom:3px solid #aedfd2}
-.hero p{font-size:14px;max-width:830px;color:#5b6f81;line-height:1.95}
-.stat-row{display:flex;gap:11px;flex-wrap:wrap;margin-top:21px}.stat{border:1px solid var(--line);background:white;border-radius:9px;padding:9px 13px;font-size:11px;color:var(--muted)}.stat strong{font-size:12px;color:var(--navy)}
-.canvas{margin-top:8px;padding-bottom:64px}
-.kicker{font:850 10px ui-monospace,monospace;letter-spacing:.12em;color:var(--teal);text-transform:uppercase}
-.section-heading{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin:22px 0 15px}
-.section-heading h2{font-size:22px;letter-spacing:-.035em;line-height:1.4;margin:5px 0 0;color:var(--navy)}.section-heading p{font-size:12px;color:var(--muted);margin:3px 0}
-.panel{background:white;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}
-.owner-map{display:grid;grid-template-columns:minmax(0,1fr) 135px minmax(0,1fr);align-items:stretch;gap:13px}
-.owner-card{padding:23px 24px 22px;min-width:0;border-top:3px solid var(--blue);position:relative;transition:transform .2s,box-shadow .2s,border-color .2s}
-.owner-card.mb{border-top-color:var(--teal)}.owner-card:hover{transform:translateY(-2px);box-shadow:0 17px 34px #18395612}
-.owner-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.owner-top span{font-size:10px;color:#93a3af;font-weight:850;letter-spacing:.12em}
-.eyeline{color:var(--blue);font:900 11px ui-monospace,monospace;letter-spacing:.12em}.mb .eyeline{color:var(--teal)}
-.owner-card h3{font-size:21px;letter-spacing:-.038em;margin:14px 0 7px;color:#183249;line-height:1.38}.owner-card p{font-size:12px;color:var(--muted);min-height:42px}
-.owner-pills{display:flex;flex-wrap:wrap;gap:7px;margin:17px 0 15px}.owner-pills span{font-size:11px;font-weight:680;border:1px solid #e1e8ef;border-radius:6px;padding:5px 8px;background:#f8fafc}
-.owner-action{border:0;padding:0;color:var(--blue);font-weight:780;background:none;font-size:12px}.mb .owner-action{color:var(--teal)}
-.link-panel{align-self:stretch;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#6f8793;text-align:center;font-size:10px;line-height:1.4}
-.link-panel:before{content:"";position:absolute;top:18%;bottom:18%;left:50%;width:1px;background:linear-gradient(#bfcad6,#8cb9aa,#bfcad6)}
-.link-chip{z-index:1;background:#e9f0f4;border:1px solid #cbd7df;border-radius:9px;padding:12px 10px;color:#466271;font:800 10px ui-monospace,monospace;box-shadow:0 2px 12px #153f5010}
-.link-chip strong{color:#173f57;display:block;font-size:13px;margin-bottom:4px}
-.boundary-strip{display:flex;gap:12px;align-items:flex-start;margin-top:13px;background:#f4f7fa;border:1px solid #e1e7ec;border-radius:12px;padding:15px 18px}
-.boundary-icon{background:#dde9f0;display:grid;place-items:center;height:26px;width:26px;flex:none;border-radius:8px;color:#325b74;font-weight:900}
-.boundary-strip p{margin:0;font-size:12px;color:#476071}.boundary-strip strong{color:#213f54}
-.extras{margin-top:12px;background:#fff;border:1px dashed #c6d3df;padding:13px 16px;border-radius:11px;font-size:12px;color:#5e6f7d}
-.extras strong{color:#243f57}
-.interface{margin-top:30px}
-.views{display:none;animation:rise .28s ease-out}.views.active{display:block}
-.explore{display:grid;grid-template-columns:330px minmax(0,1fr);gap:17px}
-.topic-list{padding:17px;align-self:start}
-.list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
-.list-head h3{font-size:14px;margin:0}.count{font:800 11px ui-monospace,monospace;color:#81919f}
-.filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
-.filter{border:1px solid #e2e9ee;background:#f7f9fb;padding:5px 9px;font-size:10px;color:#617588;border-radius:7px;font-weight:750}
-.filter.on{color:white;background:#253f58;border-color:#253f58}
-.topic-buttons{display:grid;gap:7px}
-.topic{position:relative;background:white;border:1px solid #e1e8ee;border-radius:11px;text-align:left;width:100%;padding:13px 13px;display:grid;grid-template-columns:29px 1fr;gap:10px;align-items:start;transition:.16s}
-.topic:hover{background:#f6f9fd;border-color:#c1d5e2}.topic.selected{border-color:#85bdb5;background:#f0f8f6;box-shadow:inset 3px 0 0 var(--teal)}
-.topic .idx{font:850 11px ui-monospace,monospace;color:#8da0ae;padding-top:1px}
-.topic b{display:block;color:#213c51;font-size:12px;line-height:1.45}.topic small{display:block;font-size:10px;color:#798b99;margin-top:4px}
-.topic-owner{font-weight:750;color:var(--teal)}
-.detail{padding:25px 27px;min-width:0}
-.detail-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.micro-label{font:850 10px ui-monospace,monospace;color:#8195a4;letter-spacing:.1em}
-.pill{font-size:10px;border-radius:7px;padding:5px 9px;color:#466277;background:#eff3f7;border:1px solid #e0e8ef;font-weight:750}
-.pill.verified{color:#2b6f62;background:#eaf7f2;border-color:#ccebe0}.pill.needs{color:#895f26;background:#fff7e8;border-color:#f1e1bb}
-.detail h3{font-size:clamp(20px,2.5vw,27px);letter-spacing:-.043em;color:#183449;line-height:1.42;margin:13px 0 8px}
-.lede{font-size:13px;line-height:1.9;color:#607184;margin:0 0 20px}
-.lane-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.lane{border:1px solid #dce6ef;border-radius:12px;overflow:hidden;background:#fbfdff}
-.lane.mb{border-color:#d0e6e1;background:#fbfefd}
-.lane-title{padding:12px 14px 11px;display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e3e9ed;background:#f3f7fc}
-.lane.mb .lane-title{background:#edf8f5}
-.lane-title b{font-size:12px;color:#225389}.lane.mb .lane-title b{color:#117168}
-.lane-title span{font-size:10px;color:#73879b}
-.lane-body{padding:14px}
-.mini-heading{font:800 10px ui-monospace,monospace;color:#798c9c;letter-spacing:.09em;margin-bottom:5px}
-.lane-body p{font-size:12px;color:#455e70;line-height:1.87;margin:0 0 14px}
-.lane-body p:last-child{margin-bottom:0}
-.divider{height:1px;background:#e6ebf0;margin:15px 0}
-.validation{margin-top:13px;padding:17px;border:1px solid #e5e5df;background:#fbfaf7;border-radius:12px}
-.validation-head{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}.validation-head b{font-size:13px;color:#5f5038}.validation-head small{font-size:10px;color:#9f8764;font-weight:720}
-.tests{display:grid;gap:9px;margin:12px 0 0;padding-left:18px;font-size:12px;line-height:1.8;color:#605e58}
-.caveat{margin-top:12px;color:#776653;font-size:12px;line-height:1.75}
-.refs{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.ref-link{display:inline-flex;align-items:center;text-decoration:none;border:1px solid #cddde9;background:#f5f9fb;border-radius:7px;padding:8px 10px;color:#2d597a;font-size:11px;font-weight:750}.ref-link:hover{background:#e9f4fa}
-.matrix-card,.scenario-card,.check-card{padding:25px}
-.legend{display:flex;gap:12px;flex-wrap:wrap;color:#64798b;font-size:11px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:3px;background:var(--blue);display:inline-block}.dot.mb{background:var(--teal)}.dot.both{background:#b49a6a}.dot.need{background:#b98345}
-.data-table{border:1px solid var(--line);border-radius:12px;overflow:auto;margin-top:17px}
-table{border-collapse:collapse;width:100%;text-align:left;font-size:12px;min-width:720px}
-th{padding:13px 15px;background:#f5f8fb;color:#60788b;font-size:11px;font-weight:790;border-bottom:1px solid var(--line)}
-td{padding:13px 15px;border-bottom:1px solid #edf1f4;color:#38536b;vertical-align:top}
-tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
-.table-topic{border:0;background:transparent;color:#1d4264;text-align:left;font-weight:780;padding:0;text-decoration:underline;text-decoration-color:#ccdae5;text-underline-offset:3px}
-.ownerline{display:inline-block;color:#2a668a;font-size:11px;font-weight:730}.ownerline.mb{color:var(--teal)}.ownerline.both{color:#896536}
-.table-note{background:#f7f9fb;border-radius:9px;padding:12px 13px;font-size:11px;color:#728495;margin-top:15px;line-height:1.8}
-.scenario-layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
-.formside{background:#f8fafc;border:1px solid #e2eaf0;border-radius:13px;padding:19px}
-.formgroup{margin-bottom:17px}.formgroup:last-child{margin-bottom:0}
-.formgroup>label,.formlegend{display:block;color:#486276;font-size:11px;font-weight:830;margin-bottom:7px}
-.choice{display:flex;gap:6px;flex-wrap:wrap}.choice button{border:1px solid #dce6ed;color:#60778c;background:white;font-size:11px;font-weight:750;padding:8px 12px;border-radius:8px}.choice button.on{border-color:#247b70;background:#e4f5f0;color:#176b60}
-.formside select{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #cfdce6;color:var(--ink);background:#fff;font-size:12px}
-.toggle{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:9px 0;border-bottom:1px solid #e7edf2;font-size:12px;color:#38536b}.toggle input{accent-color:var(--teal);height:17px;width:17px}
-.workflow{min-width:0}.lane-result{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result{border:1px solid #dae4ea;border-radius:12px;padding:16px 18px;background:white}.result .result-label{font-size:11px;font-weight:850;color:#6c8295}.result .result-state{font-size:16px;font-weight:840;margin:9px 0 4px;color:#1e536b}.result.ok{border-color:#b9ddd2;background:#f4fbf8}.result.no{border-color:#ebd3cc;background:#fff9f8}.result.no .result-state{color:#99574e}.result p{font-size:11px;color:#657b88;margin:0;min-height:36px}
-.workflow .testcase{margin-top:13px;background:#f7f9fc;border:1px solid #e0e7ee;border-radius:12px;padding:19px}
-.testcase h3{font-size:16px;color:var(--navy);margin-bottom:5px}
-.testcase .case-meta{font-size:11px;color:#758799}.case-actions{display:flex;gap:8px;margin-top:16px}
-.action{flex:1;border-radius:9px;border:1px solid #2a5778;background:#194767;color:white;padding:11px;font-weight:800;font-size:12px}
-.action.alt{background:#168077;border-color:#168077}.action:disabled{background:#edf0f3;border-color:#d5e0e8;color:#93a3b1;cursor:not-allowed}
-.reason{margin-top:12px;background:white;border:1px solid #dce5ec;border-left:3px solid #7b9eb4;border-radius:8px;padding:12px 14px;font-size:12px;color:#4e6576;line-height:1.7}
-.smallhelp{margin-top:14px;font-size:11px;line-height:1.85;color:#6d8191}
-.check-head{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap}
-.progress-track{width:100%;height:7px;background:#ecf1f4;border-radius:99px;overflow:hidden;margin:15px 0 18px}.progress-fill{height:100%;background:linear-gradient(90deg,#2a678e,#10a68e);width:0;transition:width .25s}
-.checks{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.check-item{display:flex;align-items:flex-start;gap:11px;border:1px solid #e2eaf0;border-radius:11px;padding:14px 16px;background:#fbfcfd}
-.check-item input{accent-color:#16827a;height:18px;width:18px;flex:none;margin-top:2px}
-.check-item b{display:block;font-size:12px;color:#1d4057}.check-item small{display:block;font-size:11px;color:#7b8c9a;margin-top:4px;line-height:1.65}
-.check-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
-.secondary-btn{border:1px solid #c5d4e0;background:white;color:#37607d;font-size:11px;font-weight:800;border-radius:8px;padding:9px 14px}
-.sources{margin-top:34px}
-.source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
-.source-card{background:white;border:1px solid var(--line);border-radius:12px;padding:17px;min-width:0}
-.source-card .number{font:850 10px ui-monospace,monospace;letter-spacing:.1em;color:#7491a2}
-.source-card h3{font-size:13px;line-height:1.5;margin:10px 0 8px;color:#1f455c}
-.source-card p{font-size:11px;color:#788896;line-height:1.75;margin:0 0 14px;min-height:46px}
-.source-card a{font-size:11px;font-weight:810;text-decoration:none}
-.difference-note{margin-top:16px;border:1px solid #e5d8c2;background:#fff9ec;border-radius:12px;padding:17px 19px;font-size:12px;line-height:1.85;color:#796242}.difference-note strong{color:#57462d}
-.bottom{border-top:1px solid #dce4eb;margin-top:36px;padding-top:19px;font-size:11px;color:#7e90a0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.hidden{display:none!important}
-.setup-path{margin-top:12px;border:1px solid #d8e4e9;border-radius:11px;background:#f3f8fa;padding:15px 16px}.path-line{display:grid;grid-template-columns:105px 1fr;gap:14px;align-items:start;border-top:1px solid #dce7eb;padding:9px 0;font-size:11px;line-height:1.75}.path-line:first-of-type{margin-top:5px}.path-line:last-child{padding-bottom:0}.path-line b{color:#2d6279}.path-line span{color:#516a7e}@media(max-width:590px){.path-line{grid-template-columns:1fr;gap:1px}}
-@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:1070px){.explore{grid-template-columns:295px 1fr}.source-grid{grid-template-columns:repeat(2,1fr)}.scenario-layout{grid-template-columns:285px 1fr}.head-nav button{padding:8px 9px}}
-@media(max-width:830px){.toprow{flex-wrap:wrap;padding-top:11px;padding-bottom:9px}.header-meta{display:none}.head-nav{width:100%;justify-content:space-between}.head-nav button{flex:1;padding:10px 5px}.owner-map{grid-template-columns:1fr 1fr;gap:9px}.link-panel{grid-column:1/-1;grid-row:2;flex-direction:row;padding:4px}.link-panel:before{height:1px;width:80%;top:50%;left:10%;bottom:auto}.link-chip{padding:8px 14px}.link-chip strong{display:inline;margin-right:8px}.explore,.scenario-layout{grid-template-columns:1fr}.topic-list{padding:15px}.topic-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:590px){.wrap{padding:0 14px}.hero{padding:32px 0 20px}.hero h1{font-size:clamp(28px,7vw,39px)}.hero p{font-size:12px}.owner-map,.lane-grid,.checks,.lane-result,.source-grid{grid-template-columns:1fr}.link-panel{grid-column:1;grid-row:auto}.owner-card{padding:19px}.owner-card p{min-height:0}.owner-card h3{font-size:18px}.detail,.matrix-card,.scenario-card,.check-card{padding:17px}.topic-buttons{grid-template-columns:1fr}.topic-list{padding:13px}.topic{padding:10px}.formside{padding:14px}.section-heading h2{font-size:19px}.stat-row{gap:7px}.stat{padding:7px 9px}.bottom{font-size:10px}.owner-pills{margin:13px 0}}
+:root{--bg:#f5f7f9;--white:#ffffff;--ink:#163448;--muted:#708493;--line:#dfe7ec;--deep:#183749;--teal:#087e75;--tealwash:#e9f6f2;--blue:#2f6386;--bluewash:#edf3f8;--amber:#996f36;--amberwash:#fbf5e8;--red:#a85454;--redwash:#fdf0ee;--shadow:0 10px 34px #153a4d0b}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);font-family:Inter,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{cursor:pointer}a{color:#226682;text-underline-offset:3px}button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid #27968c;outline-offset:3px}
+[hidden]{display:none!important}.wrap{max-width:1280px;margin:auto;padding:0 24px}
+.mast{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);background:#fffc;backdrop-filter:blur(17px)}
+.mast-inner{display:flex;min-height:62px;align-items:center;gap:16px}.logo{display:flex;align-items:center;gap:10px;color:var(--deep);font-weight:900;text-decoration:none;font-size:12px;letter-spacing:.045em}.logo-mark{width:33px;height:33px;display:grid;place-items:center;border-radius:9px;background:var(--deep);color:white;font:850 12px ui-monospace,monospace}.logo small{display:block;font-size:10px;color:#7b8e9b;font-weight:600;letter-spacing:0}
+.mast nav{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}.mast nav a{font-size:11px;text-decoration:none;font-weight:750;color:#678090}.mast nav a:hover{color:var(--teal)}
+.mast-tag{background:#e8f5f1;color:#1f7469;border:1px solid #cbe8df;border-radius:50px;font:800 10px ui-monospace,monospace;padding:6px 10px;white-space:nowrap}
+.intro{padding:31px 0 23px}.kicker{color:var(--teal);font:800 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase}
+.intro h1{font-size:clamp(30px,4vw,49px);line-height:1.24;letter-spacing:-.055em;margin:9px 0 10px;font-weight:850}.intro h1 em{font-style:normal;color:var(--teal)}
+.intro p{margin:0;max-width:900px;font-size:13px;color:#697e8e;line-height:1.9}
+.section-title{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:23px 0 13px;flex-wrap:wrap}
+.section-title h2{margin:5px 0 0;font-size:22px;letter-spacing:-.035em}.section-title p{margin:5px 0 0;font-size:12px;color:var(--muted)}
+.eyebrow{font:800 10px ui-monospace,monospace;color:#7390a1;letter-spacing:.08em}
+.subtle-pill{border:1px solid #d3dfdf;background:#f1f7f5;border-radius:8px;padding:6px 10px;font-size:11px;color:#277168;font-weight:800}
+.surface{border:1px solid var(--line);background:var(--white);box-shadow:var(--shadow);border-radius:16px}
+.goal{overflow:hidden}.goal-head{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #e5ecf0;padding:18px 21px}
+.goal-head-title b{font-size:14px;display:block;line-height:1.5}.goal-head-title span{font-size:11px;color:#8192a2}
+.role-tabs{display:flex;align-items:center;flex-wrap:wrap;gap:5px;background:#f2f6f8;border:1px solid #e5edf1;border-radius:10px;padding:4px}
+.role-tab{border:0;border-radius:7px;background:transparent;color:#6f8493;padding:9px 13px;font-size:11px;font-weight:780;transition:background .2s,color .2s,transform .2s}
+.role-tab:hover{color:#2f5d75}.role-tab[aria-pressed=true]{background:#fff;color:#116f64;box-shadow:0 2px 10px #22526b20;transform:translateY(-1px)}
+.role-tab[aria-pressed=true]::before{content:"●";font-size:8px;margin-right:5px}
+.goal-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(325px,.82fr);gap:0}
+.mock{padding:21px;background:#f6f9fa;border-right:1px solid var(--line);min-width:0}
+.mock-window{overflow:hidden;position:relative;border:1px solid #cfdae2;background:white;border-radius:12px;box-shadow:0 16px 29px #23465911;min-height:457px}
+.mock-bar{height:48px;display:flex;align-items:center;gap:10px;background:#17465b;color:#e7f3f5;padding:0 14px}.mock-logo{background:#ecf7f5;color:#205b62;width:25px;height:25px;border-radius:7px;display:grid;place-items:center;font:850 14px ui-monospace,monospace}
+.mock-bar b{font-size:12px}.mock-bar small{font-size:10px;color:#b7d1d9;margin-left:auto;white-space:nowrap}
+.mock-body{padding:16px}.mock-page-title{display:flex;justify-content:space-between;gap:8px;align-items:start}.mock-page-title b{font-size:15px;letter-spacing:-.03em}.mock-page-title small{font-size:10px;color:#7c8d9c}.mock-right-badge{font-size:10px;color:#276f66;border:1px solid #c9e4dc;padding:4px 9px;border-radius:99px;background:#eaf8f3;font-weight:770;white-space:nowrap}
+.mock-conditions{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:15px 0 12px;flex-wrap:wrap}
+.mock-conditions label{display:flex;align-items:center;gap:7px;color:#7a8e9e;font-size:10px;font-weight:850}
+.mock-conditions input{background:white;border:1px solid #d8e3e9;border-radius:8px;min-height:34px;padding:7px 10px;font-size:11px;color:#1d4054;min-width:185px;width:230px;max-width:100%}
+.mock-count{color:#8a9daa;font:750 10px ui-monospace,monospace}
+.case-grid{display:grid;grid-template-columns:minmax(0,.91fr) minmax(0,1fr);gap:12px;align-items:stretch}
+.case-list{border:1px solid #e1e8ee;border-radius:10px;overflow:auto;max-height:310px;background:#fff}
+.case-list-head{padding:10px 12px;background:#f4f7fa;border-bottom:1px solid #e2eaf0;display:flex;justify-content:space-between;align-items:center;color:#7c90a0;font-size:10px;font-weight:840}
+.case-row{width:100%;display:flex;align-items:flex-start;gap:9px;justify-content:space-between;border:0;border-bottom:1px solid #edf1f4;background:#fff;padding:12px 11px;text-align:left;transition:background .15s}
+.case-row:hover{background:#f4f8fa}.case-row[aria-selected=true]{background:#eaf6f2;box-shadow:inset 3px 0 0 #0f8b7c}
+.case-row:last-child{border-bottom:0}
+.case-row b{display:block;font:860 11px ui-monospace,monospace;color:#2c576a}
+.case-row small{display:block;color:#8b9aa7;font-size:10px;margin-top:4px}.case-status{font-size:9px;font-weight:850;padding:4px 6px;background:#edf3f7;color:#506b7c;border-radius:6px;white-space:nowrap}
+.case-status.pending{background:#fff3e3;color:#a37228}.case-status.approved{background:#e8f5ef;color:#247668}
+.case-empty{font-size:11px;padding:19px;color:#778b9b}
+.case-detail{border:1px solid #dce6ed;border-radius:10px;background:linear-gradient(165deg,#fff,#fbfdfd);padding:13px;min-width:0;display:flex;flex-direction:column}
+.detail-cap{color:#8c9dab;font:850 9px ui-monospace,monospace;letter-spacing:.1em}
+.case-detail h3{font-size:16px;margin:7px 0 8px;color:#1d4258;letter-spacing:-.04em;overflow-wrap:anywhere}
+.kv{display:grid;grid-template-columns:72px 1fr;gap:6px 10px;padding:10px 0;border-top:1px solid #edf1f4}
+.kv span{font-size:10px;color:#8394a2}.kv b{font-size:11px;color:#3a5a6d;font-weight:780;overflow-wrap:anywhere}
+.case-actions{display:flex;gap:6px;margin-top:auto;padding-top:13px}
+.case-action{flex:1;border:1px solid #1e6875;border-radius:8px;background:#205975;color:white;padding:10px 8px;font-size:11px;font-weight:790;min-width:0}
+.case-action.secondary{background:#087e75;border-color:#087e75}.case-action:hover:not(:disabled){filter:brightness(1.08)}.case-action:disabled{background:#edf1f3;border-color:#e0e6ec;color:#9cabb7;cursor:not-allowed}
+.case-action.is-hidden{display:none}
+.smallwhy{font-size:10px;color:#728999;line-height:1.65;margin:8px 0 0;min-height:18px}
+.mock-cover{position:absolute;inset:48px 0 0;z-index:5;display:grid;place-items:center;background:#f9fbfcf1;backdrop-filter:blur(3px);text-align:center;padding:22px}
+.mock-cover-inner{max-width:290px}.cover-symbol{width:45px;height:45px;display:grid;place-items:center;border-radius:13px;background:#edf3f7;color:#53758b;margin:auto auto 13px;font-size:23px}.mock-cover h3{margin:0 0 6px;color:#24445c;font-size:16px}.mock-cover p{font-size:12px;color:#6e8392;margin:0;line-height:1.8}
+.rationale{padding:23px 23px 18px;min-width:0;background:#fff}
+.rationale-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.rationale h3{font-size:17px;line-height:1.45;letter-spacing:-.035em;margin:10px 0 8px}
+.rationale>p{font-size:12px;color:#677f8f;margin:0;line-height:1.85}
+.rule-picker{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 14px}
+.rule-picker button{border:1px solid #d8e6ea;background:#f8fbfb;color:#607e88;padding:7px 10px;border-radius:8px;font-size:10px;font-weight:750}
+.rule-picker button[aria-pressed=true]{background:#e5f5ef;color:#18796b;border-color:#9bd1be}
+.dynamic-rule{border:1px solid #d9e8e8;border-radius:11px;background:#f7fbfa;padding:14px 15px}
+.dynamic-rule strong{display:block;font-size:13px;color:#1e4a50;line-height:1.55}
+.dynamic-rule p{margin:6px 0 0;font-size:11px;color:#627f82;line-height:1.75}
+.rule-mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.rule-mini span{background:#e2eeeb;color:#367971;border-radius:6px;font-size:10px;font-weight:750;padding:4px 7px}
+.owner-decisions{margin-top:15px;display:grid;gap:9px}
+.owner-decision{border-left:3px solid #597f9b;padding:4px 10px}.owner-decision.mb{border-left-color:#219385}.owner-decision.extra{border-left-color:#b8a17b}
+.owner-decision b{display:block;font-size:11px;color:#27495e}.owner-decision.mb b{color:#0e7369}.owner-decision p{font-size:11px;margin:3px 0 0;color:#6b7e8b;line-height:1.7}
+.owner-refs{margin:13px 0 0;display:flex;gap:8px;flex-wrap:wrap}.owner-refs a{font-size:10px;color:#2a7183;border-bottom:1px solid #bdd1d7;text-decoration:none;font-weight:780;padding-bottom:2px}
+.goal-foot{border-top:1px solid #e2ebee;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 20px;flex-wrap:wrap;background:#fbfdfd}
+.goal-foot span{color:#6d8190;font-size:11px}
+.options{border:1px solid #d4e4e7;background:#f4faf8;border-radius:8px;padding:8px 11px;font-size:11px;color:#226b63}
+.options summary{cursor:pointer;font-weight:800;list-style:none}.options summary::-webkit-details-marker{display:none}
+.options-content{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:11px}
+.options label{display:flex;gap:6px;align-items:center;font-size:11px}.options input{accent-color:var(--teal)}
+.select-mini{padding:6px;background:white;color:#28556c;border:1px solid #cfdde4;border-radius:6px;font-size:11px}
+.logic-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.logic-card{padding:21px;min-width:0}.logic-card h3{margin:5px 0 12px;color:#1e4458;font-size:17px;letter-spacing:-.035em}
+.policy-lines{display:grid;gap:9px}
+.policy-line{display:grid;grid-template-columns:105px 1fr;gap:14px;align-items:start;font-size:11px;padding:10px 0;border-bottom:1px solid #eef1f4}
+.policy-line:last-child{border:0}
+.policy-line b{color:#64798b;font-weight:810}.policy-line span{color:#2d5064;font-weight:670;line-height:1.8}
+.matrix-wrap{overflow:auto;border:1px solid #e0e7ed;border-radius:10px}
+.role-matrix{min-width:515px;width:100%;border-collapse:collapse;text-align:left;font-size:11px}
+.role-matrix th{padding:11px 13px;background:#f6f9fb;color:#728798;font-weight:840;border-bottom:1px solid #e3ebef}
+.role-matrix td{padding:12px 13px;color:#3a5b6d;border-bottom:1px solid #eff2f4;vertical-align:middle}
+.role-matrix tr:last-child td{border-bottom:0}
+.role-matrix tbody tr{cursor:pointer}.role-matrix tbody tr:hover{background:#f8fafb}.role-matrix tbody tr.chosen{background:#e9f5f0}
+.role-matrix .role-name{font-weight:810;color:#1a465a;white-space:nowrap}
+.mark{font-weight:830;color:#137a6b}.mark.no{color:#9aa7b0}
+.choice-note{margin:9px 0 0;font-size:10px;color:#8092a0;line-height:1.7}
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.step{position:relative;padding:20px 22px;overflow:hidden;border-top:3px solid #517d9c}
+.step.mb{border-top-color:#0b897d}
+.step-number{color:#7494a4;font:850 10px ui-monospace,monospace;letter-spacing:.08em}
+.step h3{font-size:19px;margin:8px 0 5px;letter-spacing:-.04em}
+.step p{font-size:12px;color:#687f8e;margin:0}
+.step ul{font-size:12px;color:#415e70;padding-left:18px;margin:13px 0;line-height:1.85}
+.step li{margin:4px 0}
+.step-bottom{padding-top:11px;margin-top:13px;border-top:1px solid #e7edf0;font-size:11px;color:#5c7582;line-height:1.8}
+.caution{border:1px solid #e9dfcc;background:#fffbf2;border-radius:11px;padding:14px 18px;color:#775f3c;font-size:12px;line-height:1.8;margin-top:12px}
+.caution strong{color:#634c2d}
+.details{background:white;border:1px solid var(--line);border-radius:13px;margin-top:13px;overflow:hidden}
+.details>summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;padding:18px 20px}
+.details>summary::-webkit-details-marker{display:none}.details>summary b{display:block;color:#235066;font-size:14px}.details>summary small{display:block;font-size:11px;color:#8193a0;margin-top:4px}.details .plus{height:27px;width:27px;flex:none;display:grid;place-items:center;background:#e8f3f0;border-radius:8px;font-size:17px;color:#257a6b;transition:transform .2s}
+.details[open] .plus{transform:rotate(45deg)}
+.details-content{border-top:1px solid #e6edf1;padding:18px 20px}
+.topic-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.topic-nav button{background:#f5f8fa;border:1px solid #dce6eb;color:#617b8a;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:740}
+.topic-nav button.active{background:#e9f5f1;color:#17766a;border-color:#9dcfc0}
+.detail-box{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.source-card{border:1px solid #e0e7ec;background:#fcfefe;border-radius:10px;padding:14px 15px;min-width:0}
+.source-card small{display:block;font:850 10px ui-monospace,monospace;color:#6b96a2}
+.source-card b{font-size:12px;display:block;margin:9px 0;color:#264d62;line-height:1.5}
+.source-card p{font-size:11px;color:#6f8493;line-height:1.75;margin:0 0 12px}
+.source-card a{color:#176e7d;font-size:11px;font-weight:790;text-decoration:none}
+.deep-info h3{font-size:16px;margin:0 0 6px}.deep-info p{font-size:12px;color:#607b8d;line-height:1.8;margin:4px 0 10px}
+.deep-card{border:1px solid #e0e9ee;background:#fafcfc;border-radius:10px;padding:13px}
+.deep-card b{font-size:12px;color:#22566a}.deep-card p{font-size:11px}
+.deep-refs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.deep-refs a{font-size:11px;font-weight:780}
+.footer{border-top:1px solid var(--line);margin-top:32px;padding:20px 0 42px;display:flex;gap:12px;justify-content:space-between;font-size:10px;color:#8a9cab;flex-wrap:wrap}
+.fade{animation:fade .26s ease-out}
+@keyframes fade{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:none}}
+@media(max-width:1090px){.goal-grid{grid-template-columns:1fr}.mock{border-right:0;border-bottom:1px solid var(--line)}.case-grid{grid-template-columns:.85fr 1fr}.rationale{padding:20px}.owner-decisions{grid-template-columns:repeat(2,minmax(0,1fr))}.source-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:750px){.wrap{padding:0 15px}.mast-inner{min-height:59px}.mast nav{gap:11px}.mast nav a{font-size:10px}.mast-tag{display:none}.intro{padding:22px 0 17px}.intro h1{font-size:32px}.intro p{font-size:12px}.goal-head{align-items:start;padding:15px}.role-tabs{width:100%}.role-tab{flex:1;padding:10px 7px}.mock{padding:13px}.logic-grid,.steps{grid-template-columns:1fr}.logic-card,.step{padding:18px}.rationale{padding:16px}.goal-foot{padding:13px;flex-direction:column;align-items:start}.section-title h2{font-size:19px}}
+@media(max-width:490px){.mast nav a:last-child{display:none}.intro h1{font-size:29px}.mock-window{min-height:0}.mock-bar{padding:0 9px}.mock-bar small{font-size:9px}.mock-body{padding:10px}.case-grid{grid-template-columns:1fr}.case-list{max-height:160px}.case-detail{min-height:220px}.case-row{padding:9px}.mock-conditions input{width:180px;min-width:130px}.owner-decisions{grid-template-columns:1fr}.source-grid,.detail-box{grid-template-columns:1fr}.role-matrix{min-width:470px}.goal-head{gap:9px}.policy-line{grid-template-columns:93px 1fr;gap:8px}.details-content{padding:14px}.details>summary{padding:14px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
-
-/* ─── Access Journey / interactive ownership theatre ─── */
-
-.exp-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
-.exp-play{border:1px solid #305f76;background:#193f55;color:white;border-radius:9px;padding:9px 13px;font-size:11px;font-weight:780;white-space:nowrap;transition:background .2s,transform .2s}
-.exp-play:hover{background:#28566e;transform:translateY(-1px)}
-.exp-play[aria-pressed=true]{background:#e9f4f3;color:#166b64;border-color:#98cfc5}
-@media(max-width:650px){.experience-titlebar{flex-direction:column;gap:10px}.exp-head-actions{justify-content:flex-start}.exp-play{font-size:11px;padding:9px 12px}}
-
-.experience{margin:0 0 34px;position:relative}
-.experience-titlebar{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 18px}
-.experience-titlebar h2{font-size:clamp(21px,2.6vw,29px);letter-spacing:-.05em;line-height:1.42;margin:7px 0 8px;color:#12314a}
-.experience-titlebar p{color:#61798c;font-size:12px;margin:0;max-width:775px;line-height:1.85}
-.experience-badge{border:1px solid #b7dacf;background:#edfaf6;color:#176759;border-radius:99px;font-size:11px;font-weight:790;padding:8px 12px;white-space:nowrap}
-.exp-live{display:inline-block;height:7px;width:7px;background:#12a78a;border-radius:50%;box-shadow:0 0 0 4px #15ad8b1a;margin-right:8px;vertical-align:middle;animation:exp-live 2.4s infinite}
-.exp-scenarios{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}
-.exp-scenario{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 12px 11px;text-align:left;background:white;border:1px solid #dbe5ed;border-radius:11px;transition:transform .18s,background .18s,border-color .18s,box-shadow .18s}
-.exp-scenario:hover{transform:translateY(-2px);border-color:#a6bbcb;box-shadow:0 8px 18px #315a7210}
-.exp-scenario.is-selected{border-color:#167e75;background:linear-gradient(160deg,#f4fcf9,#eaf7f3);box-shadow:inset 0 3px 0 #0e8f81,0 3px 17px #13877c12}
-.exp-scenario .scene-num{font:850 10px ui-monospace,monospace;color:#839aab;letter-spacing:.08em}
-.exp-scenario.is-selected .scene-num{color:var(--teal)}
-.exp-scenario .scene-label{font-size:12px;color:#213c53;font-weight:850;line-height:1.45}
-.exp-scenario .scene-sub{font-size:10px;color:#778a9a;line-height:1.5}
-.exp-layout{display:grid;grid-template-columns:minmax(0,1.43fr) minmax(305px,.75fr);gap:0;background:#0f2940;border:1px solid #2d4a5e;border-radius:17px;overflow:hidden;box-shadow:0 22px 51px #16364a20}
-.exp-main{padding:25px 24px 18px;background:radial-gradient(ellipse at 47% 12%,#2b536540,transparent 52%),linear-gradient(160deg,#10283c,#102b40 75%,#0c2235);min-width:0;position:relative;overflow:hidden;isolation:isolate}
-.exp-main::before{content:"";position:absolute;inset:0;z-index:-1;background-image:linear-gradient(#d4f4f305 1px,transparent 1px),linear-gradient(90deg,#d4f4f305 1px,transparent 1px);background-size:31px 31px;pointer-events:none}
-.exp-topline{display:flex;justify-content:space-between;gap:12px;color:#b8d4dc;font:750 10px ui-monospace,monospace;letter-spacing:.04em}
-.exp-topline span:first-child{color:#b3e4d9}
-.exp-track{display:grid;grid-template-columns:minmax(0,1fr) 25px minmax(0,1fr) 25px minmax(0,1fr);align-items:stretch;margin-top:22px}
-.exp-gate{position:relative;display:flex;align-items:flex-start;flex-direction:column;text-align:left;gap:0;background:#19374b;border:1px solid #527387;border-radius:12px;color:#e4f1f4;min-height:239px;padding:15px 12px 13px;min-width:0;transition:background .28s,border-color .28s,box-shadow .28s,transform .28s}
-.exp-gate:hover{transform:translateY(-2px);border-color:#8fc6c0}
-.exp-gate[data-state="pass"]{background:#163f43;border-color:#63b5a5;box-shadow:inset 0 3px 0 #65dcc1,0 0 26px #59d9b311}
-.exp-gate[data-state="stop"]{background:#45363f;border-color:#d5a08b;box-shadow:inset 0 3px 0 #ebb39a,0 0 25px #df9b8c14}
-.exp-gate[data-state="wait"]{opacity:.66}
-.exp-gate[data-state="view"]{background:#263d52;border-color:#8da7ba;box-shadow:inset 0 3px 0 #90b2c4}
-.exp-gate-num{font:850 9px ui-monospace,monospace;letter-spacing:.09em;color:#9ebfca}
-.exp-gate-icon{width:38px;height:38px;margin:13px 0 10px;display:grid;place-items:center;border-radius:10px;border:1px solid #60879a;background:#ffffff0d;font-size:24px;color:#a7cfdd;transition:background .3s,color .3s,transform .3s}
-.exp-gate[data-state="pass"] .exp-gate-icon{background:#7cdec321;color:#93f1cb;border-color:#57ad99;transform:scale(1.06)}
-.exp-gate[data-state="stop"] .exp-gate-icon{background:#dbad9740;color:#ffccbb;border-color:#bd8775}
-.exp-gate strong{font-size:15px;color:#f2fafa;letter-spacing:-.035em;line-height:1.4}
-.exp-gate-kind{font-size:11px;color:#c0d7df;line-height:1.6;margin-top:3px}
-.exp-gate-state{margin-top:12px;font-size:12px;color:#c8dfec;font-weight:850;line-height:1.5;transition:color .25s}
-.exp-gate[data-state="pass"] .exp-gate-state{color:#9ce8cb}
-.exp-gate[data-state="stop"] .exp-gate-state{color:#ffdac4}
-.exp-gate-foot{font-size:10px;color:#a3bdcb;margin-top:5px;line-height:1.6}
-.exp-more{font-size:10px;color:#b4d3d5;border-top:1px solid #ffffff20;margin-top:auto;padding-top:10px;width:100%}
-.exp-wire{position:relative;align-self:center;height:3px;background:#5b7b91;opacity:.65;margin-top:-4px}
-.exp-wire:after{content:"";position:absolute;width:0;height:0;top:-4px;right:-1px;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:6px solid #9bb6c8}
-.exp-wire-label{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#a6cbd1;font:850 8px ui-monospace,monospace}
-.exp-wire[data-state="running"]{opacity:1;background:#70e5c6;box-shadow:0 0 13px #74eacb5c}
-.exp-wire[data-state="running"]:after{border-left-color:#85f2d2}
-.exp-traveller{height:8px;width:8px;background:#a1ffdf;border-radius:50%;position:absolute;top:-3px;box-shadow:0 0 12px #87fbd2;opacity:0}
-.exp-wire[data-state="running"] .exp-traveller{opacity:1;animation:exp-travel 1.5s ease-in-out infinite}
-.exp-verdict{display:flex;align-items:center;gap:13px;border-radius:11px;border:1px solid #5c7f92;background:#1e4053;margin-top:18px;padding:14px;transition:border-color .2s,background .2s}
-.exp-verdict[data-state="pass"]{background:#174840;border-color:#66b7a3}
-.exp-verdict[data-state="stop"]{background:#483943;border-color:#be958a}
-.exp-verdict[data-state="view"]{background:#244155;border-color:#93b4c2}
-.exp-verdict-symbol{width:35px;height:35px;flex:none;display:grid;place-items:center;font-weight:900;font-size:17px;color:#0f4e41;background:#adf1d4;border-radius:9px}
-.exp-verdict[data-state="stop"] .exp-verdict-symbol{background:#f8cabb;color:#783a35}
-.exp-verdict[data-state="view"] .exp-verdict-symbol{background:#c3dce9;color:#31556b}
-.exp-verdict-body{flex:1;min-width:0}.exp-verdict-caption{font:750 9px ui-monospace,monospace;color:#acd1d2;letter-spacing:.05em}.exp-verdict-body strong{display:block;color:#f8fdfe;font-size:16px;line-height:1.55;margin-top:2px}.exp-verdict-body p{font-size:11px;color:#d3e5e6;margin:5px 0 0;line-height:1.75}
-.exp-progress{display:flex;align-items:center;gap:3px;flex:none}
-.exp-progress span{width:15px;height:6px;border-radius:2px;background:#4f7180;transition:background .3s}
-.exp-progress span.on{background:#9defce;box-shadow:0 0 10px #8ff2c849}
-.exp-adjust{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;padding-top:14px;color:#e0f1f3}
-.exp-adjust-title{font-size:10px;color:#a7c7d4;font-weight:850;letter-spacing:.06em}
-.exp-toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:10px;font-weight:750;line-height:1.6}
-.exp-toggle input{position:absolute;opacity:0;width:1px;height:1px}
-.exp-toggle-slider{position:relative;width:30px;height:18px;border:1px solid #7490a2;border-radius:99px;background:#466073;display:inline-block;transition:background .2s,border-color .2s}
-.exp-toggle-slider:after{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:#d2dee6;transition:transform .2s}
-.exp-toggle input:checked+.exp-toggle-slider{background:#1e8e77;border-color:#69d6b4}
-.exp-toggle input:checked+.exp-toggle-slider:after{transform:translateX(12px);background:#dbfff2}
-.exp-toggle input:focus-visible+.exp-toggle-slider{outline:3px solid white;outline-offset:3px}
-.exp-side{padding:24px 18px 20px;background:linear-gradient(160deg,#e9f0f4,#f4f7f8 72%);border-left:1px solid #b9cdd4;min-width:0}
-.exp-side-heading{display:flex;justify-content:space-between;align-items:center;gap:7px;font:850 10px ui-monospace,monospace;letter-spacing:.07em;color:#688399;margin-bottom:13px}
-.exp-preview-dot{background:white;color:#668394;border:1px solid #ccdae4;border-radius:6px;padding:5px 7px;font:740 9px ui-monospace,monospace;letter-spacing:0}
-.exp-window{position:relative;border:1px solid #c2d1dc;border-radius:12px;background:white;box-shadow:0 14px 35px #19354b17;overflow:hidden;min-height:265px}
-.exp-appbar{height:49px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #e5ebf0;padding:0 14px;background:#fefefe}
-.exp-app-brand{display:flex;align-items:center;gap:8px;font-size:11px;color:#274259;font-weight:850}
-.exp-app-mark{display:grid;place-items:center;border-radius:6px;width:25px;height:25px;background:#1c5368;color:white;font:900 11px ui-monospace,monospace}
-.exp-avatar{width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:#e0eeec;color:#216b61;font-size:11px;font-weight:850}
-.exp-app-content{padding:17px 15px}
-.exp-app-breadcrumb{font-size:10px;color:#8395a4}
-.exp-contract{border:1px solid #dce7ef;border-radius:8px;background:#f8fafc;display:grid;grid-template-columns:1fr auto;gap:4px 8px;padding:13px;margin-top:12px}
-.exp-contract small{font-size:10px;color:#8b9bab;grid-column:1/-1}
-.exp-contract strong{font:830 12px ui-monospace,monospace;color:#294b68}
-.exp-contract span{font-size:10px;color:#42857b;font-weight:850;background:#e6f4ef;border-radius:6px;padding:3px 7px;align-self:center}
-.exp-app-lines{display:grid;gap:7px;margin:16px 0}.exp-app-lines span{height:6px;background:#eaf0f4;border-radius:6px}.exp-app-lines span:nth-child(2){width:73%}.exp-app-lines span:nth-child(3){width:88%}
-.exp-app-actions{display:flex;gap:7px}
-.exp-action{flex:1;border:1px solid #315d80;border-radius:8px;color:white;background:#224e6e;padding:11px 7px;font-size:11px;font-weight:850;transition:background .2s,transform .2s}
-.exp-action.secondary{background:#137d73;border-color:#137d73}
-.exp-action:not(:disabled):hover{transform:translateY(-1px)}
-.exp-action:disabled{background:#ebf0f3;border-color:#dbe4eb;color:#98a8b6;cursor:not-allowed}
-.exp-app-foot{font-size:10px;color:#7991a1;margin:10px 0 0;line-height:1.75;min-height:17px}
-.exp-curtain{position:absolute;inset:49px 0 0;z-index:2;background:#fbfdfff0;backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:22px;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .25s,visibility .25s,transform .25s}
-.exp-curtain.show{opacity:1;visibility:visible;transform:translateY(0)}
-.exp-curtain-lock{height:41px;width:41px;display:grid;place-items:center;border:1px solid #d6dee8;background:#f1f5f8;border-radius:12px;color:#a26858;font-size:22px}
-.exp-curtain strong{font-size:14px;color:#365269}
-.exp-curtain small{font-size:11px;color:#8496a5;line-height:1.7}
-.exp-guide{margin-top:15px;border-left:2px solid #80afa7;padding:0 0 0 13px}
-.exp-guide-label{font-size:10px;font-weight:900;color:#187f74;letter-spacing:.04em}
-.exp-guide p{font-size:12px;color:#476477;line-height:1.85;margin:5px 0}
-.exp-follow{font-size:11px;font-weight:800;border:0;background:none;color:#155f72;padding:6px 0 2px;text-align:left}
-.exp-follow span{margin-left:6px;transition:transform .15s;display:inline-block}.exp-follow:hover span{transform:translateX(4px)}
-.exp-disclaimer{margin-top:10px;border:1px solid #e1e8ef;border-radius:9px;background:#fff;color:#748697;font-size:11px;line-height:1.75;padding:12px 14px}
-.exp-disclaimer span{font-weight:850;color:#466778;margin-right:8px}
-@keyframes exp-travel{0%{left:-2px;opacity:0}20%{opacity:1}85%{opacity:1}100%{left:calc(100% - 6px);opacity:0}}
-@keyframes exp-live{0%,100%{box-shadow:0 0 0 3px #15ad8b12}50%{box-shadow:0 0 0 7px #15ad8b17}}
-@media(max-width:1080px){
-.exp-layout{grid-template-columns:1fr}.exp-side{border-left:0;border-top:1px solid #b9cdd4}
-.exp-window{max-width:660px}.exp-side{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.78fr);gap:14px 18px;align-items:start}.exp-side-heading{grid-column:1/-1;margin:0}.exp-guide{margin-top:0}
-.exp-scenarios{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-@media(max-width:650px){
-.experience-titlebar{align-items:flex-start}.experience-badge{display:none}.experience-titlebar h2{font-size:21px}
-.exp-scenarios{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.exp-scenario{padding:9px 7px;min-height:75px}
-.exp-scenario .scene-num{font-size:9px}.exp-scenario .scene-label{font-size:11px}.exp-scenario .scene-sub{font-size:9px}
-.exp-main{padding:16px 13px 13px}.exp-topline{font-size:9px;flex-wrap:wrap;gap:5px}
-.exp-track{grid-template-columns:1fr;gap:0;margin-top:12px}
-.exp-gate{min-height:0;padding:11px 13px;display:grid;grid-template-columns:32px 1fr auto;grid-template-rows:repeat(3,auto);align-items:center;column-gap:10px}
-.exp-gate-num{grid-column:2/3;grid-row:1}.exp-gate-icon{grid-column:1/2;grid-row:1/4;height:31px;width:31px;font-size:20px;margin:0}
-.exp-gate strong{grid-column:2/3;grid-row:2;font-size:13px}.exp-gate-kind{grid-column:2/3;grid-row:3;margin:0;font-size:10px}
-.exp-gate-state{grid-column:3/4;grid-row:2;white-space:nowrap;font-size:11px;margin:0}.exp-gate-foot,.exp-gate .exp-more{display:none}
-.exp-wire{height:21px;width:3px;justify-self:15%;margin:0;background:#5b7b91}
-.exp-wire:after{top:auto;bottom:-5px;right:-4px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #9bb6c8;border-bottom:0}
-.exp-wire[data-state="running"]:after{border-left-color:transparent;border-top-color:#85f2d2}
-.exp-wire-label{left:12px;top:5px;bottom:auto;transform:none;font-size:8px}
-.exp-wire[data-state="running"] .exp-traveller{animation:exp-down 1.5s ease-in-out infinite}
-.exp-verdict{padding:11px;gap:10px;margin-top:12px}
-.exp-verdict-symbol{height:29px;width:29px;font-size:14px}
-.exp-verdict-body strong{font-size:14px}.exp-verdict-body p{font-size:10px}.exp-progress span{width:10px}
-.exp-side{display:block;padding:16px 13px}.exp-side-heading{margin-bottom:10px}.exp-guide{margin-top:13px}
-.exp-adjust{gap:8px 12px}.exp-adjust-title{flex-basis:100%}.exp-toggle{font-size:10px}
-}
-@keyframes exp-down{0%{top:0;opacity:0}20%{opacity:1}85%{opacity:1}100%{top:calc(100% - 6px);opacity:0}}
-@media(prefers-reduced-motion:reduce){.exp-traveller,.exp-live{animation:none!important}.exp-traveller{opacity:1!important;left:50%!important;top:50%!important}.exp-gate,.exp-verdict,.exp-curtain,.exp-scenario,.exp-scenario:hover{transform:none!important}}
-
-
-/* SIMPLIFIED PRESENTATION — prioritize the two actual product boundaries */
-body{background:#f8fafb}
-.topbar{box-shadow:0 3px 17px #122f4807}
-.top-details-link{font-size:12px;text-decoration:none;font-weight:750;border:1px solid #d8e5e8;background:#f5f9fa;border-radius:9px;color:#356270;padding:8px 12px}
-.top-details-link:hover{background:#e9f4f3}
-.hero{padding:30px 0 23px}
-.hero h1{margin:10px 0 12px;font-size:clamp(28px,3.6vw,44px)}
-.hero p{line-height:1.8;max-width:680px;font-size:13px}
-.canvas{margin-top:0}
-.experience{margin-bottom:21px}
-.experience-titlebar{margin-bottom:12px}
-.experience-titlebar h2{font-size:clamp(19px,2.2vw,25px);margin:4px 0 3px}
-.experience-titlebar p{font-size:11px}
-.exp-scenarios{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:9px}
-.exp-scenario{min-height:68px;padding:11px 15px;border-radius:10px;gap:2px}
-.exp-scenario .scene-num{font-size:9px}
-.exp-scenario .scene-label{font-size:12px}
-.exp-scenario .scene-sub{font-size:10px}
-.exp-scenario.is-selected{box-shadow:inset 0 2px 0 #138779;background:#f1faf6}
-.more-scenes{margin-bottom:13px;padding:0 2px}
-.more-scenes summary{cursor:pointer;color:#597789;font-size:11px;font-weight:800;padding:7px 0;list-style:none;width:max-content}
-.more-scenes summary::-webkit-details-marker{display:none}
-.more-scenes summary span{font-size:15px;margin-left:6px;display:inline-block;transition:transform .2s}
-.more-scenes[open] summary span{transform:rotate(45deg)}
-.more-scenes .additional{margin-top:9px;margin-bottom:10px}
-.more-scenes .exp-play{margin:1px 0 10px;background:#f0f5f7;border:1px solid #d6e5e9;color:#285c69}
-.more-scenes .exp-play:hover{background:#e2f2ef}
-.exp-layout{grid-template-columns:minmax(0,1.15fr) minmax(300px,.75fr);border-color:#d6e2e9;box-shadow:0 12px 31px #17395013}
-.exp-main{background:#19374d;padding:22px 23px 17px}
-.exp-main::before{display:none}
-.exp-topline{font-size:10px;color:#bad1dd}
-.exp-track{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);margin-top:16px}
-#exp-gate-b,#exp-wire-2{display:none!important}
-.exp-gate{min-height:187px;padding:16px;border:1px solid #648898;background:#24465b;border-radius:10px}
-.exp-gate:hover{transform:none}
-.exp-gate-icon{height:33px;width:33px;font-size:21px;margin:11px 0 7px}
-.exp-gate strong{font-size:17px}
-.exp-gate-kind{font-size:11px;margin-top:2px}
-.exp-gate-state{font-size:12px;margin-top:13px}
-.exp-gate-foot{display:none}
-.exp-more{font-size:10px;padding-top:8px;margin-top:auto}
-.exp-wire{height:2px}
-.exp-wire-label{font-size:9px;bottom:11px}
-.exp-verdict{margin-top:14px;padding:13px;border-radius:10px}
-.exp-verdict-body strong{font-size:15px}
-.exp-verdict-body p{font-size:11px;line-height:1.65;margin-top:3px}
-.exp-progress{display:none}
-.exp-adjust{padding-top:14px;gap:9px 15px}
-.exp-adjust-title{font-size:10px}
-.exp-advanced{display:inline-block;position:relative}
-.exp-advanced>summary{color:#cce4eb;font-size:10px;cursor:pointer;list-style:none}
-.exp-advanced>summary::-webkit-details-marker{display:none}
-.exp-advanced[open]{display:flex;align-items:center;gap:8px}
-.exp-advanced[open]>summary{color:#d3eae9}
-.exp-side{padding:21px 18px;background:#f1f6f7}
-.exp-window{min-height:250px;box-shadow:0 7px 20px #183f4a13}
-.exp-side-heading{font-size:10px;letter-spacing:0;margin-bottom:12px}
-.exp-guide{margin-top:12px}
-.exp-guide p{font-size:11px}
-.exp-disclaimer{font-size:11px;margin:9px 0 0;padding:8px 12px;background:#f1f5f6;border:0;color:#788c98}
-.deep-dive,.source-details{border:1px solid #e0e8ef;background:white;border-radius:14px;margin-top:14px;overflow:hidden;box-shadow:0 4px 16px #173c4e06}
-.deep-summary,.source-summary{list-style:none;cursor:pointer;padding:19px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.deep-summary::-webkit-details-marker,.source-summary::-webkit-details-marker{display:none}
-.deep-summary strong,.source-summary strong{font-size:15px;color:#22465b;display:block;line-height:1.5}
-.deep-summary small,.source-summary small{font-size:11px;color:#8192a0;display:block;margin-top:3px;line-height:1.65}
-.plus-icon{display:grid;place-items:center;flex:none;height:28px;width:28px;border-radius:8px;color:#3a6e72;background:#eaf4f2;font-size:17px;font-weight:500;transition:transform .2s}
-.deep-dive[open] .plus-icon,.source-details[open] .plus-icon{transform:rotate(45deg)}
-.deep-content{border-top:1px solid #e7edf1;padding:19px 19px 22px}
-.deep-content .boundary-strip{margin:0 0 17px}
-.sub-nav{border-bottom:1px solid #e7edf2;display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap}
-.sub-nav button{padding:10px 13px}
-.deep-content .interface{margin-top:16px}
-.deep-content .section-heading{margin-top:13px}
-.source-details .sources{padding:12px 19px 20px;margin-top:0;border-top:1px solid #e7edf1}
-.source-details .source-grid{gap:9px}
-.source-details .source-card{box-shadow:none}
-.source-details .section-heading{margin-top:6px}
-.bottom{margin-top:22px}
-@media(max-width:1080px){.exp-layout{grid-template-columns:1fr}.exp-side{display:block;border-top:1px solid #d5e2e8;padding:18px}.exp-window{max-width:520px}.exp-guide{margin-top:13px}}
-@media(max-width:650px){
-.hero{padding:24px 0 15px}
-.hero h1{font-size:clamp(28px,7vw,36px)}
-.exp-scenarios{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.exp-scenario{padding:9px 8px;min-height:82px}
-.exp-scenario .scene-label{font-size:11px}
-.exp-scenario .scene-sub{font-size:9px}
-.exp-track{grid-template-columns:1fr}
-.exp-gate{min-height:0;padding:11px 13px}
-.exp-gate strong{font-size:13px}
-.exp-gate-icon{margin:0}
-.exp-main{padding:17px 14px 13px}
-.exp-adjust-title{flex-basis:100%}
-.deep-summary,.source-summary{padding:16px}
-.deep-content{padding:12px}
-.source-details .sources{padding:12px}
-}
-
-</style></head>
-<body>
-<header class="topbar"><div class="wrap toprow">
-<a class="identity" href="#top"><span class="symbol">A<span style="color:#74d6c0">/</span>C</span><span>ACCESS DESIGN<span class="brand-sub">金融業務システム / 権限設計ガイド</span></span></a>
-<a class="top-details-link" id="open-deep-link" href="#deep-dive">仕様・設定を詳しく見る ↗</a>
+</style></head><body>
+<header class="mast"><div class="wrap mast-inner">
+<a class="logo" href="#top"><span class="logo-mark">A/C</span><span>ACCESS DESIGN<small>MotionBoard実運用から考える権限設計</small></span></a>
+<nav aria-label="ページ内リンク"><a href="#goal">完成イメージ</a><a href="#policy">権限設計</a><a href="#setting">設定の分担</a></nav>
+<span class="mast-tag">DESIGN PROPOSAL</span>
 </div></header>
-<div class="wrap" id="top">
-<section class="hero">
-<div class="eyebrow">HENNGE ONE × MOTIONBOARD</div>
-<h1>ログインと操作。<br><em>どこで決まる？</em></h1>
-<p>入口を守るのはHENNGE One。画面の中でできることを管理するのはMotionBoard。<br>担当者を切り替えて、その違いを確かめてみよう。</p>
+<main class="wrap" id="top">
+<section class="intro"><div class="kicker">GOAL FIRST / ROLE DESIGN</div>
+<h1>使う画面から、<em>権限を決める。</em></h1>
+<p>「銀行員がこの画面で何をしたいか」を先に決める。その動きを実現するには、どのロールが必要で、HENNGE OneとMotionBoardのどちらに何を設定するのか。完成イメージから一緒にたどれる設計デモです。</p>
 </section>
-<main class="canvas">
-
-<section class="experience" id="journey" aria-labelledby="experience-title">
-  <div class="experience-titlebar">
-    <div><div class="kicker">01 / TOUCH & UNDERSTAND</div>
-      <h2 id="experience-title">場面を選ぶと、権限の流れが変わる。</h2>
-      <p>まずは3つのケースで、HENNGE OneとMotionBoardの違いを見てみよう。</p>
-    </div>
-  </div>
-  <div class="exp-scenarios" role="group" aria-label="業務シナリオを選択">
-    <button type="button" class="exp-scenario" data-exp-scene="register"><span class="scene-num">01 / OK</span><span class="scene-label">登録できる</span><span class="scene-sub">入口も画面も通過</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="authstop"><span class="scene-num">02 / HENNGE</span><span class="scene-label">ログインできない</span><span class="scene-sub">入口で止まる</span></button>
-    <button type="button" class="exp-scenario" data-exp-scene="boardstop"><span class="scene-num">03 / MOTIONBOARD</span><span class="scene-label">画面を開けない</span><span class="scene-sub">ログイン後に止まる</span></button>
-  </div>
-  <details class="more-scenes" id="more-scenes">
-    <summary>ほかの場面も試してみる <span>＋</span></summary>
-    <div class="exp-scenarios additional" role="group" aria-label="追加の業務シナリオ">
-      <button type="button" class="exp-scenario" data-exp-scene="approve"><span class="scene-num">04 / APPROVAL</span><span class="scene-label">承認できる</span><span class="scene-sub">承認担当の操作</span></button>
-      <button type="button" class="exp-scenario" data-exp-scene="viewer"><span class="scene-num">05 / READ ONLY</span><span class="scene-label">閲覧だけできる</span><span class="scene-sub">本部の確認担当</span></button>
-      <button type="button" class="exp-scenario" data-exp-scene="self"><span class="scene-num">06 / RULE</span><span class="scene-label">自己承認できない</span><span class="scene-sub">業務ルールで止まる</span></button>
-    </div>
-    <button type="button" id="exp-play" class="exp-play" aria-pressed="false">▶ 6つの場面を順に見る</button>
-  </details>
-  <div class="exp-layout" id="exp-layout">
-    <div class="exp-main">
-      <div class="exp-topline"><span><i class="exp-live"></i> アクセスの流れ</span><span id="exp-identity">支店担当 / 契約 DEMO-K00001</span></div>
-      <div class="exp-track" aria-label="アクセスの流れ">
-        <button type="button" id="exp-gate-h" data-exp-topic="auth" class="exp-gate">
-          <span class="exp-gate-num">01 / ENTRY</span>
-          <span class="exp-gate-icon" aria-hidden="true">◎</span>
-          <strong>HENNGE One</strong>
-          <span class="exp-gate-kind">ログインできる？</span>
-          <span class="exp-gate-state" id="exp-h-state">確認中</span>
-          <span class="exp-gate-foot" id="exp-h-foot">本人認証・MFA・端末</span>
-          <span class="exp-more">設定や出典を見る ↗</span>
-        </button>
-        <div class="exp-wire" id="exp-wire-1" aria-hidden="true"><span class="exp-traveller"></span><span class="exp-wire-label">SSO</span></div>
-        <button type="button" id="exp-gate-m" data-exp-topic="board" class="exp-gate">
-          <span class="exp-gate-num">02 / BOARD</span>
-          <span class="exp-gate-icon" aria-hidden="true">▦</span>
-          <strong>MotionBoard</strong>
-          <span class="exp-gate-kind">画面を開ける？</span>
-          <span class="exp-gate-state" id="exp-m-state">確認中</span>
-          <span class="exp-gate-foot" id="exp-m-foot">ユーザー・ロール・閲覧範囲</span>
-          <span class="exp-more">設定や出典を見る ↗</span>
-        </button>
-        <div class="exp-wire" id="exp-wire-2" aria-hidden="true"><span class="exp-traveller"></span><span class="exp-wire-label">業務の条件</span></div>
-        <button type="button" id="exp-gate-b" data-exp-topic="approve" class="exp-gate">
-          <span class="exp-gate-num">03 / OPERATION</span>
-          <span class="exp-gate-icon" aria-hidden="true">◇</span>
-          <strong>登録・承認</strong>
-          <span class="exp-gate-kind">この操作をしてよい？</span>
-          <span class="exp-gate-state" id="exp-b-state">確認中</span>
-          <span class="exp-gate-foot" id="exp-b-foot">業務ルール・最終的な更新判定</span>
-          <span class="exp-more">設定や出典を見る ↗</span>
-        </button>
-      </div>
-      <div class="exp-verdict" id="exp-verdict">
-        <div class="exp-verdict-symbol" id="exp-verdict-symbol" aria-hidden="true">✓</div>
-        <div class="exp-verdict-body"><div class="exp-verdict-caption">登録・承認はどうなる？</div><strong id="exp-outcome">登録まで進めます</strong><p id="exp-outcome-note">設定を切り替えると、ここに理由が表示されます。</p></div>
-        <div class="exp-progress" id="exp-progress" aria-label="判定が進んだ段階"><span></span><span></span><span></span></div>
-      </div>
-      <div class="exp-adjust" role="group" aria-label="権限条件を切り替える">
-        <span class="exp-adjust-title">条件を変える</span>
-        <label class="exp-toggle"><input id="exp-switch-auth" type="checkbox" checked><span class="exp-toggle-slider"></span><span>HENNGEの認証</span></label>
-        <label class="exp-toggle"><input id="exp-switch-board" type="checkbox" checked><span class="exp-toggle-slider"></span><span>MotionBoardの閲覧権限</span></label>
-        <details class="exp-advanced"><summary>業務ルール ▾</summary>
-        <label class="exp-toggle"><input id="exp-switch-self" type="checkbox"><span class="exp-toggle-slider"></span><span>自分が登録した案件</span></label>
-        </details>
-      </div>
-    </div>
-    <aside class="exp-side" aria-label="銀行業務の画面プレビュー">
-      <div class="exp-side-heading"><span>業務画面のイメージ</span><span class="exp-preview-dot">架空のデータ</span></div>
-      <div class="exp-window">
-        <div class="exp-appbar"><span class="exp-app-brand"><span class="exp-app-mark">M</span>業務ダッシュボード</span><span class="exp-avatar" id="exp-avatar">担</span></div>
-        <div class="exp-app-content">
-          <div class="exp-app-breadcrumb">コベナンツ管理　/　対象契約</div>
-          <div class="exp-contract"><small>契約番号</small><strong>DEMO-K00001</strong><span id="exp-case-state">下書き</span></div>
-          <div class="exp-app-lines"><span></span><span></span><span></span></div>
-          <div class="exp-app-actions"><button type="button" class="exp-action" id="exp-register">登録する</button><button type="button" class="exp-action secondary" id="exp-approve">承認する</button></div>
-          <p class="exp-app-foot" id="exp-app-foot">今の権限で使える操作が反映されます。</p>
-        </div>
-        <div class="exp-curtain" id="exp-curtain" aria-hidden="true"><span class="exp-curtain-lock">◇</span><strong id="exp-curtain-title">画面へのアクセスを確認中</strong><small id="exp-curtain-note">認証・権限によって表示が変わります</small></div>
-      </div>
-      <div class="exp-guide"><span class="exp-guide-label">ここがポイント</span><p id="exp-owner-explain">HENNGE Oneがログイン条件を確認します。</p><button type="button" id="exp-follow" class="exp-follow">この判断の設定を見てみる <span>→</span></button></div>
-    </aside>
-  </div>
-  <p class="exp-disclaimer">※ この画面は説明用のシミュレーションです。MotionBoardの標準機能だけで承認権限を完全に制御できることを保証するものではありません。</p>
-</section>
-<details class="deep-dive" id="deep-dive">
-<summary class="deep-summary"><span><strong>仕組みや設定を詳しく見る</strong><small>HENNGE One・MotionBoardの責任分界、9つの設計論点と実機で確かめること</small></span><span class="plus-icon" aria-hidden="true">＋</span></summary>
-<div class="deep-content">
-<div class="boundary-strip"><div class="boundary-icon">i</div><p><strong>ここだけは押さえたい：</strong>HENNGE Oneでログインできても、MotionBoardのユーザー登録や承認権限は自動的に付与されません。HENNGE公式のMotionBoard向けSSOでは、<strong>ユーザーの自動作成なし</strong>と明記されています。<a href="#source-hsso">公式資料を見る</a></p></div>
-<nav class="head-nav sub-nav" aria-label="詳細資料の切り替え">
-<button type="button" data-view="boundary" class="active">担当と設定</button>
-<button type="button" data-view="matrix">比較表</button>
-<button type="button" data-view="scenario">詳細シミュレーター</button>
-<button type="button" data-view="checklist">確認リスト</button>
-</nav>
-<section class="interface">
-<div class="section-heading"><div><div class="kicker">03 / INTERACTIVE REFERENCE</div><h2 id="view-heading">各論点を、実装の粒度まで見ていく</h2><p id="view-subtitle">気になる項目を選ぶと、HENNGE One・MotionBoardの担当と、実際にやることを並べて確認できます。</p></div></div>
-<div id="view-boundary" class="views active">
-<div class="explore">
-<aside class="panel topic-list"><div class="list-head"><h3>確認するテーマ</h3><span class="count" id="topic-count">9件</span></div>
-<div class="filters" role="group" aria-label="テーマの絞り込み"><button type="button" class="filter on" data-filter="all">すべて</button><button type="button" class="filter" data-filter="hennge">HENNGE側</button><button type="button" class="filter" data-filter="mb">MotionBoard側</button><button type="button" class="filter" data-filter="shared">連携・追加設計</button></div>
-<div class="topic-buttons" id="topic-buttons"></div></aside>
-<article class="panel detail" id="topic-detail" aria-live="polite"></article>
+<section id="goal">
+<div class="section-title"><div><div class="kicker">01 / TARGET OPERATION</div><h2>まず、銀行員が使う画面を見てみる</h2><p>ロールや案件を変えると、表示範囲や使えるボタンが変わります。</p></div><span class="subtle-pill">※ 権限・画面構成は仮の設計案</span></div>
+<div class="surface goal">
+<div class="goal-head"><div class="goal-head-title"><b>誰の画面を確認しますか？</b><span>3つの業務ロールを想定。実際の銀行側の確定要件ではありません。</span></div>
+<div class="role-tabs" role="group" aria-label="利用者のロールを切り替える">
+<button type="button" class="role-tab" data-role-choice="staff" aria-pressed="true">支店担当者</button>
+<button type="button" class="role-tab" data-role-choice="approver" aria-pressed="false">支店承認者</button>
+<button type="button" class="role-tab" data-role-choice="hq" aria-pressed="false">本部閲覧者</button>
 </div></div>
-<div id="view-matrix" class="views"><div class="panel matrix-card"><div class="section-heading" style="margin-top:0"><div><div class="kicker">RESPONSIBILITY MATRIX</div><h2>誰が担うかを、ひとつの表に</h2><p>行をクリックすると、できること・設定内容・実機テストに移れます。</p></div></div><div class="legend"><span><i class="dot"></i> HENNGE主体</span><span><i class="dot mb"></i> MotionBoard主体</span><span><i class="dot both"></i> 連携・共同検討</span><span><i class="dot need"></i> 実機検証が必要</span></div><div class="data-table"><table><thead><tr><th>テーマ</th><th>HENNGE One</th><th>MotionBoard</th><th>確認状況</th></tr></thead><tbody id="matrix-body"></tbody></table></div><div class="table-note">担当欄は今回の設計案における主たる責任分担です。標準機能の存在と、銀行業務で安全に運用できることは同じではありません。</div></div></div>
-<div id="view-scenario" class="views"><div class="panel scenario-card"><div class="section-heading" style="margin-top:0"><div><div class="kicker">ROLE EXPERIENCE / MOCK DEMO</div><h2>同じ画面でも、操作はどう変わる？</h2><p>ログイン・閲覧・登録・承認を、役割を変えながら試せます。実際の製品には接続していません。</p></div></div>
-<div class="scenario-layout"><div class="formside">
-<div class="formgroup"><div class="formlegend">操作する人</div><div class="choice" id="sim-roles"><button type="button" data-role="staff" class="on">支店担当</button><button type="button" data-role="manager">承認者</button><button type="button" data-role="hq">本部閲覧</button></div></div>
-<div class="formgroup"><label for="sim-status">案件の状態</label><select id="sim-status"><option value="draft">下書き</option><option value="pending">承認待ち</option><option value="approved">承認済み</option></select></div>
-<div class="formgroup"><div class="formlegend">HENNGE One（入口）</div><label class="toggle">本人認証・MFA・端末条件を満たす<input type="checkbox" id="sim-auth" checked></label></div>
-<div class="formgroup"><div class="formlegend">MotionBoard（内部）</div><label class="toggle">利用者登録・画面権限あり<input type="checkbox" id="sim-board" checked></label><label class="toggle">担当支店の案件である<input type="checkbox" id="sim-branch" checked></label></div>
-<div class="formgroup"><div class="formlegend">業務上の追加ルール</div><label class="toggle">自分が登録した案件である<input type="checkbox" id="sim-self"></label></div>
-<button type="button" class="secondary-btn" id="sim-reset">最初の状態に戻す</button>
+<div class="goal-grid">
+<div class="mock">
+<div class="mock-window" id="mock-window">
+<div class="mock-bar"><span class="mock-logo">M</span><b>コベナンツ管理</b><small>MotionBoard業務画面（イメージ）</small></div>
+<div class="mock-body">
+<div class="mock-page-title"><div><small>ホーム ／ コベナンツ業務</small><br><b>契約・後続業務一覧</b></div><span class="mock-right-badge" id="mock-role-badge">支店担当者</span></div>
+<div class="mock-conditions"><label for="case-search">契約を探す <input type="search" id="case-search" placeholder="契約番号・取引先で検索"></label><span class="mock-count" id="case-count"></span></div>
+<div class="case-grid">
+<div class="case-list"><div class="case-list-head"><span>対象となる契約</span><span>クリックして選択</span></div><div id="case-rows"></div></div>
+<div class="case-detail" id="case-detail">
+<div class="detail-cap">SELECTED CONTRACT</div><h3 id="selected-case-title">契約を選択</h3>
+<div class="kv"><span>契約番号</span><b id="selected-case-id">—</b><span>担当支店</span><b id="selected-case-branch">—</b><span>ステータス</span><b id="selected-case-status">—</b><span>登録者</span><b id="selected-case-creator">—</b></div>
+<div class="case-actions"><button type="button" class="case-action" id="register-action">登録する</button><button type="button" class="case-action secondary" id="approve-action">承認する</button></div>
+<p id="case-why" class="smallwhy" role="status" aria-live="polite"></p>
+</div></div></div>
+<div class="mock-cover" id="mock-cover" hidden><div class="mock-cover-inner"><div class="cover-symbol">▢</div><h3 id="cover-title">画面を開けません</h3><p id="cover-description">ログインと閲覧権限を確認します。</p></div></div>
+</div></div>
+<aside class="rationale">
+<div class="rationale-head"><span class="kicker">DESIGN DECISION</span><span class="subtle-pill" id="role-group">GRP_BRANCH_STAFF（案）</span></div>
+<h3 id="rationale-title">なぜ、この人は登録できる？</h3>
+<p id="rationale-summary">業務上のゴールから、必要な権限と設定を確認します。</p>
+<div class="rule-picker" role="group" aria-label="設計の論点を切り替える">
+<button data-rule="login" type="button">ログイン</button><button data-rule="board" type="button">画面の閲覧</button><button data-rule="data" type="button">支店の範囲</button><button data-rule="register" type="button">登録</button><button data-rule="approve" type="button">承認</button>
 </div>
-<div class="workflow">
-<div class="lane-result"><div class="result" id="sim-hennge-result"><div class="result-label">HENNGE One / 入口の判定</div><div class="result-state" id="sim-h-state"></div><p id="sim-h-note"></p></div><div class="result" id="sim-mb-result"><div class="result-label">MotionBoard / 内部の判定</div><div class="result-state" id="sim-m-state"></div><p id="sim-m-note"></p></div></div>
-<div class="testcase"><div class="kicker">コベナンツ業務 / 操作例</div><h3>契約 DEMO-K00001</h3><div class="case-meta" id="case-meta"></div><div class="case-actions"><button class="action" id="sim-register" type="button">登録する</button><button class="action alt" id="sim-approve" type="button">承認する</button></div><div class="reason" id="sim-reason" role="status" aria-live="polite"></div></div>
-<p class="smallhelp"><strong>ここでのポイント：</strong>HENNGE Oneが通っても、MotionBoard側の登録や画面権限がなければ閲覧できません。登録・承認の可否は、業務上のルールも合わせて判断します。※この操作画面は構成例で、製品標準の自動連携を保証するものではありません。</p>
-</div></div></div></div>
-<div id="view-checklist" class="views"><div class="panel check-card"><div class="check-head"><div><div class="kicker">IMPLEMENTATION CHECKLIST</div><h2>設計・検証で実際にやること</h2><p class="muted">実施した項目にチェックして整理できます。チェック状態はページを閉じるとリセットされます。</p></div><div id="check-progress" style="font-size:12px;font-weight:850;color:var(--teal)">0 / 8 確認</div></div><div class="progress-track"><div class="progress-fill" id="check-fill"></div></div><div class="checks" id="check-items"></div><div class="check-actions"><button class="secondary-btn" type="button" id="reset-checks">チェックをクリア</button><button class="secondary-btn" type="button" id="copy-checks">確認事項をコピー</button></div></div></div>
+<div class="dynamic-rule"><div class="eyebrow">こう使いたい → 必要な条件</div><strong id="rule-target">支店担当は下書きの案件を登録できる</strong><p id="rule-conditions">業務のロールと案件の状態を確認します。</p><div class="rule-mini" id="rule-tags"></div></div>
+<div class="owner-decisions">
+<div class="owner-decision"><b>HENNGE One でやること</b><p id="rule-hennge"></p></div>
+<div class="owner-decision mb"><b>MotionBoard でやること</b><p id="rule-motionboard"></p></div>
+<div class="owner-decision extra"><b>追加で確認すること</b><p id="rule-guard"></p></div>
+</div>
+<div class="owner-refs" id="rule-refs"></div>
+</aside>
+</div>
+<div class="goal-foot"><span>※ この画面は動作イメージ。ボタンの出し分けだけでは、実際の更新権限を保証しません。</span>
+<details class="options"><summary>テスト条件を変える ＋</summary><div class="options-content">
+<label><input type="checkbox" id="hennge-allowed" checked> HENNGEでログイン許可</label>
+<label><input type="checkbox" id="mb-allowed" checked> MotionBoardに利用者登録・閲覧権限あり</label>
+<label for="button-display">権限外のボタン <select class="select-mini" id="button-display"><option value="disabled">無効化して表示</option><option value="hidden">非表示にする</option></select></label>
+</div></details></div>
+</div></section>
+<section id="policy">
+<div class="section-title"><div><div class="kicker">02 / ROLE & PERMISSION</div><h2>この画面にするなら、どんなロールが必要？</h2><p>先に業務の役割を決め、必要な閲覧・登録・承認の範囲を対応づけます。</p></div></div>
+<div class="logic-grid">
+<div class="surface logic-card"><div class="eyebrow">ROLE MATRIX / 運用上の役割</div><h3>3つの業務ロール案</h3>
+<div class="matrix-wrap"><table class="role-matrix"><thead><tr><th>担当</th><th>見る範囲</th><th>登録</th><th>承認</th></tr></thead><tbody id="role-matrix-body"></tbody></table></div>
+<p class="choice-note">行を押すと上の業務画面も切り替わります。ロール名・グループIDは提案例です。</p></div>
+<div class="surface logic-card"><div class="eyebrow">ROLE TRANSLATION / 業務要件 → 設定</div><h3 id="policy-role-title">支店担当者を実現するには</h3>
+<div class="policy-lines"><div class="policy-line"><b>業務ロール</b><span id="policy-role-group"></span></div><div class="policy-line"><b>閲覧の範囲</b><span id="policy-scope"></span></div><div class="policy-line"><b>ボタンの扱い</b><span id="policy-buttons"></span></div><div class="policy-line"><b>操作の判定</b><span id="policy-guard"></span></div></div></div>
+</div>
 </section>
+<section id="setting">
+<div class="section-title"><div><div class="kicker">03 / SYSTEM RESPONSIBILITY</div><h2>では、どちらに何を設定する？</h2><p>業務のゴールが決まったら、製品ごとの設定に落とします。</p></div></div>
+<div class="steps">
+<div class="surface step"><div class="step-number">01 / SIGN-IN & ACCESS</div><h3>HENNGE One</h3><p>MotionBoardを利用できる人と、入るときの条件を決める。</p>
+<ul><li>MotionBoardとのSAML SSOを設定する</li><li>ユーザー・MFA・端末のアクセスポリシーを決める</li><li>ログインの識別子（メールアドレス）を合わせる</li></ul>
+<div class="step-bottom"><strong>担当しないこと：</strong>銀行業務の「登録できる」「承認できる」をHENNGEだけで決める想定にはしません。<br><a href="#source-hsso" data-open-sources>SSO公式手順を見る ↗</a></div></div>
+<div class="surface step mb"><div class="step-number">02 / BOARD & BUSINESS ROLE</div><h3>MotionBoard</h3><p>ログインした人が、どの画面とデータを扱えるかを決める。</p>
+<ul><li>ユーザー・グループ・ロールの割り当て</li><li>フォルダー・ボードの閲覧権限の設計</li><li>支店データの絞り込み・登録入力・ボタンの見せ方の検証</li></ul>
+<div class="step-bottom"><strong>要検証：</strong>承認の更新権限を標準機能だけで強制できるか。できなければDB・APIも含めて設計します。<br><a href="#source-mrole" data-open-sources>ロール設定の公式例を見る ↗</a></div></div>
 </div>
+<div class="caution"><strong>設計上の注意：</strong>HENNGE公式のMotionBoard連携手順では、SSOによるアカウント自動作成はありません。MotionBoard側にどのユーザー・グループを用意し、異動・退職時にどう変更するかは、別途設計が必要です。<a href="#source-hsso" data-open-sources>根拠を確認</a></div>
+<details class="details" id="deep-details"><summary><span><b>さらに詳しく：実装・検証の9つの論点</b><small>各機能で「できること」「やること」「確かめること」を確認できます。</small></span><span class="plus">＋</span></summary>
+<div class="details-content"><div class="topic-nav" id="topic-nav"></div><div class="deep-info" id="topic-detail"></div></div>
 </details>
-<details class="source-details" id="source-details">
-<summary class="source-summary"><span><strong>公式資料・出典を確認する</strong><small>HENNGE OneとMotionBoardの設定根拠を9件掲載</small></span><span class="plus-icon" aria-hidden="true">＋</span></summary>
-<section class="sources" id="sources"><div class="section-heading"><div><div class="kicker">04 / PRIMARY & IMPLEMENTATION SOURCES</div><h2>公式資料から、根拠をたどれるように</h2><p>製品の仕様と運用上の設計案は分けて記載しています。検証前の論点は「要確認」として残します。</p></div></div><div class="source-grid" id="source-grid"></div>
-<div class="difference-note"><strong>バージョンについて：</strong>ここで示すMotionBoardの操作例にはClassic版やCloud版の記事が含まれます。検証環境のCloudと本番想定のオンプレ版で、機能・ライセンス・バージョン・SSO設定が一致するかは必ず別途確認してください。今回のロールマトリクスはあくまで業務設計例です。</div></section>
+<details class="details" id="source-details"><summary><span><b>公式資料・技術記事の出典</b><small>HENNGE・WingArc公式資料を中心に9件。設計案と機能仕様は区別します。</small></span><span class="plus">＋</span></summary>
+<div class="details-content"><div class="source-grid" id="source-grid"></div><p class="choice-note">Cloudで確認した内容は、本番想定のオンプレ版のバージョン・ライセンスで必ず再確認します。</p></div>
 </details>
-<div class="bottom"><span>ACCESS DESIGN / HENNGE One × MotionBoard / 2026-10-12</span><span>架空のデータのみ。実際の認証情報・契約情報にはアクセスしません。</span></div>
-</main></div>
-<script>
-(()=>{'use strict';
-const $=id=>document.getElementById(id);
+</section>
+<footer class="footer"><span>ACCESS DESIGN / HENNGE One × MotionBoard / 2026-10-12</span><span>説明用デモ・業務要件は未確定／個人・銀行の実データは使用していません</span></footer>
+</main><script>(function(){
+'use strict';
 const sources=[
 {id:'hsso',n:'01',vendor:'HENNGE公式',title:'MotionBoardのシングルサインオン設定',note:'メールアドレス連携、ユーザーの自動作成なし、SP-Initiatedのみ。SAMLの設定画面も掲載。',url:'https://support.hdeone.com/hc/ja/articles/60832202230425-MotionBoard%E3%81%AE%E3%82%B7%E3%83%B3%E3%82%B0%E3%83%AB%E3%82%B5%E3%82%A4%E3%83%B3%E3%82%AA%E3%83%B3%E8%A8%AD%E5%AE%9A'},
 {id:'haccess',n:'02',vendor:'HENNGE公式',title:'アクセス制限・MFA・端末認証',note:'端末証明書、本人認証、アクセスポリシーを組み合わせる機能。',url:'https://hennge.com/jp/service/one/identity/access/'},
@@ -544,7 +245,6 @@ const topics=[
 {id:'approve',title:'承認・差戻し・自己承認防止',owner:'shared',level:'verify',summary:'承認ボタンがあるだけでは、誰でも押してよいわけではない。',hcan:'承認者本人がログインしたかどうかという「認証」を担当します。',hdo:'承認に必要な業務役割や案件状態を、SSOが自動保証するものと扱わないよう整理します。',mcan:'データ更新アクションは構成できますが、銀行独自の承認・差戻しルールが標準機能で全て守れるかは未確認です。',mdo:'承認待ち、担当者、所属支店、自己承認禁止、二重承認防止を定義します。実行時の最終判定が必要ならDB・APIなどと責任分担します。',tests:['起票者による自己承認を防げるか','承認待ち以外での承認や差戻しを拒否できるか','複数利用者の同時操作で不整合が起きないか'],risk:'これは製品標準の承認ロール仕様ではなく、銀行業務の要件として個別に実装・検証する項目です。',refs:['maction','minput','hsso']},
 {id:'lifecycle',title:'異動・退職時の権限変更',owner:'shared',level:'verify',summary:'HENNGEで入れなくするだけでなく、MotionBoardに残る利用者・ロールも管理する。',hcan:'ユーザーのアクセス許可や認証ポリシーを管理できます。',hdo:'退職・異動・休職のイベントを定義し、SSOアクセスの停止と再付与を管理します。',mcan:'ユーザー・グループ・ロールの設定機能があります。',mdo:'HENNGE側と連動しないアカウントの更新・無効化・棚卸し方法を決めます。',tests:['HENNGE停止後にMotionBoardの既存セッションから操作が継続しないか','異動時の旧支店の閲覧権限が残らないか','アカウント棚卸し・権限申請の責任者を決めたか'],risk:'MotionBoard向けHENNGE SSO連携では自動プロビジョニングがないため、アカウントのライフサイクル管理を別途設計します。',refs:['hsso','mrole','haccess']}
 ];
-
 const configPaths={
 auth:{h:'Access Control：サービスプロバイダー設定／アクセスポリシーグループ',m:'［管理］→［システム設定］→［接続/認証］→［認証］'},
 sso:{h:'Access Control：サービスプロバイダー／SAMLメタデータ／Name ID',m:'［システム設定］→［接続/認証］→［認証］・［シングルサインオン］'},
@@ -556,208 +256,196 @@ write:{h:'認証・SSOの実施。データ更新可否とは分ける',m:'［�
 approve:{h:'ログインした本人の確認。承認者かどうかは別の業務判定',m:'業務用の承認条件・更新経路を個別設計。必要ならDB・APIで最終検証'},
 lifecycle:{h:'異動・退職時のアクセス許可見直し',m:'［システム設定］→［ユーザー］→［ユーザー／グループ］で残存権限を確認'}
 };
-const review=[
-{title:'認証・SSOの前提を確定する',desc:'MotionBoardの本番版数、HENNGE One連携方法、Name ID（メールアドレス）を確認'},
-{title:'ユーザー・業務ロール対応表を作る',desc:'支店担当、承認者、本部閲覧の役割と、MotionBoard側のユーザー・グループを紐づける'},
-{title:'フォルダー・ボードの閲覧権限を設計する',desc:'業務画面ごとに閲覧・編集・管理の可否を一覧化'},
-{title:'担当支店ごとのデータ閲覧範囲を設計する',desc:'支店マスタ、兼務、本部閲覧、検索・出力を含めて範囲を確認'},
-{title:'登録・承認ボタンの表示設計を検証する',desc:'ログインユーザー別の自動表示が可能か、代替案も含めて確認'},
-{title:'データ更新時の最終的な権限判定を決める',desc:'自己承認、承認待ち、他支店、同時更新などの業務ルールを検証'},
-{title:'異動・退職時の更新手順を決める',desc:'HENNGE側のアクセス停止とMotionBoard側の権限剥奪を揃える'},
-{title:'Cloudと本番オンプレ版で差分検証する',desc:'利用予定バージョン・ライセンス・認証設定・入力機能・制限事項を比較'}
+
+const $=id=>document.getElementById(id);
+const roles={
+ staff:{name:'支店担当者',group:'GRP_BRANCH_STAFF',scope:'所属する支店の契約',buttons:'下書きに「登録」を表示／「承認」は操作不可',guard:'登録は支店担当 × 自店 × 下書きのみ',short:'支店担当'},
+ approver:{name:'支店承認者',group:'GRP_BRANCH_APPROVER',scope:'所属する支店の契約',buttons:'承認待ちに「承認」を表示／「登録」は操作不可',guard:'承認は自店 × 承認待ち × 自己承認なし',short:'承認者'},
+ hq:{name:'本部閲覧者',group:'GRP_HQ_VIEW',scope:'複数支店の契約（参照のみ）',buttons:'登録・承認は操作不可',guard:'一覧・詳細の参照のみ。更新処理は許可しない',short:'本部閲覧'}
+};
+const records=[
+{id:'K-0001',client:'テスト企業A',branch:'青葉支店',state:'draft',creator:'支店担当者'},
+{id:'K-0002',client:'テスト企業B',branch:'青葉支店',state:'pending',creator:'支店担当者'},
+{id:'K-0003',client:'テスト企業C',branch:'青葉支店',state:'approved',creator:'支店担当者'},
+{id:'K-0004',client:'テスト企業D',branch:'海浜支店',state:'pending',creator:'他店担当者'},
+{id:'K-0005',client:'テスト企業E',branch:'青葉支店',state:'pending',creator:'支店承認者'}
 ];
-const ownerText={hennge:'主に HENNGE One',mb:'主に MotionBoard',shared:'両方で設計'};
-const ownerShort={hennge:'HENNGE',mb:'MotionBoard',shared:'連携・追加設計'};
-const levelText={confirmed:'公式機能を確認',pattern:'実装例を確認',verify:'実機で要検証'};
-let currentTopic='auth',currentView='boundary',filter='all',note='';
-function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e}
-function ownerColor(owner){return owner==='mb'?'mb':owner==='shared'?'both':''}
-function setView(id){
-currentView=id;
-document.querySelectorAll('[data-view]').forEach(b=>{const on=b.dataset.view===id;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on))});
-document.querySelectorAll('.views').forEach(x=>x.classList.toggle('active',x.id==='view-'+id));
-const headings={boundary:['各論点を、実装の粒度まで見ていく','気になる項目を選ぶと、2製品の担当と、実際にやることを並べて確認できます。'],matrix:['何をどちらで担当するか、一覧で比べる','画面・認証・業務操作を同じ粒度で比較。行を選ぶと詳細に移れます。'],scenario:['担当者を切り替え、操作を確かめる','承認ボタンは、ログインだけでなく業務条件も必要。その違いを体験できます。'],checklist:['設計・検証でやることを整理する','製品の設定だけではなく、実機での確認や運用まで、抜け漏れを防ぎます。']};
-$('view-heading').textContent=headings[id][0];$('view-subtitle').textContent=headings[id][1];
+const states={draft:'下書き',pending:'承認待ち',approved:'承認済み'};
+const aspects={
+login:{
+ title:'誰がログインできる？',
+ aim:'MotionBoardを利用する職員だけが、安全にログインできる。',
+ rule:'本人認証・MFA・端末条件を満たしたユーザーのみアクセスする。',
+ tags:['認証','MFA','SSO'],
+ hennge:'Access ControlのポリシーとSAML連携を設定する。',
+ mb:'SSOの受け側を設定し、利用者が存在することを確認する。',
+ guard:'SSOだけで銀行業務の承認ロールは決まりません。',
+ refs:['hsso','haccess']},
+board:{
+ title:'誰が画面を開ける？',
+ aim:'ログイン後、利用者が担当する業務画面にアクセスできる。',
+ rule:'MotionBoard側の利用者・所属グループ・フォルダー権限が必要。',
+ tags:['ユーザー','グループ','フォルダー'],
+ hennge:'MotionBoardへの認証までを担当する。',
+ mb:'アカウント登録、グループ所属、フォルダー・閲覧権限を設定する。',
+ guard:'HENNGEでログインできても、MotionBoardのアカウントは自動作成されない。',
+ refs:['hsso','mrole','mfolder']},
+data:{
+ title:'どの支店の契約が見える？',
+ aim:'支店担当は自店、本部は複数支店の契約を確認できる。',
+ rule:'業務ロール・所属支店と契約データの支店コードを対応づける。',
+ tags:['所属支店','ログインID','絞り込み'],
+ hennge:'ログインした本人を識別できる状態にする。',
+ mb:'ユーザー・支店対応表を用意し、ログインユーザー別の検索条件を設計する。',
+ guard:'画面上の絞り込みがDB側の行単位のアクセス制御と同義ではない点に注意。',
+ refs:['mdata','mfolder']},
+register:{
+ title:'誰が登録できる？',
+ aim:'支店担当者だけが、自店の下書き案件を登録できる。',
+ rule:'支店担当ロール × 自店の契約 × 下書き状態。',
+ tags:['支店担当','下書き','登録'],
+ hennge:'ログイン可否まで。登録ボタン単位の権限はHENNGEでは決めない。',
+ mb:'業務グループと閲覧範囲を設計。データベース入力・表示の条件を検証する。',
+ guard:'更新時にもロール・支店・案件状態を検査できるか確認。必要ならDB/API側で担保する。',
+ refs:['mrole','minput','maction']},
+approve:{
+ title:'誰が承認できる？',
+ aim:'支店承認者が、自店の承認待ち案件を承認できる。',
+ rule:'承認者ロール × 自店 × 承認待ち × 自己承認しない。',
+ tags:['承認者','承認待ち','自己承認防止'],
+ hennge:'承認担当者本人の認証を行う。銀行独自の承認権限は決定しない。',
+ mb:'承認用画面・ボタンを設計。承認可能条件に応じた操作可否を検証する。',
+ guard:'自己承認や二重更新を、画面のボタン非表示だけで防がず更新処理で再判定する。',
+ refs:['maction','minput','mbutton']}
+};
+const state={role:'staff',caseId:'K-0001',focus:'register',query:'',hennge:true,mb:true,buttonMode:'disabled',note:''};
+function element(tag,className,textContent){const node=document.createElement(tag);if(className)node.className=className;if(textContent!==undefined)node.textContent=textContent;return node}
+function viewable(){return records.filter(r=>state.role==='hq'||r.branch==='青葉支店')}
+function selected(){const list=viewable();return list.find(r=>r.id===state.caseId)||list[0]||null}
+function permissions(r=selected()){
+const open=state.hennge&&state.mb;
+const allowed=r&&open&&(state.role==='hq'||r.branch==='青葉支店');
+return {open,view:!!allowed,register:!!(allowed&&state.role==='staff'&&r.state==='draft'),approve:!!(allowed&&state.role==='approver'&&r.state==='pending'&&r.creator!=='支店承認者')};
 }
-function visibleTopics(){return topics.filter(t=>filter==='all'||t.owner===filter)}
-function renderList(){
-$('topic-buttons').replaceChildren();
-for(const t of visibleTopics()){const b=el('button','topic'+(t.id===currentTopic?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(t.id===currentTopic));const a=el('span','idx',String(topics.indexOf(t)+1).padStart(2,'0'));const w=el('span');w.append(el('b','',t.title),el('small','',ownerText[t.owner]+' / '+levelText[t.level]));b.append(a,w);b.addEventListener('click',()=>selectTopic(t.id));$('topic-buttons').append(b)}
-$('topic-count').textContent=visibleTopics().length+'件';
-document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('on',b.dataset.filter===filter));
+function chooseRole(role){
+if(!roles[role])return;
+state.role=role;state.caseId=role==='staff'?'K-0001':role==='approver'?'K-0002':'K-0004';state.focus=role==='staff'?'register':role==='approver'?'approve':'data';state.note='';state.query='';$('case-search').value='';render();
 }
-function selectTopic(id){currentTopic=id;renderList();renderDetail()}
-function addDetailBox(root,heading,paragraph){root.append(el('div','mini-heading',heading),el('p','',paragraph))}
-function renderDetail(){
-const t=topics.find(t=>t.id===currentTopic),root=$('topic-detail');root.replaceChildren();
-const top=el('div','detail-top');top.append(el('span','micro-label','TOPIC '+String(topics.indexOf(t)+1).padStart(2,'0')+' / '+ownerShort[t.owner]));top.append(el('span','pill '+(t.level==='verify'?'needs':'verified'),levelText[t.level]));root.append(top,el('h3','',t.title),el('p','lede',t.summary));
-const lanes=el('div','lane-grid');
-for(const which of ['h','m']){
- const box=el('div','lane'+(which==='m'?' mb':'')),hd=el('div','lane-title'),bd=el('div','lane-body');
- hd.append(el('b','',which==='h'?'HENNGE One':'MotionBoard'),el('span','',t.owner===(which==='h'?'hennge':'mb')?'主な担当':t.owner==='shared'?'共同で確認':'関係する設定'));
- addDetailBox(bd,'できること',t[which+'can']);addDetailBox(bd,'今回やること',t[which+'do']);box.append(hd,bd);lanes.append(box);
+function chooseCase(id){const candidate=viewable().find(x=>x.id===id);if(!candidate)return;state.caseId=id;state.note='';state.focus=candidate.state==='draft'?'register':candidate.state==='pending'?'approve':'data';render()}
+function renderRows(){
+const root=$('case-rows');root.replaceChildren();
+const show=viewable().filter(r=>[r.id,r.client,r.branch,states[r.state]].some(x=>x.toLowerCase().includes(state.query.toLowerCase())));
+$('case-count').textContent=show.length+' 件表示 / 全 '+viewable().length+' 件';
+if(!show.length){root.append(element('div','case-empty','一致する契約がありません'));return}
+for(const r of show){
+const b=element('button','case-row');b.type='button';b.dataset.caseId=r.id;b.setAttribute('aria-selected',String(r.id===selected()?.id));
+const left=element('span');left.append(element('b','',r.id),element('small','',r.client+' / '+r.branch));
+b.append(left,element('span','case-status '+r.state,states[r.state]));b.addEventListener('click',()=>chooseCase(r.id));root.append(b)}
 }
-root.append(lanes);
-const pathInfo=configPaths[t.id],pathBox=el('div','setup-path');
-pathBox.append(el('div','mini-heading','設定箇所・構成の目安'));
-for(const [name,value] of [['HENNGE One',pathInfo.h],['MotionBoard',pathInfo.m]]){const line=el('div','path-line');line.append(el('b','',name),el('span','',value));pathBox.append(line)}
-root.append(pathBox);
-const val=el('div','validation'),vh=el('div','validation-head');vh.append(el('b','','実機で確認すること'),el('small','','IMPLEMENTATION TEST'));val.append(vh);
-const ul=el('ul','tests');t.tests.forEach(test=>ul.append(el('li','',test)));val.append(ul,el('div','caveat','設計上の注意：'+t.risk));root.append(val);
-const refs=el('div','refs');for(const id of t.refs){const s=sources.find(x=>x.id===id);const a=el('a','ref-link','出典 '+s.n+'　'+s.vendor+' ↗');a.href='#source-'+id;refs.append(a)}root.append(refs);
+function renderPreview(){
+const role=roles[state.role],r=selected(),access=permissions(r);
+$('mock-role-badge').textContent=role.name;
+$('mock-cover').hidden=access.open;
+if(!state.hennge){$('cover-title').textContent='ログインできません';$('cover-description').textContent='HENNGE One側の認証・アクセス条件を満たしていません。'}
+else if(!state.mb){$('cover-title').textContent='この画面を開けません';$('cover-description').textContent='MotionBoard側の利用者登録・閲覧権限を確認します。'}
+$('selected-case-title').textContent=r?.client||'契約を選択';
+$('selected-case-id').textContent=r?.id||'—';
+$('selected-case-branch').textContent=r?.branch||'—';
+$('selected-case-status').textContent=r?states[r.state]:'—';
+$('selected-case-creator').textContent=r?.creator||'—';
+$('register-action').disabled=!access.register;
+$('approve-action').disabled=!access.approve;
+$('register-action').classList.toggle('is-hidden',state.buttonMode==='hidden'&&!access.register);
+$('approve-action').classList.toggle('is-hidden',state.buttonMode==='hidden'&&!access.approve);
+let why;
+if(!access.open)why=state.hennge?'MotionBoard側の利用者・閲覧権限が必要です。':'HENNGE Oneの認証が必要です。';
+else if(access.register)why='支店担当として下書きを登録できる想定です。';
+else if(access.approve)why='承認担当として承認できる想定です。';
+else if(r?.creator==='支店承認者'&&state.role==='approver'&&r?.state==='pending')why='この承認者が登録した案件のため、自己承認はできない設計です。';
+else if(state.role==='hq')why='本部は参照のみ。登録・承認はしない運用例です。';
+else why='ロールまたは案件の状態により、今は登録・承認できません。';
+$('case-why').textContent=state.note||why;
+renderRows();
+}
+function addRefLinks(root,ids){root.replaceChildren();for(const key of ids){const s=sources.find(x=>x.id===key);if(!s)continue;const a=element('a','',s.vendor+'：'+s.title+' ↗');a.href='#source-'+key;a.dataset.openSources='';root.append(a)}}
+function renderRationale(){
+const sp=aspects[state.focus],role=roles[state.role],r=selected(),p=permissions(r);
+$('role-group').textContent=role.group+'（案）';
+$('rationale-title').textContent=sp.title;
+$('rationale-summary').textContent='選択中：'+role.name+' / '+(r?states[r.state]:'対象なし')+'。画面のゴールから設定を逆算します。';
+$('rule-target').textContent=sp.aim;
+$('rule-conditions').textContent=sp.rule;
+$('rule-hennge').textContent=sp.hennge;
+$('rule-motionboard').textContent=sp.mb;
+$('rule-guard').textContent=sp.guard;
+const tags=$('rule-tags');tags.replaceChildren();for(const t of sp.tags)tags.append(element('span','',t));
+addRefLinks($('rule-refs'),sp.refs);
+document.querySelectorAll('[data-rule]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rule===state.focus)));
+document.querySelectorAll('[data-role-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.roleChoice===state.role)));
+$('policy-role-title').textContent=role.name+'の権限を実現するには';
+$('policy-role-group').textContent=role.group+'（提案するグループID）';
+$('policy-scope').textContent=role.scope;
+$('policy-buttons').textContent=role.buttons;
+$('policy-guard').textContent=role.guard;
 }
 function renderMatrix(){
-const tb=$('matrix-body');tb.replaceChildren();
-for(const t of topics){const tr=el('tr');const c1=el('td');const b=el('button','table-topic',t.title);b.type='button';b.addEventListener('click',()=>{filter='all';selectTopic(t.id);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})});c1.append(b);tr.append(c1);
- const h=t.owner==='hennge'?'主に担当':t.owner==='shared'?'連携・調整':'認証・接続';const m=t.owner==='mb'?'主に担当':t.owner==='shared'?'連携・実装':'受け側の設定';
- for(const [msg,cl] of [[h,t.owner==='hennge'?'':'both'],[m,t.owner==='mb'?'mb':'both']]){const td=el('td');td.append(el('span','ownerline '+cl,msg));tr.append(td)}
- tr.append(el('td','',levelText[t.level]));tb.append(tr)}
+const root=$('role-matrix-body');root.replaceChildren();
+for(const [key,r] of Object.entries(roles)){
+const tr=element('tr',state.role===key?'chosen':'');
+tr.tabIndex=0;
+const values=[r.name,key==='hq'?'全支店':'自店のみ',key==='staff'?'下書きだけ':'—',key==='approver'?'承認待ちだけ':'—'];
+values.forEach((val,i)=>tr.append(element('td',i===0?'role-name':i>1&&val==='—'?'mark no':'mark',val)));
+tr.addEventListener('click',()=>chooseRole(key));
+tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();chooseRole(key)}});
+root.append(tr);
+}
+}
+function render(){
+renderPreview();renderRationale();renderMatrix();
 }
 function renderSources(){
 const root=$('source-grid');root.replaceChildren();
-for(const s of sources){const a=el('article','source-card');a.id='source-'+s.id;a.append(el('div','number','SOURCE '+s.n+' / '+s.vendor),el('h3','',s.title),el('p','',s.note));const link=el('a','', '資料を開く ↗');link.href=s.url;link.target='_blank';link.rel='noopener noreferrer';a.append(link);root.append(a)}
+for(const s of sources){
+const article=element('article','source-card');article.id='source-'+s.id;article.append(element('small','',s.n+' / '+s.vendor),element('b','',s.title),element('p','',s.note));
+const a=element('a','', '公式資料を見る ↗');a.href=s.url;a.target='_blank';a.rel='noopener noreferrer';article.append(a);root.append(article);
 }
-const sim={role:'staff',status:'draft',auth:true,board:true,branch:true,self:false};
-function simRead(){sim.status=$('sim-status').value;sim.auth=$('sim-auth').checked;sim.board=$('sim-board').checked;sim.branch=$('sim-branch').checked;sim.self=$('sim-self').checked}
-function simRender(){
-simRead();document.querySelectorAll('[data-role]').forEach(b=>b.classList.toggle('on',b.dataset.role===sim.role));
-const hin=sim.auth,mbin=hin&&sim.board&&sim.branch,canR=mbin&&sim.role==='staff'&&sim.status==='draft',canA=mbin&&sim.role==='manager'&&sim.status==='pending'&&!sim.self;
-const hc=$('sim-hennge-result'),mc=$('sim-mb-result');hc.className='result '+(hin?'ok':'no');mc.className='result '+(mbin?'ok':'no');
-$('sim-h-state').textContent=hin?'認証条件を満たしています':'ログインできません';
-$('sim-h-note').textContent=hin?'次にMotionBoard側の権限を確認します。':'HENNGE側の認証・端末条件が不足しています。';
-$('sim-m-state').textContent=!hin?'認証後に確認':mbin?'対象の画面を開けます':'閲覧条件を満たしません';
-$('sim-m-note').textContent=!hin?'まず入口の認証が必要です。':!sim.board?'利用者登録やボード権限を確認します。':!sim.branch?'担当支店の対象範囲を確認します。':'ここから先は業務上の更新条件を確認します。';
-$('sim-register').disabled=!canR;$('sim-approve').disabled=!canA;
-const roleNames={staff:'支店担当',manager:'承認者',hq:'本部閲覧'},stateNames={draft:'下書き',pending:'承認待ち',approved:'承認済み'};
-$('case-meta').textContent=roleNames[sim.role]+' / '+stateNames[sim.status]+' / '+(sim.branch?'所属支店':'別支店');
-const reason=!hin?'HENNGE側のアクセス条件を確認してください。':!sim.board?'MotionBoard側のアカウント・閲覧権限を確認してください。':!sim.branch?'担当外の支店は、今回は操作できない設計例です。':canR?'支店担当者として、この案件を登録できます。':canA?'承認担当者として、この案件を承認できます。':sim.self&&sim.role==='manager'&&sim.status==='pending'?'自分が登録した案件は、別の担当者による承認が必要です。':sim.status==='approved'?'承認済みの案件です。登録・再承認はできません。':'閲覧できますが、現在の役割・案件状態では操作できません。';
-$('sim-reason').textContent=note||reason;
-renderExperience();
 }
-function resetSim(){sim.role='staff';sim.status='draft';sim.auth=true;sim.board=true;sim.branch=true;sim.self=false;$('sim-status').value='draft';$('sim-auth').checked=true;$('sim-board').checked=true;$('sim-branch').checked=true;$('sim-self').checked=false;note='';simRender()}
-
-/* ─────── Experiential access journey: same simulation state as the detailed test ─────── */
-const expScenes={
-register:{role:'staff',status:'draft',auth:true,board:true,branch:true,self:false},
-approve:{role:'manager',status:'pending',auth:true,board:true,branch:true,self:false},
-viewer:{role:'hq',status:'pending',auth:true,board:true,branch:true,self:false},
-authstop:{role:'staff',status:'draft',auth:false,board:true,branch:true,self:false},
-boardstop:{role:'staff',status:'draft',auth:true,board:false,branch:true,self:false},
-self:{role:'manager',status:'pending',auth:true,board:true,branch:true,self:true}
-};
-let currentScene='register',expFocus='write';
-function setExpScene(name){
-const s=expScenes[name];if(!s)return;
-Object.assign(sim,s);$('sim-status').value=s.status;
-$('sim-auth').checked=s.auth;$('sim-board').checked=s.board;$('sim-branch').checked=s.branch;$('sim-self').checked=s.self;
-note='';currentScene=name;simRender();
+let currentTopic='auth';
+function renderTopicNav(){
+const root=$('topic-nav');root.replaceChildren();
+for(const t of topics){const b=element('button',t.id===currentTopic?'active':'',t.title);b.type='button';b.dataset.topic=t.id;b.addEventListener('click',()=>{currentTopic=t.id;renderTopicNav();renderTopicDetail()});root.append(b)}
 }
-function renderExperience(){
-const passH=sim.auth,passM=passH&&sim.board&&sim.branch;
-const canRegister=passM&&sim.role==='staff'&&sim.status==='draft';
-const canApprove=passM&&sim.role==='manager'&&sim.status==='pending'&&!sim.self;
-const canChange=canRegister||canApprove;
-const states=[
-passH?'pass':'stop',
-!passH?'wait':passM?'pass':'stop',
-!passM?'wait':canChange?'pass':'view'
-];
-['exp-gate-h','exp-gate-m','exp-gate-b'].forEach((id,i)=>$(id).dataset.state=states[i]);
-$('exp-wire-1').dataset.state=passH?'running':'blocked';
-$('exp-wire-2').dataset.state=passM?'running':'blocked';
-const person={staff:'支店担当',manager:'承認者',hq:'本部閲覧'}[sim.role];
-const contractState={draft:'下書き',pending:'承認待ち',approved:'承認済み'}[sim.status];
-$('exp-identity').textContent=person+' / 契約 DEMO-K00001';
-$('exp-avatar').textContent=sim.role==='staff'?'担':sim.role==='manager'?'承':'本';
-$('exp-case-state').textContent=contractState;
-$('exp-h-state').textContent=passH?'入口を通過':'ここで止まる';
-$('exp-h-foot').textContent=passH?'本人認証・MFA・端末条件を確認済み':'認証条件が不足しています';
-$('exp-m-state').textContent=!passH?'まだ確認しない':passM?'画面を開ける':'ここで止まる';
-$('exp-m-foot').textContent=!passH?'まず入口を通ります':!sim.board?'利用者登録か閲覧権限が必要':!sim.branch?'担当支店の範囲外':'利用者・閲覧権限を確認済み';
-$('exp-b-state').textContent=!passM?'まだ確認しない':canRegister?'登録できる':canApprove?'承認できる':'閲覧のみ';
-$('exp-b-foot').textContent=!passM?'画面が開いてから確認します':canChange?'業務上の操作条件を満たします':sim.self&&sim.role==='manager'?'自分の案件は承認しない':sim.status==='approved'?'承認済みのため再更新しない':'担当する操作・状態が一致しません';
-let title,body,owner,focus;
-if(!passH){title='まず、ログインの条件を確認';body='HENNGE Oneで認証・MFA・端末条件を満たせず、ここで止まります。';owner='入口を通すかどうかは、HENNGE Oneのアクセスポリシーで判断します。';focus='auth'}
-else if(!passM){title='ログインできても、画面はまだ開けない';body=sim.board?'HENNGEの認証は済んでいます。MotionBoardで対象支店を確認する段階です。':'HENNGEの認証は済んでいます。MotionBoard側の利用者登録・画面権限を確認します。';owner='この段階はMotionBoardのユーザー・グループ・フォルダー／データ範囲の設定が担当します。';focus=sim.board?'data':'account'}
-else if(canRegister){title='この担当者は、登録まで進めます';body='HENNGEを通過し、MotionBoardの画面を開き、下書きの契約を登録できます。';owner='入口はHENNGE、閲覧と入力はMotionBoard。書き込み時の業務条件は別途確かめる設計です。';focus='write'}
-else if(canApprove){title='この担当者は、承認まで進めます';body='入口と画面の権限を満たし、承認待ちの案件を承認できる設計例です。';owner='承認ボタンの存在だけでは足りません。MotionBoardと業務ルールで、承認してよい人と状態を確かめます。';focus='approve'}
-else {title='画面は見られます。操作はここまで';body=sim.self&&sim.role==='manager'?'ログインも閲覧もできますが、自分が登録した案件なので承認は進めません。':sim.role==='hq'?'本部閲覧の担当者は、内容を確認できますが登録・承認はしない設計です。':sim.status==='approved'?'この契約は承認済みです。登録・再承認は行いません。':'ログインと閲覧の権限があっても、今の担当と案件状態では登録・承認できません。';
-owner='MotionBoardで画面を使えても、業務操作はロールや案件状態によって別に判断します。';focus=sim.role==='hq'?'account':'approve'}
-expFocus=focus;
-$('exp-outcome').textContent=title;$('exp-outcome-note').textContent=body;
-$('exp-owner-explain').textContent=owner;
-const verdict=(!passH||!passM)?'stop':canChange?'pass':'view';
-$('exp-verdict').dataset.state=verdict;
-$('exp-verdict-symbol').textContent=verdict==='pass'?'✓':verdict==='view'?'i':'−';
-$('exp-curtain').classList.toggle('show',!passM);
-$('exp-curtain').setAttribute('aria-hidden',String(passM));
-$('exp-curtain-title').textContent=!passH?'入口の認証で止まっています':'この画面を開く権限が必要です';
-$('exp-curtain-note').textContent=!passH?'HENNGE Oneでの認証条件を確認します。':sim.board?'対象支店の範囲を確認します。':'MotionBoard側のユーザー・閲覧権限を確認します。';
-$('exp-register').disabled=!canRegister;$('exp-approve').disabled=!canApprove;
-$('exp-app-foot').textContent=canRegister?'下書きの案件を登録できます。':canApprove?'承認待ちの案件を承認できます。':!passM?'まず画面を開く権限が必要です。':'今の条件では、登録・承認はできません。';
-Array.from($('exp-progress').children).forEach((e,i)=>e.classList.toggle('on',i===0?passH:i===1?passM:canChange));
-for(const key of ['auth','board','self'])$('exp-switch-'+key).checked=key==='auth'?sim.auth:key==='board'?sim.board:sim.self;
-const matching=Object.entries(expScenes).find(([key,s])=>Object.keys(s).every(k=>sim[k]===s[k]));
-currentScene=matching?matching[0]:'custom';
-document.querySelectorAll('[data-exp-scene]').forEach(btn=>{const on=btn.dataset.expScene===currentScene;btn.classList.toggle('is-selected',on);btn.setAttribute('aria-pressed',String(on))});
+function renderTopicDetail(){
+const t=topics.find(x=>x.id===currentTopic);
+if(!t)return;
+const root=$('topic-detail');root.replaceChildren();root.append(element('h3','',t.title),element('p','',t.summary));
+const grid=element('div','detail-box');
+for(const [side,code] of [['HENNGE One','h'],['MotionBoard','m']]){
+const card=element('div','deep-card');card.append(element('b','',side+'：できること'),element('p','',t[code+'can']),element('b','',side+'：やること'),element('p','',t[code+'do']));
+grid.append(card)}root.append(grid);
+const caution=element('p','', '実機で確認：'+t.tests.join(' ／ '));root.append(caution);
+root.append(element('p','', '注意点：'+t.risk));
+const links=element('div','deep-refs');for(const ref of t.refs){const s=sources.find(x=>x.id===ref);if(!s)continue;const a=element('a','',s.title+' ↗');a.href='#source-'+ref;a.dataset.openSources='';links.append(a)}
+root.append(links);
 }
-
-const expSceneOrder=['register','approve','viewer','authstop','boardstop','self'];
-let expTourTimer=null;
-let expTourIndex=0;
-function stopExpTour(){
-if(expTourTimer!==null){clearInterval(expTourTimer);expTourTimer=null}
-$('exp-play').textContent='▶ 6つの場面を順に見る';
-$('exp-play').setAttribute('aria-pressed','false');
-}
-$('exp-play').addEventListener('click',()=>{
-if(expTourTimer!==null){stopExpTour();return}
-expTourIndex=0;
-setExpScene(expSceneOrder[expTourIndex]);
-$('exp-play').textContent='■ 再生を止める';
-$('exp-play').setAttribute('aria-pressed','true');
-expTourTimer=setInterval(()=>{
-expTourIndex++;
-if(expTourIndex>=expSceneOrder.length){stopExpTour();return}
-setExpScene(expSceneOrder[expTourIndex]);
-},2600);
+function focusRule(name){if(!aspects[name])return;state.focus=name;state.note='';renderRationale()}
+document.querySelectorAll('[data-role-choice]').forEach(b=>b.addEventListener('click',()=>chooseRole(b.dataset.roleChoice)));
+document.querySelectorAll('[data-rule]').forEach(b=>b.addEventListener('click',()=>focusRule(b.dataset.rule)));
+$('case-search').addEventListener('input',()=>{state.query=$('case-search').value;renderRows()});
+$('register-action').addEventListener('click',()=>{
+const r=selected();if(!r||!permissions(r).register)return;
+r.state='pending';state.focus='register';state.note='登録を試しました。「承認待ち」に変わりました（このページ内のデモのみ）。';render();
 });
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stopExpTour()});
-document.querySelectorAll('[data-exp-scene]').forEach(b=>b.addEventListener('click',()=>{stopExpTour();setExpScene(b.dataset.expScene)}));
-for(const key of ['auth','board','self'])$('exp-switch-'+key).addEventListener('change',()=>{
-stopExpTour();
-const target=key==='auth'?'sim-auth':key==='board'?'sim-board':'sim-self';
-$(target).checked=$('exp-switch-'+key).checked;note='';simRender();
+$('approve-action').addEventListener('click',()=>{
+const r=selected();if(!r||!permissions(r).approve)return;
+r.state='approved';state.focus='approve';state.note='承認を試しました。「承認済み」に変わりました（このページ内のデモのみ）。';render();
 });
-document.querySelectorAll('[data-exp-topic]').forEach(b=>b.addEventListener('click',()=>{
-const name=b.dataset.expTopic;$('deep-dive').open=true;filter='all';selectTopic(name);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'});
-}));
-$('exp-follow').addEventListener('click',()=>{$('deep-dive').open=true;filter='all';selectTopic(expFocus);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})});
-$('exp-register').addEventListener('click',()=>{if(!$('exp-register').disabled)$('sim-register').click()});
-$('exp-approve').addEventListener('click',()=>{if(!$('exp-approve').disabled)$('sim-approve').click()});
-
-function renderChecks(){const root=$('check-items');root.replaceChildren();review.forEach((r,i)=>{const label=el('label','check-item');const input=el('input');input.type='checkbox';input.dataset.check=String(i);input.addEventListener('change',updateProgress);const span=el('span');span.append(el('b','',r.title),el('small','',r.desc));label.append(input,span);root.append(label)});updateProgress()}
-function updateProgress(){const checked=[...document.querySelectorAll('[data-check]')].filter(x=>x.checked).length;$('check-progress').textContent=checked+' / '+review.length+' 確認';$('check-fill').style.width=(checked/review.length*100)+'%'}
-document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
-document.querySelectorAll('[data-owner]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.owner;const first=visibleTopics()[0];selectTopic(first?.id||'auth');setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})}));
-document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;if(!visibleTopics().some(t=>t.id===currentTopic))currentTopic=visibleTopics()[0]?.id||'auth';renderList();renderDetail()}));
-document.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>{sim.role=b.dataset.role;note='';simRender()}));
-for(const id of ['sim-status','sim-auth','sim-board','sim-branch','sim-self'])$(id).addEventListener('change',()=>{note='';simRender()});
-$('sim-register').addEventListener('click',()=>{if($('sim-register').disabled)return;$('sim-status').value='pending';note='登録を試しました。「承認待ち」に進みました。実際のDBには保存していません。';simRender()});
-$('sim-approve').addEventListener('click',()=>{if($('sim-approve').disabled)return;$('sim-status').value='approved';note='承認を試しました。「承認済み」に進みました。実際のDBには保存していません。';simRender()});
-$('sim-reset').addEventListener('click',resetSim);
-$('reset-checks').addEventListener('click',()=>{document.querySelectorAll('[data-check]').forEach(c=>c.checked=false);updateProgress()});
-$('copy-checks').addEventListener('click',()=>{
- const lines=review.map((r,i)=>'['+(document.querySelector('[data-check="'+i+'"]').checked?'x':' ')+'] '+r.title+' — '+r.desc);
- const content='HENNGE One × MotionBoard 権限設計チェックリスト\n'+lines.join('\n');
- if(navigator.clipboard?.writeText){navigator.clipboard.writeText(content).then(()=>{$('copy-checks').textContent='コピーしました'}).catch(()=>{$('copy-checks').textContent='コピーできませんでした'})}else{$('copy-checks').textContent='コピー非対応のブラウザです'}
+$('hennge-allowed').addEventListener('change',()=>{state.hennge=$('hennge-allowed').checked;state.focus='login';state.note='';render()});
+$('mb-allowed').addEventListener('change',()=>{state.mb=$('mb-allowed').checked;state.focus='board';state.note='';render()});
+$('button-display').addEventListener('change',()=>{state.buttonMode=$('button-display').value;renderPreview()});
+document.addEventListener('click',ev=>{
+const a=ev.target.closest?.('a[href^="#source-"]');if(a)$('source-details').open=true;
 });
-$('open-deep-link').addEventListener('click',()=>{$('deep-dive').open=true});
-document.addEventListener('click',event=>{
-const link=event.target.closest?.('a[href^="#source-"]');
-if(link)$('source-details').open=true;
-});
-renderList();renderDetail();renderMatrix();renderSources();renderChecks();resetSim();setExpScene('register');setView('boundary');
-})();
-</script>
-</body></html>
+document.querySelectorAll('[data-open-sources]').forEach(a=>a.addEventListener('click',()=>{$('source-details').open=true}));
+renderSources();renderTopicNav();renderTopicDetail();render();
+})()</script></body></html>
