@@ -139,7 +139,7 @@ function render(){const v=get();let h=v.idOk&&v.mfa&&v.device;
  let guard=visible&&(v.status==='draft'||v.status==='pending');
  $('hstate').textContent=h?'認証・アクセス許可':'アクセス拒否';$('hstate').className='state '+(h?'good':'bad');
  $('mstate').textContent=!h?'認証待ち':!m?'ボードにアクセス不可':!scope?'他店データを対象外':'閲覧条件を満たす';$('mstate').className='state '+(visible?'good':'bad');
- $('bstate').textContent=!visible?'更新判定には進めない':!guard?'承認済み・変更制限':'業務ルールを検査';$('bstate').className='state '+(guard?'good':'bad');
+ $('bstate').textContent=!visible?'更新判定には進めない':canReg?'登録を許可':canApp?'承認を許可':'更新操作を拒否';$('bstate').className='state '+(allow?'good':'bad');
  let allow=canReg||canApp;$('summary-chip').textContent=!h?'HENNGEで停止':!visible?'MotionBoardで停止':allow?'操作可能なものあり':'参照のみ';$('summary-chip').className='chip '+(allow?'good':!visible?'bad':'warn');
  $('role-chip').textContent=roles[v.role];$('status-label').textContent=states[v.status];$('scope-label').textContent=v.scope==='own'?'所属支店':'別支店';
  $('register').disabled=!canReg;$('approve').disabled=!canApp;$('register-box').style.display=v.hide&&v.role!=='staff'?'none':'block';$('approve-box').style.display=v.hide&&v.role!=='manager'?'none':'block';
@@ -155,7 +155,7 @@ function render(){const v=get();let h=v.idOk&&v.mfa&&v.device;
  $('signal').dataset.tone=tone;
  $('signal-subject').textContent=v.role==='staff'?'BRANCH STAFF':v.role==='manager'?'APPROVER':'HQ VIEWER';
  $('signal-action').textContent=canReg?'REGISTER':canApp?'APPROVE':'NONE';
- document.querySelectorAll('.flow .stage').forEach((node,i)=>{node.dataset.state=([h,visible,guard])[i]?'good':'bad'});
+ document.querySelectorAll('.flow .stage').forEach((node,i)=>{node.dataset.state=([h,visible,allow])[i]?'good':'bad'});
  document.querySelectorAll('[data-role-preset]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.rolePreset===v.role)));
  $('audit').textContent=notice||reason;
 }
