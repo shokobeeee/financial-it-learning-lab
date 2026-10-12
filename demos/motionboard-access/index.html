@@ -2,60 +2,56 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light">
-<title>権限設計ラボ | HENNGE One × MotionBoard</title>
+<meta name="color-scheme" content="dark"><meta name="theme-color" content="#070c12">
+<title>ACCESS CONTROL / LAB | MotionBoard × HENNGE One</title>
 <meta name="description" content="銀行業務の登録・承認権限を、認証・画面・DBの3層で検討できる架空データの対話型デモ。製品機能と公式の出典つき。">
 <style>
-:root{--navy:#122239;--blue:#315cf3;--aqua:#15a999;--paper:#f4f6fb;--text:#19263c;--muted:#66758c;--line:#e1e7f0;--panel:#fff;--red:#c33f51;--amber:#996b1b}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--text);font-family:Inter,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;line-height:1.65}
-a{color:#2855ce;text-underline-offset:3px}button,select{font:inherit}button{cursor:pointer}
-header{background:linear-gradient(120deg,#101e33,#1e3558 78%,#24505c);color:white;padding:38px 22px 46px}
-.shell{max-width:1220px;margin:auto}
-.eyebrow{font-size:11px;letter-spacing:.16em;font-weight:800;color:#87d9d5}h1{font-size:clamp(27px,4.3vw,48px);letter-spacing:-.04em;line-height:1.19;margin:12px 0}header p{color:#c8d5e5;max-width:760px;font-size:15px}
-.tagline{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.tag{font-size:12px;background:#ffffff1c;border:1px solid #ffffff24;border-radius:99px;padding:5px 12px;color:#daeafa}
-main{max-width:1220px;padding:0 18px 60px;margin:-20px auto 0}
-.grid{display:grid;grid-template-columns:minmax(310px,370px) minmax(0,1fr);align-items:start;gap:16px}
-.card{background:var(--panel);border-radius:18px;border:1px solid var(--line);box-shadow:0 5px 24px #14274309;padding:22px}
-.sidebar{position:sticky;top:14px}.section-kicker{color:#4c70bd;text-transform:uppercase;letter-spacing:.12em;font-size:10px;font-weight:850}
-h2{font-size:19px;letter-spacing:-.025em;margin:3px 0 7px}h3{margin:0;font-size:15px}p{margin:5px 0 0}.muted{color:var(--muted);font-size:12px}
-.rule{height:1px;background:var(--line);margin:18px 0}
-label.field{display:block;margin:15px 0 4px;font-size:12px;font-weight:780}.select{width:100%;border:1px solid #d8dfeb;background:#fbfcff;color:var(--text);padding:11px 12px;border-radius:10px}
-.toggle-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #eef1f6;padding:11px 0;font-size:13px}.toggle-row:last-child{border:0}
-.toggle-row small{display:block;color:var(--muted);font-size:11px}.toggle-row input{width:19px;height:19px;accent-color:var(--blue);flex:none}
-.note{background:#eff4ff;border-radius:12px;padding:12px;font-size:12px;color:#40567d;margin-top:18px}
-.headline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.mini{font-size:10px;color:#607090}
-.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border-radius:99px;font-size:11px;font-weight:750;padding:4px 9px;background:#edf1f7;color:#57677d}.chip.good{background:#dcf7ed;color:#127052}.chip.bad{background:#fce9ed;color:#b43b4c}.chip.warn{background:#fff2d9;color:#8a621b}
-.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
-.stage{border-radius:14px;border:1px solid #e0e6f0;padding:14px;min-width:0;background:#fafcff}
-.stage .index{font-size:10px;color:#73839b;font-weight:800;letter-spacing:.12em}.stage .brand{font-size:15px;font-weight:850;margin:5px 0 5px}.stage p{font-size:12px;color:#64728a;min-height:39px}
-.stage .state{font-size:12px;font-weight:850;margin:12px 0 3px}.stage .state.good{color:#13856e}.stage .state.bad{color:var(--red)}
-.doc-btn{border:1px solid #d9e3fa;background:white;color:#3155a5;padding:7px 10px;border-radius:8px;font-weight:750;font-size:11px;margin-top:7px}
-.decision{margin:16px 0 0;background:#f5f8ff;border:1px solid #e0e8fd;border-radius:13px;padding:16px}
-.decision strong{font-size:16px}.contract{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0;color:#4b5f79;font-size:13px}
-.terminal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.action{border:0;padding:13px 9px;border-radius:10px;color:white;background:#365df1;font-weight:850}.action.approve{background:#119783}.action:disabled{background:#dfe5ee;color:#8793a5;cursor:not-allowed}
-.action-note{font-size:11px;color:#697b93;margin:7px 0 0}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.smallcard{background:#f8fafd;border-radius:13px;border:1px solid #ebeff7;padding:15px}
-.smallcard .answer{font-weight:850;color:#233a65;font-size:13px}.smallcard p{font-size:12px;color:#68758c}
-.audit{margin-top:14px;border-left:3px solid #7998e9;padding:6px 12px;color:#53657d;font-size:12px}
-.sect{margin-top:20px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0}.tab{font-size:12px;border-radius:9px;border:1px solid #dce4f2;background:#f7f9fd;color:#556986;padding:7px 10px}.tab.current{color:#244ccf;background:#e9efff;border-color:#bacbf7;font-weight:780}
-.evidence{border:1px solid #e2e8f2;background:#fbfcff;border-radius:13px;padding:18px}
-.evidence .status{font-size:11px;font-weight:850;color:#966619}.evidence strong{display:block;margin:5px 0}.evidence .definition{font-size:13px;line-height:1.8}.evidence .impl{margin-top:12px;font-size:12px;background:#eef3fc;border-radius:9px;padding:10px;color:#486183}
-.source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
-.source{border:1px solid #e3e9f3;border-radius:12px;padding:15px;background:#fff}.source h3{margin:4px 0 6px}.source p{font-size:12px;color:#5b6d83}.source a{font-size:12px;font-weight:750;display:inline-block;margin-top:9px}
-.number{color:#4a72c3;font-size:11px;font-weight:900}
-.warning{background:#fff9ed;border:1px solid #eedbb1;border-radius:13px;padding:16px;font-size:13px;color:#715622;margin-top:18px}
-footer{padding:16px 0;color:#7b879b;font-size:11px}
-@media(max-width:920px){.grid{grid-template-columns:1fr}.sidebar{position:static}.flow{grid-template-columns:1fr 1fr 1fr}}
-@media(max-width:600px){header{padding-top:27px}.card{padding:17px}.flow{grid-template-columns:1fr}.stage p{min-height:0}.split,.source-grid{grid-template-columns:1fr}.terminal{gap:8px}h1{font-size:29px}}
+:root{--bg:#070c12;--surface:#121d27;--panel:#15222d;--edge:#334652;--fg:#eaf1f4;--muted:#9aacba;--lime:#d2ff58;--cyan:#7ce9c8;--lav:#ad98ff;--red:#ff7c91;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;z-index:-1;inset:0;background:radial-gradient(ellipse 500px 500px at 98% 5%,#38499428,transparent 85%),radial-gradient(ellipse 500px 650px at 1% 90%,#275b5130,transparent 85%);pointer-events:none}
+a{color:var(--lime);text-underline-offset:4px}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+header{position:relative;background:radial-gradient(circle at 78% 51%,#385f5550,transparent 36%),linear-gradient(150deg,#131e2a,#0a1017 80%);border-bottom:1px solid #344b53;padding:0 22px 85px;overflow:hidden;isolation:isolate}
+header::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(90deg,transparent 28%,black);z-index:-1}
+.shell{max-width:1270px;margin:auto}.topbar{display:flex;align-items:center;gap:16px;border-bottom:1px solid #ffffff20;min-height:75px}.brand{display:flex;align-items:center;gap:11px;font:850 13px var(--mono);letter-spacing:.035em;color:var(--fg);text-decoration:none}.mark{display:grid;place-items:center;width:41px;height:41px;background:var(--lime);border-radius:12px;transform:rotate(-7deg);color:#0a150d;font:950 17px var(--mono);box-shadow:0 0 35px #c2ff5863}.mark span{transform:rotate(7deg)}.nav-links{display:flex;align-items:center;gap:26px;margin-left:auto}.nav-links a{font:750 10px var(--mono);color:#b8c8cf;text-decoration:none}.nav-links a:hover{color:var(--lime)}.nav-live{margin-left:8px;border:1px solid #65875a;padding:8px 12px;border-radius:99px;background:#cdff5612;color:var(--lime);font:800 10px var(--mono);white-space:nowrap}.nav-live::before{content:"●";margin-right:8px;text-shadow:0 0 14px var(--lime);animation:pulse 2s infinite}
+.hero{position:relative;display:grid;grid-template-columns:1fr .7fr;gap:18px;align-items:center;min-height:350px}.eyebrow{color:var(--lime);letter-spacing:.16em;font:800 11px var(--mono)}h1{color:#f5fcf7;font-weight:900;font-size:clamp(40px,6vw,76px);line-height:1.11;letter-spacing:-.075em;margin:17px 0 23px}h1 .outline{color:transparent;-webkit-text-stroke:1px #bdcdbb}h1 .acid{color:var(--lime)}.hero-lead{font-size:14px;max-width:580px;color:#b4c3ca;line-height:1.95}.hero-labels{display:flex;gap:8px;flex-wrap:wrap;margin-top:23px}.hero-labels span{border:1px solid #527067;border-radius:6px;padding:6px 9px;font:750 10px var(--mono);color:#a7cbc0;background:#ffffff08}
+.orbit{position:relative;min-height:300px}.orbit::before{content:"";position:absolute;right:8%;top:3%;width:min(26vw,290px);aspect-ratio:1;border:1px solid #b5f9977c;border-radius:50%;box-shadow:0 0 0 30px #aeff800b,0 0 0 60px #aeff8009,0 0 0 90px #aeff8006,inset 0 0 70px #83ff9220;animation:slow 25s linear infinite}.orbit::after{content:"";position:absolute;top:48%;right:34%;height:15px;width:15px;border-radius:50%;border:2px solid var(--lime);box-shadow:0 0 0 8px #ccff5b29,0 0 30px var(--lime)}.orbit strong{position:absolute;right:0;bottom:9%;font:900 clamp(42px,6vw,85px)/1 var(--mono);letter-spacing:-.095em;color:#f0fff013;-webkit-text-stroke:1px #b1f69860}.orbit small{position:absolute;right:3%;top:4%;font:750 10px var(--mono);letter-spacing:.14em;color:#b7d6bc}
+main{position:relative;max-width:1270px;margin:-39px auto 0;padding:0 20px 44px}.grid{display:grid;grid-template-columns:minmax(307px,355px) minmax(0,1fr);gap:16px;align-items:start}
+.card{position:relative;border:1px solid #415360;background:linear-gradient(160deg,#172430,#111b26 78%);padding:22px;border-radius:19px;box-shadow:0 20px 65px #0005}
+.sidebar{position:sticky;top:14px;background:linear-gradient(160deg,#1e2e3a,#121d28 70%);border-color:#587066;overflow:hidden}.sidebar::before{content:"";position:absolute;height:3px;left:0;right:0;top:0;background:linear-gradient(90deg,var(--lime),var(--cyan),var(--lav))}
+.section-kicker{font:850 10px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--lime)}h2{font-size:20px;line-height:1.35;letter-spacing:-.035em;color:#f6fafb;margin:9px 0}h3{color:#eef5f8;font-size:14px;margin:0}p{margin:6px 0 0}.muted{color:var(--muted);font-size:12px;line-height:1.8}
+.field{display:block;font-size:12px;font-weight:800;color:#dfe9ef;margin:19px 0 7px}.select{width:100%;border-radius:10px;border:1px solid #516574;background:#0c151d;color:#eef5f8;padding:10px 12px}.select:focus{border-color:var(--lime)}
+#role{display:none}.role-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.role-option{border:1px solid #4b5d67;background:#162732;color:#d1e1e6;border-radius:9px;text-align:left;padding:10px 8px;min-height:85px;transition:.2s}.role-option strong{display:block;color:#e6f2f3;font-size:12px}.role-option small{display:block;color:#9bb0b4;font-size:10px;margin-top:4px}.role-option .num{display:block;color:#84b9a4;font:900 10px var(--mono);margin-bottom:9px}.role-option[aria-pressed=true]{border-color:var(--lime);background:#c5ff5514;box-shadow:inset 0 3px 0 var(--lime),0 0 21px #c5ff5512}.role-option[aria-pressed=true] .num{color:var(--lime)}.role-option:hover{border-color:var(--lime)}
+.scenarios{margin-top:14px}.preset-btns{display:flex;gap:6px;margin-top:8px}.preset{flex:1;border:1px solid #647871;border-radius:8px;color:#dbeadf;background:#ffffff0b;padding:9px 3px;font:800 10px var(--mono);transition:.2s}.preset:hover{border-color:var(--lime);background:#caff5a24;color:var(--lime)}
+.rule{height:1px;margin:20px 0;background:linear-gradient(90deg,#56676f,transparent)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #ffffff10;font-size:12px;color:#e0e9ed}.toggle-row:last-child{border:0}.toggle-row small{display:block;font-size:10px;color:#90a0af;line-height:1.5;margin-top:2px}.toggle-row input{appearance:none;-webkit-appearance:none;position:relative;flex:none;height:23px;width:42px;border-radius:99px;border:1px solid #788991;background:#384753;transition:background .2s}.toggle-row input::before{content:"";position:absolute;top:3px;left:3px;height:15px;width:15px;background:#a4b4be;border-radius:50%;transition:.2s}.toggle-row input:checked{background:#bef85e35;border-color:var(--lime)}.toggle-row input:checked::before{background:var(--lime);transform:translateX(18px);box-shadow:0 0 8px #cbff62a3}
+.note{background:#203039;border:1px solid #47605c;border-radius:10px;padding:12px;color:#bed1cc;font-size:11px;margin-top:18px}
+.workspace{display:flex;flex-direction:column;gap:16px;min-width:0}.signal{position:relative;overflow:hidden;isolation:isolate;min-height:215px;background:linear-gradient(125deg,#1e3634,#13232b 60%,#10202a);border:1px solid #6f9c72;border-radius:19px;padding:24px 28px;box-shadow:0 20px 60px #0005}.signal::before{content:"";position:absolute;right:-105px;top:-150px;width:385px;height:385px;border-radius:50%;border:1px solid #d1ff7480;box-shadow:0 0 0 36px #baff720d,0 0 0 72px #baff7209,0 0 0 108px #baff7206;z-index:-1}.signal[data-tone=deny]{border-color:#9f5061;background:linear-gradient(125deg,#3a202e,#152029 80%)}.signal[data-tone=deny]::before{border-color:#ff8c9866;box-shadow:0 0 0 36px #ff87920f,0 0 0 72px #ff879209}.signal[data-tone=neutral]{border-color:#736799;background:linear-gradient(125deg,#30283e,#15202a 80%)}.signal[data-tone=neutral]::before{border-color:#aa94ff88;box-shadow:0 0 0 36px #ad92ff0e,0 0 0 72px #ad92ff08}
+.signal-kicker{font:850 10px var(--mono);color:#bce5cf;letter-spacing:.13em}.signal-kicker::before{content:"●";margin-right:9px;color:var(--lime);text-shadow:0 0 10px var(--lime)}.signal-value{font:900 clamp(35px,4.9vw,61px)/1.15 var(--mono);letter-spacing:-.075em;color:var(--lime);margin:22px 0 8px;overflow-wrap:anywhere}.signal[data-tone=deny] .signal-value{color:var(--red)}.signal[data-tone=neutral] .signal-value{color:var(--lav)}.signal-detail{font-size:12px;color:#c4d8d4}.signal-meta{display:flex;gap:25px;flex-wrap:wrap;margin-top:20px;padding-top:12px;border-top:1px solid #d3e8dc2a;font:750 10px var(--mono);color:#a4b7ba}.signal-meta b{color:#e5f5e9;margin-left:8px}
+.headline{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.chip{display:inline-flex;align-items:center;border:1px solid #5c7080;border-radius:8px;background:#2a4050;color:#e3edf3;padding:6px 10px;font:850 10px var(--mono)}.chip.good{color:var(--lime);background:#31452c;border-color:#7ca766}.chip.bad{color:var(--red);background:#472b37;border-color:#975264}.chip.warn{color:#d4c0ff;background:#322d4a;border-color:#685e97}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}.stage{position:relative;min-width:0;border:1px solid #4b6271;border-radius:13px;background:#0c1721;padding:15px;transition:border .2s,box-shadow .2s,transform .2s}.stage:hover{transform:translateY(-3px)}.stage[data-state=good]{border-color:#80aa79;box-shadow:inset 0 2px 0 #bff95b7a}.stage[data-state=bad]{border-color:#906070;box-shadow:inset 0 2px 0 #ff809054}.stage:not(:last-child)::after{content:"→";position:absolute;z-index:2;right:-15px;top:40%;font:900 18px var(--mono);color:var(--lime);text-shadow:0 0 16px #b9ff63}.stage .index{color:#83a5b3;font:850 10px var(--mono);letter-spacing:.08em}.stage .brand{margin:18px 0 9px;font-size:17px;font-weight:900;color:#f3f9f9}.stage p{font-size:11px;color:#a5b7c5;line-height:1.7;min-height:60px}.stage .state{font-size:11px;font-weight:850;margin:11px 0 4px}.stage .state.good{color:var(--lime)}.stage .state.bad{color:var(--red)}.doc-btn{border:1px solid #526779;background:#2739447a;color:#c9e0e2;border-radius:8px;font:800 10px var(--mono);padding:8px 9px;margin-top:9px;transition:.2s}.doc-btn:hover{background:var(--lime);color:#111d18;border-color:var(--lime)}
+.decision{background:linear-gradient(135deg,#192a37,#0e1923);border:1px solid #506572;border-radius:13px;padding:18px;margin-top:18px}.decision strong{color:#f5f8fb;font-size:16px}.contract{display:flex;align-items:center;flex-wrap:wrap;gap:9px;color:#b3c6d2;font-size:12px;margin:16px 0}.contract b{color:var(--lime);font:850 12px var(--mono)}.terminal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.action{width:100%;border:1px solid #c9ff83;background:var(--lime);color:#132012;padding:12px 10px;border-radius:9px;font-weight:850;box-shadow:0 6px 26px #a4ff5a24;transition:transform .2s,box-shadow .2s}.action:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 35px #a4ff5a4b}.action.approve{background:var(--lav);border-color:#c5b5ff;color:#18112a;box-shadow:0 6px 25px #ac98ff24}.action:disabled{background:#2e404c;color:#8194a2;border-color:#536774;box-shadow:none;cursor:not-allowed}.action-note{font-size:11px;color:#9fb2c1;margin-top:8px}.audit{margin-top:14px;border-left:2px solid var(--lime);background:#d1ff5a0e;padding:10px 12px;color:#c8dbd6;font:650 11px/1.7 var(--mono)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.smallcard{background:#0b1821;border:1px solid #405461;border-radius:12px;padding:15px}.smallcard .answer{color:#e3f1f2;font-size:13px;font-weight:900;margin-top:7px}.smallcard p{font-size:11px;color:#a3b6c4;line-height:1.8}.smallcard .doc-btn{margin-top:13px}
+.sect{margin-top:20px}.tabs{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0}.tab{font-size:12px;font-weight:750;border:1px solid #455966;border-radius:8px;background:#152630;color:#aabeca;padding:8px 11px;transition:.2s}.tab:hover{border-color:var(--lime);color:var(--lime)}.tab.current{color:#101c15;border-color:var(--lime);background:var(--lime);font-weight:850}.evidence{border:1px solid #405560;background:linear-gradient(150deg,#152632,#101a23);border-radius:12px;padding:18px}.evidence .status{font:850 10px var(--mono);color:#ffd395}.evidence strong{display:block;color:#f4f8f8;font-size:17px;margin:9px 0}.evidence .definition{font-size:12px;line-height:1.9;color:#c8d5dc}.evidence .impl{margin-top:15px;border-left:2px solid var(--lav);background:#ab91ff12;border-radius:0 7px 7px 0;padding:11px 13px;color:#d3c8ff;font-size:12px;line-height:1.7}#evidence-links a{color:var(--lime);font-size:11px}
+.source-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}.source{border:1px solid #455d68;border-radius:12px;background:linear-gradient(150deg,#192a35,#0e1923);padding:17px;display:flex;flex-direction:column;min-height:230px;transition:.2s}.source:hover{transform:translateY(-3px);border-color:var(--lime)}.source h3{font-size:14px;line-height:1.5;margin:13px 0 8px}.source p{color:#a7b9c6;font-size:11px;line-height:1.8;flex:1}.source a{display:inline-block;margin-top:16px;font-size:11px;font-weight:850;color:var(--lime)}.number{font:850 10px var(--mono);color:var(--lav);letter-spacing:.03em}.warning{background:#3d2e1c6b;border:1px solid #906c45;border-radius:11px;color:#f0d4aa;padding:16px;font-size:12px;line-height:1.85;margin-top:20px}.warning b{color:#ffdaa2}
+footer{padding:28px 4px;color:#8b9ba9;font:750 10px var(--mono)}.foot-accent{color:var(--lime)}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}@keyframes slow{to{transform:rotate(360deg)}}
+@media(max-width:1160px){.source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage .brand{font-size:15px}}
+@media(max-width:920px){.grid{grid-template-columns:1fr}.sidebar{position:static}.hero{grid-template-columns:1fr .5fr}.flow .stage p{min-height:55px}}
+@media(max-width:640px){header{padding:0 15px 70px}.topbar{min-height:65px}.nav-links{display:none}.nav-live{margin-left:auto;font-size:9px;padding:7px}.brand{font-size:11px}.mark{width:35px;height:35px}.hero{display:block;min-height:auto;padding:35px 0 0}.hero h1{font-size:clamp(42px,10vw,61px)}.hero-lead{font-size:12px}.orbit{display:none}main{padding:0 11px 38px;margin-top:-35px}.grid{gap:12px}.card,.signal{padding:18px;border-radius:15px}.workspace{gap:12px}.role-option{min-height:83px;padding:9px 6px}.role-option strong{font-size:11px}.role-option small{font-size:9px}.signal{min-height:210px}.signal-value{font-size:clamp(36px,10vw,55px)}.signal::before{right:-190px}.signal-meta{gap:9px 15px}.flow{grid-template-columns:1fr;gap:9px}.stage{padding:13px}.stage p{min-height:0}.stage .brand{margin:7px 0}.stage:not(:last-child)::after{right:15px;top:auto;bottom:-15px;transform:rotate(90deg)}.split,.source-grid{grid-template-columns:1fr}.terminal{gap:8px}.action{font-size:12px}.source{min-height:0}.tab{padding:8px 10px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style></head>
 <body>
-<header><div class="shell"><div class="eyebrow">FINANCIAL IT / ACCESS DESIGN LAB</div><h1>承認ボタンは、<br>誰が制御する？</h1><p>HENNGE One × MotionBoard × 業務DB。支店担当・承認者・閲覧者のロールや案件状態を切り替え、登録／承認の可否がどこで決まるのかを体験する設計検討デモ。</p><div class="tagline"><span class="tag">架空の銀行業務データ</span><span class="tag">ログイン不要の説明用ページ</span><span class="tag">出典・検証事項つき</span></div></div></header>
-<main>
+<header id="top"><div class="shell">
+<nav class="topbar" aria-label="ページ内ナビゲーション"><a href="#top" class="brand"><span class="mark"><span>AC</span></span>ACCESS CONTROL / LAB</a><div class="nav-links"><a href="#simulator">01 / SIMULATE</a><a href="#explain">02 / CAPABILITIES</a><a href="#sources">03 / EVIDENCE</a></div><div class="nav-live">LIVE SANDBOX</div></nav>
+<div class="hero"><div><div class="eyebrow">FINANCIAL IT / PERMISSION ARCHITECTURE</div><h1>権限の境界を、<br><span class="outline">見える化</span><span class="acid">する。</span></h1><p class="hero-lead">承認ボタンを「見せる」ことと、「実行できる」ことは違う。HENNGE One × MotionBoard × 業務DBの3層を、操作して理解する権限設計シミュレーター。</p><div class="hero-labels"><span>THREE LAYERS</span><span>REAL-TIME DECISION</span><span>OFFICIAL SOURCES</span></div></div><div class="orbit" aria-hidden="true"><small>IDENTITY → PERMISSION → EXECUTION</small><strong>ACL/03</strong></div></div>
+</div></header>
+<main id="simulator">
 <div class="grid">
 <aside class="card sidebar">
 <div class="section-kicker">01 / Scenario Controls</div><h2>業務条件を変更する</h2><p class="muted">切り替えると、制御担当とボタン状態が連動します。</p>
-<label class="field" for="role">ログインユーザーの業務ロール</label>
+<label class="field" for="role">USER ROLE / 操作する人</label>
+<div class="role-switch" role="group" aria-label="ロール切替"><button type="button" class="role-option" data-role-preset="staff" aria-pressed="true"><span class="num">01 / STAFF</span><strong>支店担当</strong><small>登録・起票</small></button><button type="button" class="role-option" data-role-preset="manager" aria-pressed="false"><span class="num">02 / APPROVE</span><strong>承認者</strong><small>承認・確認</small></button><button type="button" class="role-option" data-role-preset="head" aria-pressed="false"><span class="num">03 / READ</span><strong>本部閲覧</strong><small>参照のみ</small></button></div>
+<div class="scenarios"><div class="section-kicker">QUICK SCENARIOS / 動作サンプル</div><div class="preset-btns"><button type="button" class="preset" data-scenario="register">↗ 登録可</button><button type="button" class="preset" data-scenario="approve">✓ 承認可</button><button type="button" class="preset" data-scenario="deny">× 拒否例</button></div></div>
 <select class="select" id="role"><option value="staff">支店担当者（登録する人）</option><option value="manager">支店承認者（承認する人）</option><option value="head">本部閲覧担当（見るだけ）</option></select>
 <div class="rule"></div>
 <div class="section-kicker">HENNGE One / Access Control</div>
@@ -76,7 +72,9 @@ footer{padding:16px 0;color:#7b879b;font-size:11px}
 <label class="toggle-row"><span>自分が起票した案件<small>自己承認禁止の業務ルール例</small></span><input type="checkbox" id="self"></label>
 <div class="note">実環境のHENNGE One・MotionBoard・DBには一切接続していません。判定とボタン操作は、このブラウザ内だけのシミュレーションです。</div>
 </aside>
-<div>
+<div class="workspace">
+<section class="signal" id="signal" data-tone="neutral" aria-live="polite">
+<div class="signal-kicker">● LIVE POLICY DECISION / ACCESS ENGINE v1.1</div><div class="signal-value" id="signal-value">VERIFYING...</div><div class="signal-detail" id="signal-detail">認証と業務条件を評価しています</div><div class="signal-meta"><span>SUBJECT <b id="signal-subject">BRANCH</b></span><span>CONTRACT <b>DEMO-K00001</b></span><span>ACTION <b id="signal-action">NONE</b></span></div></section>
 <section class="card">
 <div class="headline"><div><div class="section-kicker">02 / Live Decision</div><h2>3層の判定フロー</h2></div><span class="chip" id="summary-chip">判定中</span></div>
 <div class="flow">
@@ -149,12 +147,32 @@ function render(){const v=get();let h=v.idOk&&v.mfa&&v.device;
  $('approve-note').textContent=canApp?'承認待ち → 承認済み':v.role!=='manager'?'承認権限なし':v.status!=='pending'?'承認待ちではない':v.self?'自己承認は禁止':!visible?'画面・支店の条件を満たさない':'業務条件を満たさない';
  $('visible-answer').textContent=visible?'契約データを参照できる想定':'参照できない想定';$('update-answer').textContent=allow?'更新操作を1つ以上許可':'更新操作を拒否';
  let reason=!v.idOk?'本人認証失敗：HENNGE One側で停止':!v.mfa?'MFA条件未達：HENNGE One側で停止':!v.device?'端末条件未達：HENNGE One側で停止':!v.mbAccount?'アカウント未作成：MotionBoard側で停止':!v.folder?'フォルダー権限なし：MotionBoard側で停止':!scope?'他支店の情報：表示対象外の想定':v.status==='approved'?'承認済み：登録・再承認を禁止する設計':v.self&&v.role==='manager'?'自己承認防止：DB・業務処理で拒否する設計':allow?'現在の条件では許可される操作があります':'業務ロールまたは状態が操作条件を満たしません';
+
+ const verdict=!h?'ACCESS DENIED':!visible?'BOARD LOCKED':allow?'AUTHORIZED':'VIEW ONLY';
+ const tone=!h||!visible?'deny':allow?'allow':'neutral';
+ $('signal-value').textContent=verdict;
+ $('signal-detail').textContent=!h?'HENNGE One：認証・アクセス条件を満たしていません':!visible?'MotionBoard：ボード・所属支店の条件を満たしていません':allow?'このロールには実行可能な操作があります':'閲覧は可能ですが、実行条件を満たす操作はありません';
+ $('signal').dataset.tone=tone;
+ $('signal-subject').textContent=v.role==='staff'?'BRANCH STAFF':v.role==='manager'?'APPROVER':'HQ VIEWER';
+ $('signal-action').textContent=canReg?'REGISTER':canApp?'APPROVE':'NONE';
+ document.querySelectorAll('.flow .stage').forEach((node,i)=>{node.dataset.state=([h,visible,guard])[i]?'good':'bad'});
+ document.querySelectorAll('[data-role-preset]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.rolePreset===v.role)));
  $('audit').textContent=notice||reason;
 }
 vals.forEach(id=>$(id).addEventListener('change',()=>{notice='';render()}));
 document.querySelectorAll('[data-guide]').forEach(el=>el.addEventListener('click',()=>showEvidence(el.dataset.guide,true)));
 $('register').addEventListener('click',()=>{if($('register').disabled)return;$('status').value='pending';notice='デモ操作：登録を受け付けた想定。状態が「承認待ち」に変わりました。DBには保存していません。';render()});
 $('approve').addEventListener('click',()=>{if($('approve').disabled)return;$('status').value='approved';notice='デモ操作：承認を受け付けた想定。状態が「承認済み」に変わりました。DBには保存していません。';render()});
+
+document.querySelectorAll('[data-role-preset]').forEach(btn=>btn.addEventListener('click',()=>{$('role').value=btn.dataset.rolePreset;notice='';render()}));
+document.querySelectorAll('[data-scenario]').forEach(btn=>btn.addEventListener('click',()=>{
+ const preset=btn.dataset.scenario;
+ ['idOk','mfa','device','mbAccount','folder'].forEach(id=>$(id).checked=true);
+ $('scope').value='own';$('hide').checked=false;$('self').checked=preset==='deny';
+ $('role').value=preset==='register'?'staff':'manager';
+ $('status').value=preset==='register'?'draft':'pending';
+ notice='';render();
+}));
 showEvidence('auth');render();
 })();
 </script>
