@@ -139,6 +139,13 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 /* ─── Access Journey / interactive ownership theatre ─── */
+
+.exp-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.exp-play{border:1px solid #305f76;background:#193f55;color:white;border-radius:9px;padding:9px 13px;font-size:11px;font-weight:780;white-space:nowrap;transition:background .2s,transform .2s}
+.exp-play:hover{background:#28566e;transform:translateY(-1px)}
+.exp-play[aria-pressed=true]{background:#e9f4f3;color:#166b64;border-color:#98cfc5}
+@media(max-width:650px){.experience-titlebar{flex-direction:column;gap:10px}.exp-head-actions{justify-content:flex-start}.exp-play{font-size:11px;padding:9px 12px}}
+
 .experience{margin:0 0 34px;position:relative}
 .experience-titlebar{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 18px}
 .experience-titlebar h2{font-size:clamp(21px,2.6vw,29px);letter-spacing:-.05em;line-height:1.42;margin:7px 0 8px;color:#12314a}
@@ -294,7 +301,7 @@ tbody tr:last-child td{border:0}tbody tr:hover{background:#f7fafb}
       <h2 id="experience-title">ひとりの行員になって、権限の境界を通ってみる。</h2>
       <p>下の場面を切り替えるだけで、どこまで進めるのかが変わります。色の変化と、動くアクセス経路に注目してみてください。</p>
     </div>
-    <span class="experience-badge"><span class="exp-live"></span>操作できる設計デモ</span>
+    <div class="exp-head-actions"><button type="button" id="exp-play" class="exp-play" aria-pressed="false">▶ 6つの場面を順に見る</button><span class="experience-badge"><span class="exp-live"></span>操作できる設計デモ</span></div>
   </div>
   <div class="exp-scenarios" role="group" aria-label="業務シナリオを選択">
     <button type="button" class="exp-scenario" data-exp-scene="register"><span class="scene-num">01</span><span class="scene-label">登録担当</span><span class="scene-sub">登録まで進む</span></button>
@@ -577,6 +584,7 @@ const verdict=(!passH||!passM)?'stop':canChange?'pass':'view';
 $('exp-verdict').dataset.state=verdict;
 $('exp-verdict-symbol').textContent=verdict==='pass'?'✓':verdict==='view'?'i':'−';
 $('exp-curtain').classList.toggle('show',!passM);
+$('exp-curtain').setAttribute('aria-hidden',String(passM));
 $('exp-curtain-title').textContent=!passH?'入口の認証で止まっています':'この画面を開く権限が必要です';
 $('exp-curtain-note').textContent=!passH?'HENNGE Oneでの認証条件を確認します。':sim.board?'対象支店の範囲を確認します。':'MotionBoard側のユーザー・閲覧権限を確認します。';
 $('exp-register').disabled=!canRegister;$('exp-approve').disabled=!canApprove;
@@ -587,8 +595,31 @@ const matching=Object.entries(expScenes).find(([key,s])=>Object.keys(s).every(k=
 currentScene=matching?matching[0]:'custom';
 document.querySelectorAll('[data-exp-scene]').forEach(btn=>{const on=btn.dataset.expScene===currentScene;btn.classList.toggle('is-selected',on);btn.setAttribute('aria-pressed',String(on))});
 }
-document.querySelectorAll('[data-exp-scene]').forEach(b=>b.addEventListener('click',()=>setExpScene(b.dataset.expScene)));
+
+const expSceneOrder=['register','approve','viewer','authstop','boardstop','self'];
+let expTourTimer=null;
+let expTourIndex=0;
+function stopExpTour(){
+if(expTourTimer!==null){clearInterval(expTourTimer);expTourTimer=null}
+$('exp-play').textContent='▶ 6つの場面を順に見る';
+$('exp-play').setAttribute('aria-pressed','false');
+}
+$('exp-play').addEventListener('click',()=>{
+if(expTourTimer!==null){stopExpTour();return}
+expTourIndex=0;
+setExpScene(expSceneOrder[expTourIndex]);
+$('exp-play').textContent='■ 再生を止める';
+$('exp-play').setAttribute('aria-pressed','true');
+expTourTimer=setInterval(()=>{
+expTourIndex++;
+if(expTourIndex>=expSceneOrder.length){stopExpTour();return}
+setExpScene(expSceneOrder[expTourIndex]);
+},2600);
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopExpTour()});
+document.querySelectorAll('[data-exp-scene]').forEach(b=>b.addEventListener('click',()=>{stopExpTour();setExpScene(b.dataset.expScene)}));
 for(const key of ['auth','board','self'])$('exp-switch-'+key).addEventListener('change',()=>{
+stopExpTour();
 const target=key==='auth'?'sim-auth':key==='board'?'sim-board':'sim-self';
 $(target).checked=$('exp-switch-'+key).checked;note='';simRender();
 });
@@ -596,8 +627,8 @@ document.querySelectorAll('[data-exp-topic]').forEach(b=>b.addEventListener('cli
 const name=b.dataset.expTopic;filter='all';selectTopic(name);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'});
 }));
 $('exp-follow').addEventListener('click',()=>{filter='all';selectTopic(expFocus);setView('boundary');$('view-heading').scrollIntoView({behavior:'smooth',block:'start'})});
-$('exp-register').addEventListener('click',()=>{if(!this?.disabled)$('sim-register').click()});
-$('exp-approve').addEventListener('click',()=>{if(!this?.disabled)$('sim-approve').click()});
+$('exp-register').addEventListener('click',()=>{if(!$('exp-register').disabled)$('sim-register').click()});
+$('exp-approve').addEventListener('click',()=>{if(!$('exp-approve').disabled)$('sim-approve').click()});
 
 function renderChecks(){const root=$('check-items');root.replaceChildren();review.forEach((r,i)=>{const label=el('label','check-item');const input=el('input');input.type='checkbox';input.dataset.check=String(i);input.addEventListener('change',updateProgress);const span=el('span');span.append(el('b','',r.title),el('small','',r.desc));label.append(input,span);root.append(label)});updateProgress()}
 function updateProgress(){const checked=[...document.querySelectorAll('[data-check]')].filter(x=>x.checked).length;$('check-progress').textContent=checked+' / '+review.length+' 確認';$('check-fill').style.width=(checked/review.length*100)+'%'}
